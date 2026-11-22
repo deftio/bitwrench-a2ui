@@ -1,0 +1,222 @@
+{
+ "commit": "5ff1b05f02d39f969b52a942e78e864ef3ac01fa",
+ "source": "https://github.com/a2ui-project/a2ui/tree/main/catalogs/basic/v1/examples",
+ "license": "Apache-2.0",
+ "examples": [
+  {
+   "file": "account-balance.json",
+   "name": "Account Balance",
+   "description": "Example of account balance demonstrating currency formatting."
+  },
+  {
+   "file": "advanced-form-validator.json",
+   "name": "Advanced Form Validator",
+   "description": "Demonstrates complex validation logic and deeply nested formatting functions."
+  },
+  {
+   "file": "calendar-day.json",
+   "name": "Calendar Day",
+   "description": "Example of calendar day demonstrating dynamic templating, relative paths, and date formatting."
+  },
+  {
+   "file": "chat-message.json",
+   "name": "Chat Message",
+   "description": "Example of chat message demonstrating templating and relative paths."
+  },
+  {
+   "file": "child-list-template.json",
+   "name": "ChildList Template Expansion",
+   "description": "Demonstrates dynamic list generation using ChildList object templates."
+  },
+  {
+   "file": "coffee-order.json",
+   "name": "Coffee Order",
+   "description": "Example of coffee order demonstrating templating and currency formatting."
+  },
+  {
+   "file": "contact-card.json",
+   "name": "Contact Card",
+   "description": "Example of contact card"
+  },
+  {
+   "file": "countdown-timer.json",
+   "name": "Countdown Timer",
+   "description": "Example of countdown timer demonstrating date formatting."
+  },
+  {
+   "file": "credit-card.json",
+   "name": "Credit Card",
+   "description": "Example of credit card"
+  },
+  {
+   "file": "email-compose.json",
+   "name": "Email Compose",
+   "description": "Example of email compose"
+  },
+  {
+   "file": "event-detail.json",
+   "name": "Event Detail",
+   "description": "Example of event detail demonstrating date and string formatting."
+  },
+  {
+   "file": "financial-data-grid.json",
+   "name": "Financial Data Grid",
+   "description": "Demonstrates complex layout weighting and alignment using Rows and Columns with templates."
+  },
+  {
+   "file": "flight-status.json",
+   "name": "Flight Status",
+   "description": "Example of flight status demonstrating date formatting."
+  },
+  {
+   "file": "incremental-dashboard.json",
+   "name": "Incremental Dashboard",
+   "description": "Demonstrates structural evolution of a UI where loading placeholders are incrementally replaced by actual components."
+  },
+  {
+   "file": "live-invitation-builder.json",
+   "name": "Live Invitation Builder",
+   "description": "Demonstrates reactive two-way binding where editor inputs update a live preview in real-time."
+  },
+  {
+   "file": "login-form.json",
+   "name": "Login Form with Validation",
+   "description": "Example of login form demonstrating validation checks and logic."
+  },
+  {
+   "file": "markdown-text.json",
+   "name": "Markdown Text Support",
+   "description": "Demonstrates Markdown rendering in Text component."
+  },
+  {
+   "file": "modal.json",
+   "name": "Modal Sample",
+   "description": "Example of Modal component showing a trigger and content."
+  },
+  {
+   "file": "movie-card.json",
+   "name": "Movie Card",
+   "description": "Example of movie card demonstrating Modal and Video components."
+  },
+  {
+   "file": "music-player.json",
+   "name": "Music Player",
+   "description": "Example of music player"
+  },
+  {
+   "file": "notification-permission.json",
+   "name": "Notification Permission",
+   "description": "Example of notification permission"
+  },
+  {
+   "file": "podcast-episode.json",
+   "name": "Podcast Episode",
+   "description": "Example of podcast episode demonstrating AudioPlayer and date formatting."
+  },
+  {
+   "file": "product-card.json",
+   "name": "Product Card",
+   "description": "Example of product card demonstrating currency formatting and pluralization."
+  },
+  {
+   "file": "purchase-complete.json",
+   "name": "Purchase Complete",
+   "description": "Example of purchase complete demonstrating currency formatting."
+  },
+  {
+   "file": "recipe-card.json",
+   "name": "Recipe Card",
+   "description": "Example of recipe card demonstrating Tabs and pluralization."
+  },
+  {
+   "file": "restaurant-card.json",
+   "name": "Restaurant Card",
+   "description": "Example of restaurant card"
+  },
+  {
+   "file": "scaffold-complex-layout.json",
+   "name": "Complex Layout",
+   "description": "Simple example demonstrating basic catalog components."
+  },
+  {
+   "file": "scaffold-formatted-text.json",
+   "name": "Formatted Text",
+   "description": "Simple example demonstrating basic catalog components."
+  },
+  {
+   "file": "scaffold-incremental.json",
+   "name": "Incremental",
+   "description": "Simple example demonstrating basic catalog components."
+  },
+  {
+   "file": "scaffold-interactive-button.json",
+   "name": "Interactive Button",
+   "description": "Simple example demonstrating basic catalog components."
+  },
+  {
+   "file": "scaffold-row-layout.json",
+   "name": "Row Layout",
+   "description": "Simple example demonstrating basic catalog components."
+  },
+  {
+   "file": "scaffold-simple-login-form.json",
+   "name": "Simple Login Form",
+   "description": "Simple example demonstrating basic catalog components."
+  },
+  {
+   "file": "scaffold-simple-text.json",
+   "name": "Simple Text",
+   "description": "Simple example demonstrating basic catalog components."
+  },
+  {
+   "file": "shipping-status.json",
+   "name": "Shipping Status",
+   "description": "Example of shipping status demonstrating templating and relative paths."
+  },
+  {
+   "file": "software-purchase.json",
+   "name": "Software Purchase",
+   "description": "Example of software purchase demonstrating currency formatting and ChoicePicker."
+  },
+  {
+   "file": "sports-player.json",
+   "name": "Sports Player",
+   "description": "Example of sports player"
+  },
+  {
+   "file": "stats-card.json",
+   "name": "Stats Card",
+   "description": "Example of stats card demonstrating currency and number formatting."
+  },
+  {
+   "file": "step-counter.json",
+   "name": "Step Counter",
+   "description": "Example of step counter demonstrating number formatting."
+  },
+  {
+   "file": "task-card.json",
+   "name": "Task Card",
+   "description": "Example of task card demonstrating CheckBox and DateTimeInput."
+  },
+  {
+   "file": "track-list.json",
+   "name": "Track List",
+   "description": "Example of track list demonstrating templating, relative paths, and number formatting."
+  },
+  {
+   "file": "user-profile.json",
+   "name": "User Profile",
+   "description": "Example of user profile demonstrating number formatting."
+  },
+  {
+   "file": "weather-current.json",
+   "name": "Weather Current",
+   "description": "Example of weather current demonstrating templating and string formatting."
+  },
+  {
+   "file": "workout-summary.json",
+   "name": "Workout Summary",
+   "description": "Example of workout summary demonstrating number and date formatting."
+  }
+ ]
+}

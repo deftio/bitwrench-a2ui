@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multiple surfaces · bitwrench-a2ui example</title>
+<style>body { font-family: system-ui, sans-serif; max-width: 720px; margin: 32px auto; padding: 0 16px; } #app > .a2ui-surface { margin-bottom: 16px; } button { margin-right: 8px; }</style>
+</head>
+<body>
+<h1>Multiple surfaces</h1>
+<p>One renderer, several independent surfaces, the way a chat shows several agent replies. Each has its own data model; the same component ids in different surfaces do not collide.</p>
+<p><button id="add" type="button">Add a surface</button><button id="del" type="button">Delete the oldest</button><button id="dark" type="button">Toggle dark</button></p>
+<div id="app"></div>
+
+<script src="../node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
+<script src="../dist/bitwrench-a2ui.min.js"></script>
+<script>
+  const CAT = 'https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json';
+  const renderer = bwA2UI.createRenderer({ mount: '#app', theme: 'sunset' });
+  let n = 0, dark = false;
+  function add() {
+    n++;
+    renderer.receive({ version: '1.0', createSurface: { surfaceId: `card-${n}`, catalogId: CAT, dataModel: { n, count: 0 },
+      components: [
+        { id: 'root', component: 'Card', child: 'row' },
+        { id: 'row', component: 'Row', justify: 'spaceBetween', align: 'center', children: ['label', 'box'] },
+        { id: 'label', component: 'Text', text: { '@call': 'formatString', args: { value: '**Surface ${/n}**' } } },
+        { id: 'box', component: 'CheckBox', label: 'Done', value: { '@path': '/done' } },
+      ] } });
+  }
+  document.getElementById('add').onclick = add;
+  document.getElementById('del').onclick = () => { const id = renderer.surfaceIds()[0]; if (id) renderer.receive({ version: '1.0', deleteSurface: { surfaceId: id } }); };
+  document.getElementById('dark').onclick = () => { dark = !dark; renderer.setThemeMode(dark ? 'dark' : 'light'); document.body.style.background = dark ? '#111827' : ''; };
+  add(); add(); add();
+</script>
+</body>
+</html>

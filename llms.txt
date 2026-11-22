@@ -1,0 +1,28 @@
+# bitwrench-a2ui
+
+> A2UI v1.0 renderer for plain JavaScript, built on bitwrench and Google's @a2ui/web_core. One script tag (global `bwA2UI`) or `npm install bitwrench-a2ui`. Renders the basic catalog (18 components, 14 functions) and custom catalogs to live DOM, or to HTML strings in Node.
+
+Key API:
+
+- `createRenderer({ mount, send, theme, catalogs, validation, onDiagnostic })` returns a renderer with `receive(messageOrArray)`, `receiveStream(readableStream)`, `capabilities()`, `metadata()`, `setTheme()`, `setThemeMode('light'|'dark')`, `destroy()`.
+- `send(message, metadata)` is called with every renderer-to-agent message (`action`, `error`, `callAgentFunction`, `rendererFunctionResponse`).
+- `renderToHTML(messages, opts)` from `bitwrench-a2ui/static` returns `{ html, css, errors }`.
+- Transports: `connectSSE`, `connectWebSocket`, `parseJsonl`, `readJsonl`, plus A2A and AG-UI helpers.
+- Custom components: `component({ render(p, ctx), update?(el, p, ctx) })` returning bitwrench TACO objects `{t, a, c, o}`; register with `buildCatalog(catalogJson, { Name: impl })`.
+
+## Docs
+
+- [Quick start](https://github.com/deftio/bitwrench-a2ui/blob/main/docs/quick-start.md)
+- [A2UI in five minutes](https://github.com/deftio/bitwrench-a2ui/blob/main/docs/a2ui-in-five-minutes.md)
+- [API reference](https://github.com/deftio/bitwrench-a2ui/blob/main/docs/api.md)
+- [Components](https://github.com/deftio/bitwrench-a2ui/blob/main/docs/components.md)
+- [Custom catalogs](https://github.com/deftio/bitwrench-a2ui/blob/main/docs/custom-catalogs.md)
+- [Using with LLMs](https://github.com/deftio/bitwrench-a2ui/blob/main/docs/using-with-llms.md)
+- [Security](https://github.com/deftio/bitwrench-a2ui/blob/main/docs/security.md)
+
+## Optional
+
+- [How it works](https://github.com/deftio/bitwrench-a2ui/blob/main/docs/how-it-works.md)
+- [Compatibility](https://github.com/deftio/bitwrench-a2ui/blob/main/docs/compatibility.md)
+- [Conformance report](https://github.com/deftio/bitwrench-a2ui/blob/main/docs/conformance-report.md)
+- [A2UI specification](https://a2ui.org/)

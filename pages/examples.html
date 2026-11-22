@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Examples · bitwrench-a2ui</title>
+<meta name="description" content="Standalone bitwrench-a2ui examples: hello world, forms with validation, JSONL streaming, custom catalogs, multiple surfaces, static HTML export and an SSE agent.">
+</head>
+<body>
+<div id="site-nav"></div>
+<main id="app" class="site-main"></main>
+<footer id="site-footer" class="site-footer"></footer>
+
+<script src="../node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
+<script src="../dist/bitwrench-a2ui.min.js"></script>
+<script src="site.js"></script>
+<script>
+(function () {
+  site.initPage('examples.html');
+  const SRC = `${site.SITE.repo}/blob/main/examples/`;
+  const browser = [
+    ['hello.html', 'Hello, A2UI', 'The smallest complete page: two script tags, one renderer, one message, and the action it sends.'],
+    ['form.html', 'Form with validation', 'Checks run as you type; the submit button stays disabled until the form is valid and sends the whole form.'],
+    ['streaming.html', 'Streaming JSONL', 'A slow stream cut into awkward chunks, fed to receiveStream(). Components appear as they arrive.'],
+    ['custom-catalog.html', 'Custom catalog', 'A host-defined StatCard component and a local function, mixed with the basic catalog on one surface.'],
+    ['multiple-surfaces.html', 'Multiple surfaces', 'Several independent surfaces in one renderer, created and deleted, with dark mode.'],
+  ];
+  const node = [
+    ['static-export.mjs', 'Static HTML export', 'node examples/static-export.mjs > order.html renders an order summary to a complete HTML page, no browser involved.'],
+    ['agent-server.mjs', 'Agent over SSE', 'node examples/agent-server.mjs starts a dependency-free scripted agent. Messages stream to the page over Server-Sent Events and actions are POSTed back with metadata.'],
+  ];
+  const card = ([file, title, text], runnable) => ({ t: 'div', a: { class: 'site-card' }, c: [
+    { t: 'h3', c: title },
+    { t: 'p', a: { class: 'site-muted' }, c: text },
+    { t: 'p', a: { style: 'margin:0' }, c: [
+      runnable ? { t: 'a', a: { class: 'site-link', href: `../examples/${file}` }, c: 'Open' } : null,
+      runnable ? ' · ' : null,
+      { t: 'a', a: { class: 'site-link', href: SRC + file }, c: 'Source' },
+    ] },
+  ] });
+  bw.mount('#app', [
+    site.header('Examples', 'Small, complete programs you can copy. Each browser example is a single HTML file that loads the pinned bitwrench build and bitwrench-a2ui; replace the relative paths with the CDN URLs shown in the comments to use them anywhere.'),
+    site.section('In the browser', null, { t: 'div', a: { class: 'site-grid' }, c: browser.map(e => card(e, true)) }),
+    site.section('With Node', 'These run from a checkout of the repository.', { t: 'div', a: { class: 'site-grid' }, c: node.map(e => card(e, false)) }),
+    site.section('MCP App template', null, { t: 'p', c: [
+      'templates/mcp-app builds a single-file ui:// resource with the renderer and your initial messages inlined. See ',
+      { t: 'a', a: { class: 'site-link', href: 'docs.html?doc=mcp-apps' }, c: 'MCP Apps' }, '.'] }),
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playground · bitwrench-a2ui</title>
+<meta name="description" content="Edit A2UI v1.0 messages and watch bitwrench render them: step through streams, inspect the data model, view tree and TACO, and export HTML.">
+</head>
+<body>
+<div id="site-nav"></div>
+<main id="app" class="site-main"></main>
+<footer id="site-footer" class="site-footer"></footer>
+
+<script src="../node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
+<script src="../node_modules/bitwrench/dist/bitwrench-code-edit.umd.min.js"></script>
+<script src="../dist/bitwrench-a2ui.min.js"></script>
+<script src="site.js"></script>
+<script src="fixtures.js"></script>
+<script>
+(function () {
+  const { FIXTURES } = window.A2UI_FIXTURES;
+  site.initPage('playground.html', { wide: true });
+
+  const state = {
+    messages: [], pointer: 0, renderer: null, timer: null, speed: 400,
+    outbound: [], diags: [], fixture: null, validation: 'relaxed', theme: 'teal',
+  };
+
+  // ---- message parsing -------------------------------------------------------
+  function parse(text) {
+    const t = text.trim();
+    if (!t) return [];
+    try {
+      const v = JSON.parse(t);
+      if (Array.isArray(v)) return v;
+      if (v && Array.isArray(v.messages)) return v.messages;
+      return [v];
+    } catch (e) {
+      try { return bwA2UI.parseJsonl(t, { strict: true }); }
+      catch { throw new Error(`Not JSON or JSONL: ${e.message}`); }
+    }
+  }
+
+  // ---- renderer lifecycle ----------------------------------------------------
+  function reset() {
+    stop();
+    state.renderer && state.renderer.destroy();
+    const mount = document.getElementById('pg-surface');
+    mount.innerHTML = '';
+    state.pointer = 0; state.outbound = []; state.diags = [];
+    state.renderer = bwA2UI.createRenderer({
+      mount, theme: state.theme, validation: state.validation,
+      send: m => {
+        state.outbound.push(m);
+        if (m.action && state.fixture && state.fixture.respond) {
+          const reply = state.fixture.respond(m.action);
+          if (reply.length) setTimeout(() => { reply.forEach(r => state.renderer.receive(r)); refresh(); }, 300);
+        }
+        refresh();
+      },
+      onDiagnostic: d => { state.diags.push(d); refresh(); },
+    });
+    state.renderer.setThemeMode(site.SITE.mode === 'dark' ? 'dark' : 'light');
+    refresh();
+  }
+
+  function load() {
+    try {
+      state.messages = parse(editorValue());
+      setStatus(`${state.messages.length} message(s) ready`, '');
+    } catch (e) {
+      state.messages = [];
+      setStatus(e.message, 'err');
+    }
+    reset();
+  }
+
+  function step() {
+    if (state.pointer >= state.messages.length) { stop(); return false; }
+    state.renderer.receive(state.messages[state.pointer++]);
+    refresh();
+    return true;
+  }
+  function runAll() { stop(); while (step()) { /* apply all */ } }
+  function play() {
+    stop();
+    state.timer = setInterval(() => { if (!step()) stop(); }, state.speed);
+    refresh();
+  }
+  function stop() { if (state.timer) clearInterval(state.timer); state.timer = null; }
+
+  // ---- editor ----------------------------------------------------------------
+  let editorEl = null;
+  function editorValue() { return editorEl ? editorEl._bwCodeEdit.getValue() : ''; }
+  function setEditor(text) {
+    if (editorEl && editorEl._bwCodeEdit) editorEl._bwCodeEdit.setValue(text);
+  }
+
+  // ---- presets ---------------------------------------------------------------
+  let upstream = [];
+  async function loadUpstreamIndex() {
+    try {
+      const r = await fetch('data/upstream-examples.json');
+      upstream = (await r.json()).examples;
+      const sel = document.getElementById('pg-preset');
+      const group = document.createElement('optgroup');
+      group.label = 'Upstream A2UI examples (Apache-2.0)';
+      for (const ex of upstream) {
+        const o = document.createElement('option');
+        o.value = `up:${ex.file}`;
+        o.textContent = ex.name;
+        o.title = ex.description;
+        group.appendChild(o);
+      }
+      sel.appendChild(group);
+    } catch { /* offline: local presets only */ }
+  }
+
+  async function choosePreset(value) {
+    state.fixture = null;
+    let messages;
+    if (value.startsWith('up:')) {
+      const r = await fetch(`../test/upstream/examples/${value.slice(3)}`);
+      messages = (await r.json()).messages;
+    } else {
+      const f = FIXTURES.find(x => x.id === value);
+      state.fixture = f;
+      messages = f.stream ? f.stream.flatMap(s => s.messages) : f.messages;
+    }
+    setEditor(JSON.stringify(messages, null, 2));
+    load();
+    runAll();
+  }
+
+  // ---- export / share --------------------------------------------------------
+  function exportHtml() {
+    const { html } = bwA2UI.renderToHTML(state.messages.slice(0, state.pointer || state.messages.length), { theme: state.theme, includeCss: true });
+    return html;
+  }
+  function share() {
+    const url = `${location.origin}${location.pathname}#m=${site.encodeShare(editorValue())}`;
+    navigator.clipboard && navigator.clipboard.writeText(url).then(() => setStatus('Share link copied to the clipboard', ''), () => setStatus(url, ''));
+    history.replaceState(null, '', url);
+  }
+
+  // ---- inspectors ------------------------------------------------------------
+  function setStatus(text, kind) {
+    const el = document.getElementById('pg-status');
+    if (el) { el.textContent = text; el.className = `site-badge ${kind || ''}`; }
+  }
+  function snap() {
+    const r = state.renderer;
+    return r && r.surfaceIds().length ? r.inspect(r.surfaceIds()[0]) : null;
+  }
+  const inspector = site.tabs([
+    { label: 'Messages', render: () => ({ t: 'ol', a: { class: 'site-log', start: '1' }, c: state.messages.map((m, i) => ({
+      t: 'li', a: { style: i < state.pointer ? '' : 'opacity:0.45' }, c: `${i < state.pointer ? '✓' : '·'} ${Object.keys(m).find(k => k !== 'version') || '?'}  ${JSON.stringify(m).slice(0, 160)}` })) }) },
+    { label: 'Data model', render: () => site.code(snap() ? site.pretty(snap().dataModel) : '{}') },
+    { label: 'View tree', render: () => site.code(snap() ? site.pretty(snap().viewTree) : '(no surface)') },
+    { label: 'TACO', render: () => site.code(snap() ? site.pretty(snap().taco) : '(no surface)') },
+    { label: () => 'Outbound', render: () => site.code(state.outbound.map(m => site.pretty(m)).join('\n\n') || 'Actions, errors and function calls the renderer sends to the agent appear here.') },
+    { label: 'Diagnostics', render: () => ({ t: 'ul', a: { class: 'site-log' }, c: state.diags.length ? state.diags.map(d => ({ t: 'li', c: [
+      { t: 'span', a: { class: `site-badge ${d.level === 'error' ? 'err' : 'warn'}` }, c: `${d.source || ''} ${d.code || d.level}` }, ' ', String(d.message || '').slice(0, 400)] })) : [{ t: 'li', c: 'No diagnostics.' }] }) },
+    { label: 'HTML', render: () => site.code(state.messages.length ? exportHtml() : '') },
+  ].map(t => ({ ...t, label: typeof t.label === 'function' ? t.label() : t.label })));
+  function refresh() {
+    inspector.draw();
+    const pos = document.getElementById('pg-pos');
+    if (pos) pos.textContent = `${state.pointer} / ${state.messages.length}`;
+  }
+
+  site.onMode(mode => state.renderer && state.renderer.setThemeMode(mode === 'dark' ? 'dark' : 'light'));
+
+  // ---- layout ----------------------------------------------------------------
+  const presetOptions = FIXTURES.map(f => ({ t: 'option', a: { value: f.id }, c: f.title }));
+  const themes = Object.keys(bw.THEME_PRESETS);
+
+  bw.mount('#app', [
+    site.header('Playground', 'Write or paste A2UI v1.0 messages (a JSON array, a single message, or JSON Lines). Step through them to see progressive rendering, interact with the surface, and inspect everything the renderer sees and sends.'),
+    { t: 'div', a: { class: 'site-toolbar' }, c: [
+      { t: 'select', a: { id: 'pg-preset', class: 'site-btn', 'aria-label': 'Preset', onchange: e => choosePreset(e.target.value) }, c: [{ t: 'optgroup', a: { label: 'bitwrench-a2ui demos' }, c: presetOptions }] },
+      { t: 'button', a: { type: 'button', class: 'site-btn primary', onclick: () => { load(); runAll(); } }, c: 'Run all' },
+      { t: 'button', a: { type: 'button', class: 'site-btn', onclick: () => { if (!state.messages.length) load(); step(); } }, c: 'Step' },
+      { t: 'button', a: { type: 'button', class: 'site-btn', onclick: () => { load(); play(); } }, c: 'Play' },
+      { t: 'button', a: { type: 'button', class: 'site-btn', onclick: () => { stop(); load(); } }, c: 'Reset' },
+      { t: 'label', c: ['Speed ', { t: 'input', a: { type: 'range', min: '100', max: '1500', step: '100', value: '400', 'aria-label': 'Play speed (ms per message)', oninput: e => { state.speed = Number(e.target.value); } } }] },
+      { t: 'span', a: { id: 'pg-pos', class: 'site-muted' }, c: '0 / 0' },
+      { t: 'span', a: { class: 'site-spacer', style: 'flex:1' } },
+      { t: 'label', c: ['Theme ', { t: 'select', a: { class: 'site-btn', onchange: e => { state.theme = e.target.value; state.renderer && state.renderer.setTheme(state.theme); } }, c: themes.map(t => ({ t: 'option', a: { value: t, selected: t === 'teal' }, c: t })) }] },
+      { t: 'label', c: [{ t: 'input', a: { type: 'checkbox', onchange: e => { state.validation = e.target.checked ? 'strict' : 'relaxed'; load(); runAll(); } } }, ' Strict'] },
+      { t: 'button', a: { type: 'button', class: 'site-btn', onclick: () => { navigator.clipboard && navigator.clipboard.writeText(exportHtml()); setStatus('HTML copied', ''); } }, c: 'Copy HTML' },
+      { t: 'button', a: { type: 'button', class: 'site-btn', onclick: () => site.download('a2ui-surface.html', bwA2UI.renderToDocument(state.messages, { theme: state.theme }).html, 'text/html') }, c: 'Download page' },
+      { t: 'button', a: { type: 'button', class: 'site-btn', onclick: share }, c: 'Share link' },
+      { t: 'span', a: { id: 'pg-status', class: 'site-badge' }, c: 'ready' },
+    ] },
+    { t: 'div', a: { style: 'display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));align-items:start' }, c: [
+      site.panel('Messages (editable)', { t: 'div', a: { id: 'pg-editor' } }),
+      site.panel('Rendered surface', { t: 'div', a: { id: 'pg-surface', style: 'min-height:300px' } }),
+    ] },
+    { t: 'div', a: { style: 'margin-top:16px' }, c: site.panel('Inspector', inspector.taco) },
+    { t: 'p', a: { class: 'site-muted', style: 'margin-top:16px;font-size:0.9rem' }, c: [
+      'Demos with a scripted reply answer button clicks through a small simulated agent in this page. Upstream examples come from ',
+      { t: 'a', a: { class: 'site-link', href: 'https://github.com/a2ui-project/a2ui/tree/main/catalogs/basic/v1/examples' }, c: 'a2ui-project/a2ui' }, ' (Apache-2.0).',
+    ] },
+  ]);
+
+  const initial = location.hash.startsWith('#m=') ? (() => { try { return site.decodeShare(location.hash.slice(3)); } catch { return null; } })() : null;
+  editorEl = bw.mount('#pg-editor', bw.codeEditor({ code: initial || JSON.stringify(FIXTURES[0].messages, null, 2), lang: 'js', height: '560px', lineNumbers: true }));
+  if (!editorEl._bwCodeEdit) editorEl = document.querySelector('#pg-editor .bw_ce');
+  inspector.draw();
+  loadUpstreamIndex();
+  if (initial) { load(); runAll(); } else { choosePreset(FIXTURES[0].id); }
+})();
+</script>
+</body>
+</html>

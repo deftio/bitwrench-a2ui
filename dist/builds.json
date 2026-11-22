@@ -1,0 +1,64 @@
+{
+  "name": "bitwrench-a2ui",
+  "version": "0.1.0",
+  "built": "2026-11-22T11:11:31.116Z",
+  "pins": {
+    "bitwrench": "2.1.15",
+    "@a2ui/web_core": "0.15.0",
+    "quikdown": "1.3.2",
+    "a2uiSpecCommit": "5ff1b05f02d39f969b52a942e78e864ef3ac01fa"
+  },
+  "files": {
+    "bitwrench-a2ui.bundle.min.js": {
+      "bytes": 661503,
+      "gzip": 188208,
+      "brotli": 156047,
+      "integrity": "sha384-RNM9pB5KY5WKzCIpvOfExomHDsPCdmU3oaswfWRACTWpC9a2GYX/MN7Y8l0yOcPI"
+    },
+    "bitwrench-a2ui.esm.min.js": {
+      "bytes": 485365,
+      "gzip": 140197,
+      "brotli": 114894,
+      "integrity": "sha384-pIReuFJo9E2IUZLHlRDhizWItzChCXT6U3gU2MWBA6jL+8V/OjJ/q83+gMZdYzWH"
+    },
+    "bitwrench-a2ui.js": {
+      "bytes": 1054316,
+      "gzip": 212538,
+      "brotli": 168426,
+      "integrity": "sha384-iku6EITMKT8nb3Q7AYTOrwQeOY2qW/P7WrP4V7bV7n/qA57mAgbFFqgv/zRvlUzv"
+    },
+    "bitwrench-a2ui.min.js": {
+      "bytes": 485783,
+      "gzip": 140368,
+      "brotli": 114977,
+      "integrity": "sha384-5/ZpudeyBTkqoGiV1gR2J1WA0lbWX3KpctvvV8/js70NLeqjuQc2rYf5G0a4GhRl"
+    },
+    "bitwrench.umd.min.js (pinned, loaded separately)": {
+      "bytes": 175720,
+      "gzip": 48360,
+      "integrity": "sha384-udDmcsr7TEJzzxbXOV5b0EaJuEcmQjGTZNDr8fNdR/xEMq7raSMWAGgLZOqU6JLu"
+    }
+  },
+  "checks": {
+    "bitwrench-a2ui.js": {
+      "litModules": 0,
+      "universalLayerModules": 0
+    },
+    "bitwrench-a2ui.min.js": {
+      "litModules": 0,
+      "universalLayerModules": 0
+    },
+    "bitwrench-a2ui.esm.min.js": {
+      "litModules": 0,
+      "universalLayerModules": 0
+    }
+  },
+  "bundledPackages": [
+    "@a2ui/web_core",
+    "@preact/signals-core",
+    "quikdown",
+    "redos-detector",
+    "zod",
+    "zod-to-json-schema"
+  ]
+}

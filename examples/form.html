@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Form with validation · bitwrench-a2ui example</title>
+<style>body { font-family: system-ui, sans-serif; max-width: 720px; margin: 32px auto; padding: 0 16px; } pre { background: #0f172a; color: #e2e8f0; padding: 12px; border-radius: 8px; overflow: auto; }</style>
+</head>
+<body>
+<h1>Form with validation</h1>
+<p>Checks run in the browser as you type. The Submit button is disabled until every check passes, and the action carries the whole form from the data model.</p>
+<div id="app"></div>
+<h2>Sent to the agent</h2>
+<pre id="log">(nothing yet)</pre>
+
+<script src="../node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
+<script src="../dist/bitwrench-a2ui.min.js"></script>
+<script>
+  const required = path => ({ condition: { '@call': 'required', args: { value: { '@path': path } } }, message: 'This field is required.' });
+  const renderer = bwA2UI.createRenderer({
+    mount: '#app',
+    theme: 'indigo',
+    send: m => { document.getElementById('log').textContent = JSON.stringify(m, null, 2); },
+  });
+  renderer.receive({ version: '1.0', createSurface: {
+    surfaceId: 'signup',
+    catalogId: 'https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json',
+    dataModel: { form: { name: '', email: '', plan: ['free'], age: 30, agree: false } },
+    components: [
+      { id: 'root', component: 'Card', child: 'col' },
+      { id: 'col', component: 'Column', children: ['title', 'name', 'email', 'plan', 'age', 'agree', 'submit'] },
+      { id: 'title', component: 'Text', text: '### Create an account' },
+      { id: 'name', component: 'TextField', label: 'Name', value: { '@path': '/form/name' }, '@checks': [required('/form/name')] },
+      { id: 'email', component: 'TextField', label: 'Email', value: { '@path': '/form/email' },
+        '@checks': [required('/form/email'), { condition: { '@call': 'email', args: { value: { '@path': '/form/email' } } }, message: 'Please enter a valid email address.' }] },
+      { id: 'plan', component: 'ChoicePicker', label: 'Plan', options: [{ label: 'Free', value: 'free' }, { label: 'Pro', value: 'pro' }, { label: 'Team', value: 'team' }], value: { '@path': '/form/plan' } },
+      { id: 'age', component: 'Slider', label: { '@call': 'formatString', args: { value: 'Age: ${/form/age}' } }, min: 13, max: 100, value: { '@path': '/form/age' } },
+      { id: 'agree', component: 'CheckBox', label: 'I agree to the terms', value: { '@path': '/form/agree' } },
+      { id: 'submit', component: 'Button', variant: 'primary', child: 'submitLabel',
+        action: { event: { name: 'signup', context: { form: { '@path': '/form' } } } },
+        '@checks': [required('/form/name'), { condition: { '@call': 'email', args: { value: { '@path': '/form/email' } } } }, { condition: { '@path': '/form/agree' }, message: 'Please accept the terms.' }] },
+      { id: 'submitLabel', component: 'Text', text: 'Create account' },
+    ],
+  } });
+</script>
+</body>
+</html>

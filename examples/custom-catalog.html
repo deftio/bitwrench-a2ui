@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Custom catalog · bitwrench-a2ui example</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 760px; margin: 32px auto; padding: 0 16px; }
+  .stat { border-radius: 10px; padding: 12px 16px; background: var(--a2ui-color-primary-light); }
+  .stat-label { font-size: 0.85rem; color: var(--a2ui-color-text-muted); }
+  .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--a2ui-color-primary); }
+  .stat-trend { font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<h1>Custom catalog</h1>
+<p>A host-defined <code>StatCard</code> component and a local <code>toCelsius</code> function, mixed with the basic catalog on one surface. The agent can use them because the host registered them; it cannot add components of its own.</p>
+<div id="app"></div>
+
+<script src="../node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
+<script src="../dist/bitwrench-a2ui.min.js"></script>
+<script>
+  const DASH = 'https://example.com/catalogs/dashboard/v1.json';
+  const BASIC = 'https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json';
+
+  // 1. The catalog document: what the agent is told it may use.
+  const dashboardJson = {
+    catalogId: DASH, protocolVersion: '1.0',
+    components: {
+      StatCard: { type: 'object', description: 'A labelled number with a trend arrow.',
+        properties: {
+          component: { const: 'StatCard' },
+          label: { $ref: 'common_types.json#/$defs/DynamicString' },
+          value: { $ref: 'common_types.json#/$defs/DynamicString' },
+          trend: { type: 'string', enum: ['up', 'down', 'flat'] },
+          weight: { type: 'number', description: 'Flex grow inside a Row or Column.' },
+        },
+        required: ['component', 'label', 'value'] },
+    },
+  };
+
+  // 2. The implementation: TACO built from resolved props, updated in place.
+  const arrows = { up: '▲ up', down: '▼ down', flat: '▶ flat' };
+  const StatCard = bwA2UI.component({
+    render: p => ({ t: 'div', a: { class: 'stat' }, c: [
+      { t: 'div', a: { class: 'stat-label' }, c: p.label.value },
+      { t: 'div', a: { class: 'stat-value' }, c: String(p.value.value) },
+      { t: 'div', a: { class: 'stat-trend' }, c: arrows[p.trend] || '' },
+    ] }),
+    update(el, p) {
+      el.querySelector('.stat-value').textContent = String(p.value.value);
+      el.querySelector('.stat-trend').textContent = arrows[p.trend] || '';
+      return true;
+    },
+  });
+
+  // 3. A local function the agent can call from bindings.
+  const toCelsius = bwA2UI.makeFunction({
+    name: 'toCelsius', returnType: 'string',
+    // Arguments can be bindings, so use the dynamic types from common_types.json.
+    args: { type: 'object', properties: { value: { $ref: 'common_types.json#/$defs/DynamicNumber' } }, required: ['value'] },
+    execute: ({ value }) => `${Math.round((value - 32) * 5 / 9)} °C`,
+  });
+
+  const renderer = bwA2UI.createRenderer({
+    mount: '#app', theme: 'emerald',
+    catalogs: [bwA2UI.createBasicCatalog({ functions: [toCelsius] }), bwA2UI.buildCatalog(dashboardJson, { StatCard })],
+  });
+
+  renderer.receive({ version: '1.0', createSurface: {
+    surfaceId: 'dash', catalogId: BASIC,
+    dataModel: { visitors: 1284, tempF: 72 },
+    components: [
+      { id: 'root', component: 'Column', children: ['row', 'slider'] },
+      { id: 'row', component: 'Row', children: ['a', 'b'] },
+      { id: 'a', component: 'StatCard', '@catalogId': DASH, label: 'Visitors today', value: { '@path': '/visitors' }, trend: 'up', weight: 1 },
+      { id: 'b', component: 'StatCard', '@catalogId': DASH, label: 'Outside', value: { '@call': 'toCelsius', args: { value: { '@path': '/tempF' } } }, trend: 'flat', weight: 1 },
+      { id: 'slider', component: 'Slider', label: 'Temperature (°F)', min: 0, max: 110, value: { '@path': '/tempF' } },
+    ],
+  } });
+
+  // The agent (here, a timer) updates data; the custom card updates in place.
+  setInterval(() => renderer.receive({ version: '1.0', updateDataModel: { surfaceId: 'dash', path: '/visitors', value: 1284 + Math.floor(Math.random() * 40) } }), 1500);
+</script>
+</body>
+</html>

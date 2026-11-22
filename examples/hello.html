@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hello, A2UI · bitwrench-a2ui example</title>
+<style>body { font-family: system-ui, sans-serif; max-width: 640px; margin: 32px auto; padding: 0 16px; }</style>
+</head>
+<body>
+<h1>Hello, A2UI</h1>
+<p>The smallest complete example: two script tags, one renderer, one message.</p>
+<div id="app"></div>
+<pre id="log"></pre>
+
+<!-- From a CDN (pin versions and add integrity hashes from dist/builds.json):
+<script src="https://cdn.jsdelivr.net/npm/bitwrench@2.1.15/dist/bitwrench.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitwrench-a2ui@0.1.0/dist/bitwrench-a2ui.min.js"></script>
+-->
+<script src="../node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
+<script src="../dist/bitwrench-a2ui.min.js"></script>
+<script>
+  const renderer = bwA2UI.createRenderer({
+    mount: '#app',
+    // Everything the renderer would send to your agent arrives here.
+    send: message => { document.getElementById('log').textContent = JSON.stringify(message, null, 2); },
+  });
+
+  renderer.receive({
+    version: '1.0',
+    createSurface: {
+      surfaceId: 'hello',
+      catalogId: 'https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json',
+      dataModel: { name: 'Ada' },
+      components: [
+        { id: 'root', component: 'Column', children: ['greeting', 'name', 'go'] },
+        { id: 'greeting', component: 'Text', text: { '@call': 'formatString', args: { value: '## Hello, ${/name}!' } } },
+        { id: 'name', component: 'TextField', label: 'Your name', value: { '@path': '/name' } },
+        { id: 'go', component: 'Button', child: 'goLabel', variant: 'primary',
+          action: { event: { name: 'submit', context: { name: { '@path': '/name' } } } } },
+        { id: 'goLabel', component: 'Text', text: 'Submit' },
+      ],
+    },
+  });
+</script>
+</body>
+</html>

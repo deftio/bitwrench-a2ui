@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM sandbox · bitwrench-a2ui</title>
+<meta name="description" content="Paste a Claude, Gemini or OpenAI API key and watch a model build an A2UI v1.0 interface live, rendered by bitwrench-a2ui. Keys stay in your browser.">
+</head>
+<body>
+<div id="site-nav"></div>
+<main id="app" class="site-main wide"></main>
+<footer id="site-footer" class="site-footer"></footer>
+
+<script src="../node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
+<script src="../dist/bitwrench-a2ui.min.js"></script>
+<script src="site.js"></script>
+<script>
+(function () {
+  site.initPage('llm.html', { wide: true });
+
+  // ---- providers ---------------------------------------------------------------
+  // Calls go straight from this page to the provider you choose, with your key.
+  // Keys live in sessionStorage only (cleared when the tab closes or with "Forget key").
+  const PROVIDERS = {
+    claude: {
+      label: 'Claude (Anthropic)',
+      models: ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5'],
+      keyHint: 'sk-ant-...',
+      async call({ key, model, system, history }) {
+        const fallbackOk = model !== 'claude-haiku-5-5';   // server-side refusal fallback
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-api-key': key,
+            'anthropic-version': '2023-06-01',
+            // Required for calls made directly from a browser. This page only ever uses
+            // the key you typed, in your own browser.
+            'anthropic-dangerous-direct-browser-access': 'true',
+            ...(fallbackOk ? { 'anthropic-beta': 'server-side-fallback-2026-07-01' } : {}),
+          },
+          body: JSON.stringify({
+            model, max_tokens: 16000, system,
+            messages: history.map(m => ({ role: m.role, content: m.text })),
+            ...(fallbackOk ? { fallbacks: 'default' } : {}),
+          }),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error?.message || `HTTP ${res.status}`);
+        if (json.stop_reason === 'refusal') throw new Error(`The model declined (${json.stop_details?.category || 'refusal'}).`);
+        return json.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
+      },
+    },
+    gemini: {
+      label: 'Gemini (Google)',
+      models: ['gemini-2.5-flash', 'gemini-2.5-pro'],
+      keyHint: 'AIza...',
+      async call({ key, model, system, history }) {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: system }] },
+            contents: history.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.text }] })),
+          }),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error?.message || `HTTP ${res.status}`);
+        return (json.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('\n');
+      },
+    },
+    openai: {
+      label: 'OpenAI',
+      models: ['gpt-4.1', 'gpt-4.1-mini'],
+      keyHint: 'sk-...',
+      async call({ key, model, system, history }) {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
+          body: JSON.stringify({ model, messages: [{ role: 'system', content: system }, ...history.map(m => ({ role: m.role, content: m.text }))] }),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error?.message || `HTTP ${res.status}`);
+        return json.choices?.[0]?.message?.content || '';
+      },
+    },
+  };
+
+  // ---- prompt, built from the basic catalog document -----------------------------
+  const CATALOG = bwA2UI.BASIC_CATALOG_DOCUMENT;
+  function describeProp(name, schema, required) {
+    let type = schema.$ref ? schema.$ref.split('/').pop() : schema.type || 'any';
+    if (schema.enum) type = schema.enum.join('|');
+    if (schema.oneOf || schema.anyOf) type = 'see description';
+    return `${name}${required ? '*' : ''} (${type})${schema.description ? `: ${schema.description.split('. ')[0]}` : ''}`;
+  }
+  function catalogSummary() {
+    return Object.entries(CATALOG.components).map(([name, def]) => {
+      const req = new Set(def.required || []);
+      const props = Object.entries(def.properties || {}).filter(([k]) => k !== 'component').map(([k, s]) => describeProp(k, s, req.has(k)));
+      return `- ${name}: ${props.join('; ')}`;
+    }).join('\n') + `\nFunctions: ${Object.keys(CATALOG.functions || {}).join(', ')}`;
+  }
+  const SYSTEM = `You build user interfaces with the A2UI v1.0 protocol (https://a2ui.org).
+Reply with JSON Lines only: one A2UI message per line. No prose, no explanations, no code fences.
+
+Message rules:
+- Every message is an object with "version": "1.0" and exactly one of createSurface, updateComponents, updateDataModel, deleteSurface.
+- Start with one createSurface message for surfaceId "main" with catalogId "${CATALOG.catalogId}", carrying "components" and "dataModel".
+- Components are a flat list. Exactly one has id "root". Containers refer to children by id. Ids are letters, digits and underscores, starting with a letter.
+- Bind values with {"@path": "/json/pointer"}. Inputs (TextField, CheckBox, ChoicePicker, Slider, DateTimeInput) must bind "value" to a data model path. ChoicePicker values are arrays of strings.
+- Buttons need "child" (usually a Text id) and "action": {"event": {"name": "...", "context": {"key": {"@path": "/..."}}}}.
+- Use {"@call": "formatString", "args": {"value": "Hello \${/name}"}} to put data into text. Text supports simple Markdown (headings, bold, lists).
+- Validation: add "@checks": [{"condition": {"@call": "required", "args": {"value": {"@path": "/x"}}}, "message": "..."}] to inputs and buttons.
+- Do not send styles or themes.
+
+When the user performs an action you will receive the action message. Reply with updateComponents and/or updateDataModel messages for surface "main" that respond to it.
+
+Catalog guidance:
+${CATALOG.instructions}
+
+Components (* = required):
+${catalogSummary()}`;
+
+  // ---- state -----------------------------------------------------------------------
+  const keyName = p => `a2ui-llm-key-${p}`;
+  const session = { get: k => { try { return sessionStorage.getItem(k) || ''; } catch { return ''; } }, set: (k, v) => { try { v ? sessionStorage.setItem(k, v) : sessionStorage.removeItem(k); } catch { /* ignore */ } } };
+  const state = { provider: 'claude', model: 'claude-opus-5-5', history: [], busy: false, renderer: null, wire: [], diags: [], outbound: [] };
+
+  function newRenderer() {
+    state.renderer && state.renderer.destroy();
+    const mount = document.getElementById('llm-surface');
+    mount.innerHTML = '';
+    state.wire = []; state.diags = []; state.outbound = [];
+    state.renderer = bwA2UI.createRenderer({
+      mount, theme: 'indigo', validation: 'relaxed',
+      onDiagnostic: d => { state.diags.push(d); inspector.draw(); },
+      send: m => { state.outbound.push(m); inspector.draw(); if (m.action) ask(`The user performed this action:\n${JSON.stringify(m)}\nReply with A2UI messages that update surface "main".`, { fromAction: true }); },
+    });
+    state.renderer.setThemeMode(site.SITE.mode === 'dark' ? 'dark' : 'light');
+  }
+
+  function extractMessages(text) {
+    const cleaned = text.replace(/```(?:json|jsonl)?/g, '').trim();
+    const out = [];
+    for (const line of cleaned.split(/\r?\n/)) {
+      const s = line.trim();
+      if (!s || (s[0] !== '{' && s[0] !== '[')) continue;
+      try { const v = JSON.parse(s); out.push(...(Array.isArray(v) ? v : [v])); }
+      catch { state.diags.push({ level: 'error', source: 'llm', code: 'BAD_LINE', message: s.slice(0, 200) }); }
+    }
+    if (!out.length) {
+      try { const v = JSON.parse(cleaned); out.push(...(Array.isArray(v) ? v : v.messages || [v])); } catch { /* reported below */ }
+    }
+    return out;
+  }
+
+  async function ask(text, { fromAction = false } = {}) {
+    const key = document.getElementById('llm-key').value.trim();
+    if (!key) { status('Paste an API key first.', 'err'); return; }
+    if (state.busy) return;
+    session.set(keyName(state.provider), key);
+    state.busy = true;
+    status(fromAction ? 'Sending your action to the model…' : 'Asking the model…', '');
+    state.history.push({ role: 'user', text });
+    try {
+      const reply = await PROVIDERS[state.provider].call({ key, model: state.model, system: SYSTEM, history: state.history });
+      state.history.push({ role: 'assistant', text: reply });
+      const messages = extractMessages(reply);
+      if (!messages.length) { status('The reply contained no A2UI messages; see the transcript.', 'warn'); }
+      for (const m of messages) { state.wire.push(m); state.renderer.receive(m); }
+      if (messages.length) status(`Rendered ${messages.length} message(s).`, '');
+    } catch (e) {
+      state.history.pop();
+      status(e.message, 'err');
+    } finally {
+      state.busy = false;
+      inspector.draw();
+    }
+  }
+
+  function status(text, kind) {
+    const el = document.getElementById('llm-status');
+    el.textContent = text;
+    el.className = `site-badge ${kind || ''}`;
+  }
+
+  const inspector = site.tabs([
+    { label: 'Wire messages', render: () => site.code(state.wire.map(m => JSON.stringify(m)).join('\n') || '(none yet)') },
+    { label: 'Transcript', render: () => site.code(state.history.map(m => `${m.role.toUpperCase()}:\n${m.text}`).join('\n\n') || '(empty)') },
+    { label: 'Data model', render: () => site.code(state.renderer && state.renderer.surfaceIds().length ? site.pretty(state.renderer.inspect().dataModel) : '{}') },
+    { label: 'TACO', render: () => site.code(state.renderer && state.renderer.surfaceIds().length ? site.pretty(state.renderer.inspect().taco) : '(nothing rendered)') },
+    { label: 'Diagnostics', render: () => ({ t: 'ul', a: { class: 'site-log' }, c: state.diags.length ? state.diags.map(d => ({ t: 'li', c: [{ t: 'span', a: { class: `site-badge ${d.level === 'error' ? 'err' : 'warn'}` }, c: d.code || d.level }, ' ', String(d.message || '').slice(0, 300)] })) : [{ t: 'li', c: 'None.' }] }) },
+    { label: 'System prompt', render: () => site.code(SYSTEM) },
+  ]);
+
+  function providerControls() {
+    const p = PROVIDERS[state.provider];
+    return [
+      { t: 'label', c: ['Provider ', { t: 'select', a: { class: 'site-btn', onchange: e => { state.provider = e.target.value; state.model = PROVIDERS[state.provider].models[0]; drawControls(); } },
+        c: Object.entries(PROVIDERS).map(([id, v]) => ({ t: 'option', a: { value: id, selected: id === state.provider }, c: v.label })) }] },
+      { t: 'label', c: ['Model ', { t: 'input', a: { class: 'site-btn', list: 'llm-models', value: state.model, size: '18', 'aria-label': 'Model id', onchange: e => { state.model = e.target.value.trim(); } } },
+        { t: 'datalist', a: { id: 'llm-models' }, c: p.models.map(m => ({ t: 'option', a: { value: m } })) }] },
+      { t: 'label', c: ['API key ', { t: 'input', a: { id: 'llm-key', class: 'site-btn', type: 'password', autocomplete: 'off', placeholder: p.keyHint, value: session.get(keyName(state.provider)), size: '24' } }] },
+      { t: 'button', a: { type: 'button', class: 'site-btn', onclick: () => { session.set(keyName(state.provider), ''); document.getElementById('llm-key').value = ''; status('Key forgotten.', ''); } }, c: 'Forget key' },
+    ];
+  }
+  function drawControls() { bw.mount('#llm-controls', providerControls()); }
+
+  const SUGGESTIONS = ['A booking form for a dentist appointment with date, time and a reason', 'A dashboard of three KPIs and a list of recent orders', 'A recipe card with ingredients and a servings slider', 'A survey with a rating, a multiple-choice question and comments'];
+
+  bw.mount('#app', [
+    site.header('LLM sandbox', 'Describe a UI and let a model build it as A2UI v1.0, rendered live by bitwrench-a2ui. Click the buttons it generates: the action goes back to the model, which updates the surface.'),
+    { t: 'div', a: { class: 'site-card', style: 'margin-bottom:16px' }, c: [
+      { t: 'strong', c: 'Your key stays in this browser. ' },
+      { t: 'span', a: { class: 'site-muted' }, c: 'It is kept in sessionStorage for this tab only and sent only to the provider you pick, directly from this page; there is no server in between. Use a restricted or development key. Model calls cost money on your account, and results vary.' },
+    ] },
+    { t: 'div', a: { id: 'llm-controls', class: 'site-toolbar' } },
+    { t: 'div', a: { class: 'site-toolbar' }, c: [
+      { t: 'input', a: { id: 'llm-prompt', class: 'site-btn', style: 'flex:1;min-width:260px', placeholder: 'Describe the UI you want…', onkeydown: e => { if (e.key === 'Enter') go(); } } },
+      { t: 'button', a: { type: 'button', class: 'site-btn primary', onclick: () => go() }, c: 'Build it' },
+      { t: 'button', a: { type: 'button', class: 'site-btn', onclick: () => { state.history = []; newRenderer(); inspector.draw(); status('Cleared.', ''); } }, c: 'Start over' },
+      { t: 'span', a: { id: 'llm-status', class: 'site-badge' }, c: 'ready' },
+    ] },
+    { t: 'p', a: { class: 'site-muted', style: 'font-size:0.9rem' }, c: ['Try: ', ...SUGGESTIONS.flatMap((s, i) => [i ? ' · ' : '', { t: 'a', a: { href: '#', class: 'site-link', onclick: e => { e.preventDefault(); document.getElementById('llm-prompt').value = s; } }, c: s }])] },
+    { t: 'div', a: { style: 'display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));align-items:start' }, c: [
+      site.panel('Rendered surface', { t: 'div', a: { id: 'llm-surface', style: 'min-height:300px' } }),
+      site.panel('Inspector', inspector.taco),
+    ] },
+  ]);
+
+  function go() {
+    const text = document.getElementById('llm-prompt').value.trim();
+    if (!text) return;
+    if (!state.history.length) newRenderer();
+    ask(state.history.length ? `Change the UI: ${text}` : text);
+  }
+
+  site.onMode(mode => state.renderer && state.renderer.setThemeMode(mode === 'dark' ? 'dark' : 'light'));
+  drawControls();
+  newRenderer();
+  inspector.draw();
+})();
+</script>
+</body>
+</html>

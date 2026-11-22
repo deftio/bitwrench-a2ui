@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent over SSE · bitwrench-a2ui example</title>
+<style>body { font-family: system-ui, sans-serif; max-width: 640px; margin: 32px auto; padding: 0 16px; }</style>
+</head>
+<body>
+<h1>Agent over SSE</h1>
+<p>Run <code>node examples/agent-server.mjs</code> and open this page from it (http://localhost:8787/). Messages arrive over Server-Sent Events; actions go back with <code>fetch</code>, with the renderer's metadata attached.</p>
+<div id="app"></div>
+
+<script src="/node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
+<script src="/dist/bitwrench-a2ui.min.js"></script>
+<script>
+  const renderer = bwA2UI.createRenderer({
+    mount: '#app',
+    theme: 'nord',
+    send: (message, metadata) => fetch('/action', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ message, metadata }),
+    }),
+  });
+  bwA2UI.connectSSE(renderer, '/events');
+</script>
+</body>
+</html>

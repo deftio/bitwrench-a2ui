@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Read(./**)",
+      "Edit(./**)",
+      "WebSearch",
+      "WebFetch"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "denyRead": ["~/deftio"],
+      "allowRead": ["~/deftio/bitwrench-a2ui"],
+      "allowWrite": ["~/deftio/bitwrench-a2ui"]
+    },
+    "network": {
+      "allowLocalBinding": true,
+      "allowedDomains": [
+        "github.com",
+        "*.github.com",
+        "*.githubusercontent.com",
+        "registry.npmjs.org",
+        "*.npmjs.org",
+        "unpkg.com",
+        "cdn.jsdelivr.net",
+        "data.jsdelivr.com",
+        "a2ui.org",
+        "*.a2ui.org",
+        "developers.googleblog.com",
+        "playwright.azureedge.net",
+        "*.playwright.dev"
+      ]
+    }
+  },
+  "env": {
+  "npm_config_cache": "/Users/manu/deftio/bitwrench-a2ui/tmp/.npm-cache",
+  "PLAYWRIGHT_BROWSERS_PATH": "/Users/manu/deftio/bitwrench-a2ui/tmp/ms-playwright"
+  }
+}

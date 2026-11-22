@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Streaming JSONL · bitwrench-a2ui example</title>
+<style>body { font-family: system-ui, sans-serif; max-width: 720px; margin: 32px auto; padding: 0 16px; } button { margin-bottom: 12px; }</style>
+</head>
+<body>
+<h1>Streaming JSONL</h1>
+<p>Agents usually stream one A2UI message per line. This page simulates a slow stream that is cut into awkward chunks (even mid-line) and feeds it to <code>renderer.receiveStream()</code>. Components that are referenced before they arrive appear in place when they do.</p>
+<button id="go" type="button">Replay stream</button>
+<div id="app"></div>
+
+<script src="../node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
+<script src="../dist/bitwrench-a2ui.min.js"></script>
+<script>
+  const CAT = 'https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json';
+  const lines = [
+    { version: '1.0', createSurface: { surfaceId: 'weather', catalogId: CAT, components: [{ id: 'root', component: 'Card', child: 'col' }, { id: 'col', component: 'Column', children: ['title', 'now', 'days'] }], dataModel: { days: [] } } },
+    { version: '1.0', updateComponents: { surfaceId: 'weather', components: [{ id: 'title', component: 'Text', text: '### Weather in Lisbon' }] } },
+    { version: '1.0', updateComponents: { surfaceId: 'weather', components: [{ id: 'now', component: 'Row', align: 'center', children: ['icon', 'temp'] }, { id: 'icon', component: 'Icon', name: 'info' }, { id: 'temp', component: 'Text', text: { '@call': 'formatString', args: { value: '**${/now}°C**, ${/sky}' } } }] } },
+    { version: '1.0', updateDataModel: { surfaceId: 'weather', path: '/now', value: 21 } },
+    { version: '1.0', updateDataModel: { surfaceId: 'weather', path: '/sky', value: 'clear skies' } },
+    { version: '1.0', updateComponents: { surfaceId: 'weather', components: [{ id: 'days', component: 'List', direction: 'horizontal', children: { componentId: 'day', path: '/days' } }, { id: 'day', component: 'Card', child: 'dayText' }, { id: 'dayText', component: 'Text', text: { '@call': 'formatString', args: { value: '${d}: ${t}°' } } }] } },
+    { version: '1.0', updateDataModel: { surfaceId: 'weather', path: '/days', value: [{ d: 'Mon', t: 22 }, { d: 'Tue', t: 19 }, { d: 'Wed', t: 24 }] } },
+  ];
+  const jsonl = lines.map(l => JSON.stringify(l)).join('\n') + '\n';
+
+  // A ReadableStream that delivers the bytes in uneven chunks with delays.
+  function slowStream(text) {
+    const bytes = new TextEncoder().encode(text);
+    let pos = 0;
+    return new ReadableStream({
+      async pull(controller) {
+        if (pos >= bytes.length) { controller.close(); return; }
+        await new Promise(r => setTimeout(r, 180));
+        const n = 40 + Math.floor(Math.random() * 120);
+        controller.enqueue(bytes.slice(pos, pos + n));
+        pos += n;
+      },
+    });
+  }
+
+  let renderer;
+  async function run() {
+    document.getElementById('app').innerHTML = '';
+    renderer && renderer.destroy();
+    renderer = bwA2UI.createRenderer({ mount: '#app', validation: 'relaxed', theme: 'ocean' });
+    await renderer.receiveStream(slowStream(jsonl));
+  }
+  document.getElementById('go').addEventListener('click', run);
+  run();
+</script>
+</body>
+</html>

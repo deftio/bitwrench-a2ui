@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+  body { margin: 0; padding: 12px; font-family: var(--host-font, system-ui, -apple-system, "Segoe UI", sans-serif); background: transparent; }
+  /* Map the host's style tokens (when it provides them) onto the renderer's variables. */
+  .a2ui-surface { --a2ui-font-family: var(--host-font, inherit); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<!-- bitwrench + bitwrench-a2ui, inlined: MCP App sandboxes usually allow no external scripts. -->
+<script>{{BUNDLE}}</script>
+<script>
+(function () {
+  'use strict';
+  // Initial A2UI messages, inlined at build time (may be empty).
+  var INITIAL = {{MESSAGES}};
+
+  // The postMessage bridge. Adapt this to your MCP host's MCP Apps API; it is kept
+  // minimal and readable on purpose. Accept messages only from the parent frame.
+  function post(payload) {
+    if (window.parent && window.parent !== window) window.parent.postMessage(payload, '*');
+  }
+
+  var renderer = bwA2UI.createRenderer({
+    mount: '#app',
+    theme: {{THEME}},
+    validation: 'relaxed',
+    send: function (message, metadata) { post({ a2ui: message, metadata: metadata }); },
+  });
+
+  window.addEventListener('message', function (event) {
+    if (event.source !== window.parent) return;          // only the host frame
+    var data = event.data;
+    if (!data || typeof data !== 'object' || !('a2ui' in data)) return;
+    renderer.receive(bwA2UI.collectEnvelopes(data.a2ui)); // untrusted: only valid v1.0 envelopes pass
+  });
+
+  if (INITIAL.length) renderer.receive(INITIAL);
+  // Tell the host the renderer is ready, with its capabilities.
+  post({ a2uiReady: true, capabilities: renderer.capabilities() });
+})();
+</script>
+</body>
+</html>

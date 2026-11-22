@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Components · bitwrench-a2ui</title>
+<meta name="description" content="All 18 A2UI v1.0 basic catalog components rendered live with bitwrench, with their JSON.">
+</head>
+<body>
+<div id="site-nav"></div>
+<main id="app" class="site-main"></main>
+<footer id="site-footer" class="site-footer"></footer>
+
+<script src="../node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
+<script src="../dist/bitwrench-a2ui.min.js"></script>
+<script src="site.js"></script>
+<script src="gallery.js"></script>
+<script>
+(function () {
+  site.initPage('gallery.html');
+  const CAT = 'https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json';
+  const renderers = [];
+  const groups = ['Display', 'Layout', 'Inputs'];
+
+  function card(entry, i) {
+    const messages = [{ version: '1.0', createSurface: { surfaceId: `g-${entry.name}`, catalogId: CAT, components: entry.components, ...(entry.data ? { dataModel: entry.data } : {}) } }];
+    entry._messages = messages;
+    return { t: 'article', a: { class: 'site-card', id: entry.name.toLowerCase() }, c: [
+      { t: 'h3', c: entry.name },
+      { t: 'p', a: { class: 'site-muted', style: 'margin:0 0 10px' }, c: entry.note },
+      { t: 'div', a: { id: `gal-${i}`, style: 'min-height:48px;margin-bottom:10px' } },
+      { t: 'details', c: [{ t: 'summary', c: 'A2UI JSON' }, site.code(JSON.stringify(messages[0], null, 2))] },
+      { t: 'p', a: { style: 'margin:8px 0 0;font-size:0.9rem' }, c: [
+        { t: 'a', a: { class: 'site-link', href: `playground.html#m=${site.encodeShare(JSON.stringify(messages, null, 2))}` }, c: 'Open in playground →' }] },
+    ] };
+  }
+
+  bw.mount('#app', [
+    site.header('Components', 'The A2UI v1.0 basic catalog has 18 components. Each one below is a live A2UI surface rendered by bitwrench-a2ui; try the inputs, and switch the site to dark mode to see both palettes. The JSON is exactly what an agent would send.'),
+    { t: 'p', c: groups.map(g => ({ t: 'span', a: { class: 'site-badge' }, c: g })) },
+    ...groups.map(g => site.section(g, null, { t: 'div', a: { class: 'site-grid', style: 'grid-template-columns:repeat(auto-fill,minmax(340px,1fr))' },
+      c: window.A2UI_GALLERY.map((e, i) => e.group === g ? card(e, i) : null).filter(Boolean) })),
+    site.section('Notes', null, { t: 'p', c: [
+      'Media examples point at placeholder URLs, so the players show no content. Component details are in the ',
+      { t: 'a', a: { class: 'site-link', href: 'docs.html?doc=components' }, c: 'components guide' }, '.'] }),
+  ]);
+
+  window.A2UI_GALLERY.forEach((entry, i) => {
+    const r = bwA2UI.createRenderer({ mount: document.getElementById(`gal-${i}`), theme: 'teal', send: () => {} });
+    r.setThemeMode(site.SITE.mode === 'dark' ? 'dark' : 'light');
+    r.receive(entry._messages);
+    renderers.push(r);
+  });
+  site.onMode(mode => renderers.forEach(r => r.setThemeMode(mode === 'dark' ? 'dark' : 'light')));
+})();
+</script>
+</body>
+</html>
