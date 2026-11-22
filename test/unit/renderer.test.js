@@ -83,7 +83,9 @@ describe('createRenderer', () => {
     r.receive(create('c', [{ id: 'root', component: 'Text', text: 'c' }]));
     r.destroy();
     assert.equal(mount.querySelectorAll('.a2ui-surface').length, 0);
-    assert.equal(r.version, '1.0');
+    assert.equal(r.protocolVersion, '1.0');
+    assert.equal(r.version, lib.VERSION);
+    assert.equal(lib.getVersion(), lib.VERSION);
     assert.equal(r.catalogId, BASIC_CATALOG_ID);
     assert.ok(r.processor);
   });

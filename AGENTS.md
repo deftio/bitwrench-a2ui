@@ -15,7 +15,7 @@ An A2UI v1.0 renderer. `@a2ui/web_core` does protocol work (message processing, 
 * **`src/static/`** - `renderToHTML` / `renderToDocument`.
 * **`src/transport/`** - JSONL, SSE, WebSocket, A2A and AG-UI helpers.
 * **`src/theme/`** - theme presets to `--a2ui-*` CSS variables.
-* **Generated, do not edit** - `src/catalog/basic/catalog-json.js` (`npm run sync:upstream`), `src/catalog/basic/icons.js` (`tools/fetch-icons.js`), `docs/conformance-report.md` (`npm run conformance:report`), `dist/` (`npm run build`).
+* **Generated, do not edit** - `src/version.js` (from `package.json` by `tools/gen-version.js`, run by every build), `src/catalog/basic/catalog-json.js` (`npm run sync:upstream`), `src/catalog/basic/icons.js` (`tools/fetch-icons.js`), `docs/conformance-report.md` (`npm run conformance:report`), `dist/` (`npm run build`).
 * **`test/upstream/`** - pinned copies of upstream fixtures; refresh with `npm run sync:upstream`, never by hand.
 
 ## Commands

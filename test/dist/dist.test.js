@@ -51,7 +51,7 @@ describe('dist builds', { skip: !has('bitwrench-a2ui.min.js') && 'run npm run bu
 
   it('the MCP App template builds a single self-contained file that renders and bridges messages', async () => {
     const { execFileSync } = await import('node:child_process');
-    const html = execFileSync(process.execPath, ['templates/mcp-app/build.js', 'test/upstream/examples/login-form.json', '--title', 'Login <test>'],
+    const html = execFileSync(process.execPath, ['templates/mcp-app/build.js', 'test/upstream/examples/login-form.json', '--title', 'Login <test>', '--host-origin', 'https://host.example'],
       { cwd: new URL('../../', import.meta.url), encoding: 'utf8', maxBuffer: 1 << 26 });
     assert.ok(html.includes('<title>Login &lt;test&gt;</title>'));
     const errors = [];
@@ -59,20 +59,22 @@ describe('dist builds', { skip: !has('bitwrench-a2ui.min.js') && 'run npm run bu
     vc.on('jsdomError', e => errors.push(e.message));
     const parentPosts = [];
     const dom = new JSDOM(html, { runScripts: 'dangerously', virtualConsole: vc, pretendToBeVisual: true,
-      beforeParse(win) { Object.defineProperty(win, 'parent', { value: { postMessage: m => parentPosts.push(m) } }); } });
+      beforeParse(win) { Object.defineProperty(win, 'parent', { value: { postMessage: (m, origin) => parentPosts.push({ m, origin }) } }); } });
     const w = dom.window;
     await new Promise(r => setTimeout(r, 50));
     assert.equal(w.document.querySelectorAll('script[src]').length, 0, 'no external scripts');
     assert.ok(w.document.querySelector('[data-a2ui-id="root"]'), 'initial messages rendered');
-    assert.ok(parentPosts.some(p => p.a2uiReady && p.capabilities), 'ready message posted');
+    assert.ok(parentPosts.some(p => p.m.a2uiReady && p.m.capabilities), 'ready message posted');
+    assert.ok(parentPosts.every(p => p.origin === 'https://host.example'), 'posts only to the host origin');
     const surfaceId = JSON.parse(fs.readFileSync(new URL('../upstream/examples/login-form.json', import.meta.url), 'utf8'))
       .messages.map(m => m.createSurface?.surfaceId).find(Boolean);
-    const hostMessage = source => {
-      const ev = new w.MessageEvent('message', { data: { a2ui: { version: '1.0', deleteSurface: { surfaceId } } } });
+    const hostMessage = (source, origin = 'https://host.example') => {
+      const ev = new w.MessageEvent('message', { origin, data: { a2ui: { version: '1.0', deleteSurface: { surfaceId } } } });
       Object.defineProperty(ev, 'source', { value: source });
       w.dispatchEvent(ev);
     };
     hostMessage(null);                                   // not from the parent: ignored
+    hostMessage(w.parent, 'https://evil.example');       // the parent, but at another origin: ignored
     assert.ok(w.document.querySelector('[data-a2ui-id="root"]'), 'foreign message ignored');
     hostMessage(w.parent);                               // from the host frame: applied
     await new Promise(r => setTimeout(r, 20));

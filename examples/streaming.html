@@ -27,15 +27,16 @@
   ];
   const jsonl = lines.map(l => JSON.stringify(l)).join('\n') + '\n';
 
-  // A ReadableStream that delivers the bytes in uneven chunks with delays.
+  // A ReadableStream that delivers the bytes in uneven chunks (cutting lines in half) with delays.
+  const CHUNKS = [47, 113, 71, 150, 59, 96];
   function slowStream(text) {
     const bytes = new TextEncoder().encode(text);
-    let pos = 0;
+    let pos = 0, i = 0;
     return new ReadableStream({
       async pull(controller) {
         if (pos >= bytes.length) { controller.close(); return; }
         await new Promise(r => setTimeout(r, 180));
-        const n = 40 + Math.floor(Math.random() * 120);
+        const n = CHUNKS[i++ % CHUNKS.length];
         controller.enqueue(bytes.slice(pos, pos + n));
         pos += n;
       },
@@ -44,8 +45,8 @@
 
   let renderer;
   async function run() {
-    document.getElementById('app').innerHTML = '';
     renderer && renderer.destroy();
+    bw.clear('#app');
     renderer = bwA2UI.createRenderer({ mount: '#app', validation: 'relaxed', theme: 'ocean' });
     await renderer.receiveStream(slowStream(jsonl));
   }

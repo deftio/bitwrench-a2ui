@@ -156,6 +156,7 @@ var bwA2UI = (() => {
     createRenderer: () => createRenderer,
     fromA2A: () => fromA2A,
     fromAgUiEvent: () => fromAgUiEvent,
+    getVersion: () => getVersion,
     isEnvelope: () => isEnvelope,
     isHttpUrl: () => isHttpUrl,
     isSafeColor: () => isSafeColor,
@@ -178,6 +179,12 @@ var bwA2UI = (() => {
   var bw = globalThis.bw;
   if (!bw) throw new Error("bitwrench-a2ui: load bitwrench (bitwrench.umd.min.js) before bitwrench-a2ui");
   var bitwrench_default = bw;
+
+  // src/version.js
+  var VERSION = "0.9.0";
+  function getVersion() {
+    return VERSION;
+  }
 
   // node_modules/zod/v3/external.js
   var external_exports = {};
@@ -26768,7 +26775,10 @@ ${styles.alternateCss}` : "", themeVarsCss(bw2, styles, ".a2ui-surface"), adapte
         unmount: (surfaceId) => unmountSurface(surfaceId ?? api.surfaceIds()[0])
       },
       catalogId: BASIC_CATALOG_ID,
-      version: PROTOCOL_VERSION
+      /** The A2UI protocol version this renderer speaks ('1.0'). */
+      protocolVersion: PROTOCOL_VERSION,
+      /** The bitwrench-a2ui package version. */
+      version: VERSION
     };
     return api;
   }
@@ -26875,8 +26885,9 @@ ${styles.alternateCss}` : "", themeVarsCss(bw2, styles, ".a2ui-surface"), adapte
   function toA2APart(envelopes) {
     return { kind: "data", data: Array.isArray(envelopes) ? envelopes : [envelopes], metadata: { mimeType: A2UI_MIME_TYPE } };
   }
+  var messageSeq = 0;
   function toA2AMessage(envelopes, metadata = {}, ids = {}) {
-    const messageId = ids.messageId ?? (globalThis.crypto?.randomUUID?.() ?? `m-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`);
+    const messageId = ids.messageId ?? (globalThis.crypto?.randomUUID?.() ?? `m-${Date.now().toString(36)}-${++messageSeq}`);
     return {
       kind: "message",
       role: "user",
@@ -26981,8 +26992,5 @@ ${html}
 `;
     return { html: doc, errors };
   }
-
-  // src/index.js
-  var VERSION = "0.9.0";
   return __toCommonJS(browser_exports);
 })();

@@ -1,24 +1,30 @@
 #!/usr/bin/env node
-// Prepare, verify and tag a release. Publishing is done by CI, never from a laptop.
+// Cut a release: version, checks, commit, tag, push, then follow CI until npm and the
+// GitHub Release are done. package.json holds the version (the single source of truth);
+// src/version.js is generated from it. Publishing happens in CI, never from a laptop.
 //
-//   npm run release -- patch|minor|major        0.1.0 -> 0.1.1 / 0.2.0 / 1.0.0
-//   npm run release -- 0.2.0-rc.1               an explicit version (pre-releases go to "next")
-//   npm run release -- minor --dry-run          every check and gate, no changes kept
-//   npm run release -- minor --yes              no prompts (for scripted use)
+//   npm run release                             release the version in package.json as is
+//                                               (e.g. a first version published by hand)
+//   npm run release -- patch|minor|major        bump first: 0.9.0 -> 0.9.1 / 0.10.0 / 1.0.0
+//   npm run release -- 0.10.0-rc.1              an explicit version (pre-releases go to "next")
+//   npm run release:dry [-- minor]              every check and gate, nothing kept or pushed
+//   flags: --yes (no prompts)  --no-watch (do not follow the workflow)
 //
 // Steps (stops at the first failure; see RELEASE.md):
-//   1. Pre-flight   on main, clean, in sync with origin, right git identity, version free on
-//                   npm and as a tag, CHANGELOG "Unreleased" has content, package not private
-//   2. Bump         package.json, package-lock.json, src/index.js VERSION, CDN URLs in docs
-//                   and examples, CHANGELOG "Unreleased" -> "## X.Y.Z - date"
-//   3. Gates        build, CDN tag check, tests with the 100% coverage gate, conformance
-//                   report, package check with a real install, site build
-//   4. Commit + tag "release: vX.Y.Z" and an annotated tag vX.Y.Z (signed if git has a key)
-//   5. Push         main and the tag, atomically. The tag push starts .github/workflows/release.yml,
-//                   which publishes to npm (OIDC, provenance) and creates the GitHub Release.
+//   1. Pre-flight   on main, clean, in sync with origin, git and gh identity are deftio, tag
+//                   free, not already on npm (unless releasing a hand-published version),
+//                   release notes in CHANGELOG, package not private
+//   2. Version      package.json + package-lock.json (npm version), src/version.js, CDN URLs
+//                   in docs and examples, CHANGELOG "Unreleased" -> "## X.Y.Z - date"
+//   3. Gates        build, version and CDN checks, tests with the 100% coverage gate,
+//                   conformance report, package check with a real install, site build
+//   4. Commit + tag "release: vX.Y.Z" (if anything changed) and an annotated tag vX.Y.Z,
+//                   signed when git has a signing key
+//   5. Push + watch main and the tag, atomically. The tag starts .github/workflows/release.yml
+//                   (npm via OIDC with provenance, attestations, GitHub Release); with gh
+//                   signed in, the script follows that run and prints the release links.
 //
-// Each of steps 4 and 5 asks first. If a gate fails after the bump, the script offers to
-// restore the working tree to HEAD.
+// Steps 4 and 5 ask first. If a gate fails, the script offers to restore the working tree.
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -99,16 +105,27 @@ export function promoteChangelog(text, version, date) {
 }
 
 // ---- main ------------------------------------------------------------------------------
+// Files the gates may rewrite without changing anything real: build timestamps and the
+// report's date. Discarded before tagging when they are the only difference.
+const NOISE = ['-I', '"built":', '-I', '^\\* \\*\\*Generated\\*\\*'];
+const hasRealChanges = () => { try { git('diff', '--quiet', ...NOISE); return false; } catch { return true; } };
+const ghOk = () => { try { execFileSync('gh', ['auth', 'status'], { stdio: 'ignore' }); return true; } catch { return false; } };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 async function main() {
-  if (!target) fail('say which version: npm run release -- patch|minor|major|X.Y.Z [--dry-run]');
   const pkg = JSON.parse(read('package.json'));
   const from = pkg.version;
-  let version;
-  try { version = nextVersion(from, target); } catch (e) { fail(e.message); }
-  if (compareVersions(version, from) <= 0) fail(`${version} is not newer than ${from}`);
+  // No argument: release the version already in package.json (for example a first release
+  // published by hand). Otherwise bump first.
+  const bump = Boolean(target);
+  let version = from;
+  if (bump) {
+    try { version = nextVersion(from, target); } catch (e) { fail(e.message); }
+    if (compareVersions(version, from) <= 0) fail(`${version} is not newer than ${from}`);
+  }
   const tag = `v${version}`;
   const prerelease = version.includes('-');
-  console.log(`\nbitwrench-a2ui ${from} -> ${version}${prerelease ? ' (pre-release, npm tag "next")' : ''}`);
+  console.log(`\nbitwrench-a2ui ${bump ? `${from} -> ${version}` : `${version} (the version in package.json)`}${prerelease ? ', pre-release (npm tag "next")' : ''}`);
 
   // 1. Pre-flight --------------------------------------------------------------------------
   step(1, 'Pre-flight checks');
@@ -130,7 +147,12 @@ async function main() {
   const user = tryGit('config', 'user.name');
   if (user !== OWNER) fail(`git user.name is "${user}": commits to ${OWNER}/* must be made as ${OWNER} (set it with git config --local)`);
   if (!tryGit('config', 'user.email')) fail('git user.email is not set');
-  ok(`identity: git user ${user}, origin owner ${owner}`);
+  let ghUser = null;
+  if (ghOk()) {
+    ghUser = execFileSync('gh', ['api', 'user', '--jq', '.login'], { encoding: 'utf8' }).trim();
+    if (ghUser !== OWNER) fail(`the active gh account is ${ghUser}: switch with gh auth switch -u ${OWNER}`);
+  }
+  ok(`identity: git user ${user}, origin owner ${owner}${ghUser ? `, gh account ${ghUser}` : ' (gh not signed in: the workflow will not be watched)'}`);
 
   run('git', ['fetch', '--quiet', '--tags', 'origin', BRANCH]);
   const behind = Number(git('rev-list', '--count', `HEAD..origin/${BRANCH}`));
@@ -141,44 +163,50 @@ async function main() {
   if (git('ls-remote', '--tags', 'origin', `refs/tags/${tag}`)) fail(`tag ${tag} already exists on origin`);
   ok(`tag ${tag} is free`);
 
+  let onNpm = false;
   try {
-    const published = execFileSync(npm, ['view', `${pkg.name}@${version}`, 'version'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
-    if (published) fail(`${pkg.name}@${version} is already on npm`);
-    ok(`${pkg.name}@${version} is not on npm yet`);
+    onNpm = Boolean(execFileSync(npm, ['view', `${pkg.name}@${version}`, 'version'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim());
   } catch (e) {
     // An unknown name or version is a 404; anything else (offline, proxy) must not pass silently.
     if (!/E404|404 Not Found/.test(String(e.stderr))) fail(`could not ask npm whether ${version} exists:\n${e.stderr || e.message}`);
-    ok(`${pkg.name}@${version} is not on npm yet`);
   }
+  if (onNpm && bump) fail(`${pkg.name}@${version} is already on npm`);
+  if (onNpm) warn(`${pkg.name}@${version} is already on npm (published by hand?): the workflow will skip npm and create the GitHub Release`);
+  else ok(`${pkg.name}@${version} is not on npm yet`);
 
-  if (pkg.private) {
-    const msg = 'package.json has "private": true, so npm would refuse to publish. Set it to false once the npm name is registered (see RELEASE.md).';
-    if (DRY) warn(msg); else fail(msg);
-  } else ok('package is publishable');
+  if (pkg.private) fail('package.json has "private": true, so npm would refuse to publish');
+  ok('package is publishable');
 
-  let changelog;
-  try { changelog = promoteChangelog(read('CHANGELOG.md'), version, new Date().toISOString().slice(0, 10)); } catch (e) {
-    if (DRY) warn(e.message); else fail(e.message);
-  }
-  if (changelog) ok('CHANGELOG "Unreleased" has release notes');
+  const today = new Date().toISOString().slice(0, 10);
+  let changelog = read('CHANGELOG.md');
+  const hasSection = new RegExp(`^## ${version.replace(/\./g, '\\.')} - `, 'm').test(changelog);
+  if (!hasSection) {
+    try { changelog = promoteChangelog(changelog, version, today); } catch (e) { fail(e.message); }
+    ok('CHANGELOG "Unreleased" notes become the release notes');
+  } else if (bump) {
+    fail(`CHANGELOG.md already has a ${version} section`);
+  } else ok(`CHANGELOG has a ${version} section`);
 
-  // 2. Bump --------------------------------------------------------------------------------
-  step(2, `Bump to ${version}`);
+  // 2. Version -----------------------------------------------------------------------------
+  step(2, bump ? `Bump to ${version}` : `Version ${version}`);
+  const cdnChanges = cdnFiles().filter(f => bumpCdn(read(f), version) !== read(f));
   if (DRY) {
-    for (const f of cdnFiles()) { const t = read(f); if (bumpCdn(t, version) !== t) console.log(`  would update CDN version in ${f}`); }
-    console.log('  would update package.json, package-lock.json, src/index.js, CHANGELOG.md');
+    if (bump) console.log('  would update package.json, package-lock.json and src/version.js');
+    for (const f of cdnChanges) console.log(`  would update the CDN version in ${f}`);
+    if (!hasSection) console.log('  would move the CHANGELOG "Unreleased" notes under the new version');
   } else {
-    run(npm, ['version', version, '--no-git-tag-version', '--ignore-scripts', '--allow-same-version']);
-    write('src/index.js', read('src/index.js').replace(/export const VERSION = '[^']+';/, `export const VERSION = '${version}';`));
-    for (const f of cdnFiles()) { const t = read(f); const n = bumpCdn(t, version); if (n !== t) { write(f, n); ok(`CDN version in ${f}`); } }
-    write('CHANGELOG.md', changelog);
-    ok('package.json, package-lock.json, src/index.js, CHANGELOG.md');
+    if (bump) run(npm, ['version', version, '--no-git-tag-version', '--ignore-scripts']);
+    run(process.execPath, ['tools/gen-version.js']);
+    for (const f of cdnChanges) { write(f, bumpCdn(read(f), version)); ok(`CDN version in ${f}`); }
+    if (!hasSection) write('CHANGELOG.md', changelog);
   }
+  ok('package.json is the single source of truth; src/version.js is generated from it');
 
   // 3. Gates -------------------------------------------------------------------------------
   step(3, 'Build and verify');
   try {
     run(npm, ['run', 'build']);
+    run(process.execPath, ['tools/gen-version.js', '--check']);
     run(process.execPath, ['tools/cdn-tags.js', '--check']);
     run(npm, ['run', 'test:coverage']);
     run(npm, ['run', 'conformance:report']);
@@ -186,47 +214,68 @@ async function main() {
     run(process.execPath, ['tools/build-site.js']);
   } catch {
     console.error('\n✗ a gate failed.');
-    if (!DRY && await confirm('Restore the working tree to HEAD (undo the bump and build output)?')) {
+    if (await confirm('Restore the working tree to HEAD (undo the version change and build output)?')) {
       git('checkout', '--', '.');
       console.log('  restored.');
     }
     process.exit(1);
   }
   ok('all gates passed');
+  if (!hasRealChanges()) git('checkout', '--', '.');   // only timestamps changed
 
   if (DRY) {
     const changed = git('status', '--porcelain');
-    if (changed) {
-      warn(`the gates rewrote tracked files (build output or the report date):\n${changed}`);
-      warn('restore them with: git checkout -- .');
-    }
+    if (changed) warn(`the gates changed tracked files; restore them with git checkout -- .\n${changed}`);
     console.log(`\n✓ dry run complete: ${tag} is ready to release.\n`);
     return;
   }
 
   // 4. Commit and tag ----------------------------------------------------------------------
   step(4, `Commit and tag ${tag}`);
-  console.log(git('status', '--short'));
-  if (!await confirm(`Commit these changes as "release: ${tag}" and tag ${tag}?`)) {
-    console.log('\n  Stopped before committing. The bumped files are left in place; git checkout -- . undoes them.\n');
+  const changes = git('status', '--porcelain');
+  if (changes) console.log(changes);
+  else console.log(`  nothing to commit: ${tag} will tag the current commit, ${git('rev-parse', '--short', 'HEAD')}`);
+  if (!await confirm(changes ? `Commit these changes as "release: ${tag}" and tag ${tag}?` : `Tag ${git('rev-parse', '--short', 'HEAD')} as ${tag}?`)) {
+    console.log('\n  Stopped. Nothing was committed or tagged; git checkout -- . undoes any file changes.\n');
     return;
   }
-  git('add', '-A');
-  git('commit', '-m', `release: ${tag}`);
+  if (changes) {
+    git('add', '-A');
+    git('commit', '-m', `release: ${tag}`);
+  }
   const signed = !!tryGit('config', 'user.signingkey');
   git('tag', signed ? '-s' : '-a', tag, '-m', `bitwrench-a2ui ${tag}`);
-  ok(`committed and tagged ${tag}${signed ? ' (signed)' : ''}`);
+  ok(`${changes ? 'committed and ' : ''}tagged ${tag}${signed ? ' (signed)' : ''}`);
 
-  // 5. Push --------------------------------------------------------------------------------
+  // 5. Push and follow the workflow --------------------------------------------------------
   step(5, 'Push');
-  if (!await confirm(`Push ${BRANCH} and ${tag} to origin? This starts the publish workflow.`)) {
+  if (!await confirm(`Push ${BRANCH} and ${tag} to origin? This starts the Release workflow.`)) {
     console.log(`\n  Not pushed. When ready: git push --atomic origin ${BRANCH} ${tag}\n`);
     return;
   }
   run('git', ['push', '--atomic', 'origin', BRANCH, tag]);
+  const actions = `https://github.com/${OWNER}/bitwrench-a2ui/actions/workflows/release.yml`;
+  if (!ghUser || args.includes('--no-watch')) {
+    console.log(`\n✓ ${tag} pushed. Follow the Release workflow at ${actions}\n`);
+    return;
+  }
+  // Find the run for this tag and watch it to the end.
+  let id = null;
+  for (let i = 0; i < 30 && !id; i++) {
+    await sleep(4000);
+    id = execFileSync('gh', ['run', 'list', '--workflow', 'release.yml', '--branch', tag, '--limit', '1', '--json', 'databaseId', '--jq', '.[0].databaseId // empty'], { cwd: root, encoding: 'utf8' }).trim() || null;
+  }
+  if (!id) { console.log(`\n✓ ${tag} pushed, but the workflow run did not appear yet: ${actions}\n`); return; }
+  try {
+    execFileSync('gh', ['run', 'watch', id, '--exit-status', '--interval', '10'], { cwd: root, stdio: 'inherit' });
+  } catch {
+    fail(`the Release workflow failed: https://github.com/${OWNER}/bitwrench-a2ui/actions/runs/${id}\n  Fix the cause and re-run the failed jobs; every step is safe to repeat (RELEASE.md, Recovery).`);
+  }
   console.log(`
-✓ ${tag} pushed. The Release workflow now builds, tests, publishes to npm and creates the
-  GitHub Release:  https://github.com/${OWNER}/bitwrench-a2ui/actions/workflows/release.yml
+✓ released ${tag}
+  npm:     https://www.npmjs.com/package/${pkg.name}/v/${version}
+  GitHub:  https://github.com/${OWNER}/bitwrench-a2ui/releases/tag/${tag}
+  CDN:     https://cdn.jsdelivr.net/npm/${pkg.name}@${version}/dist/bitwrench-a2ui.min.js
 `);
 }
 

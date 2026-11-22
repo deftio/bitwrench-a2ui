@@ -1,7 +1,8 @@
 // Build a single-file MCP App (ui:// resource) that renders A2UI.
 //
 //   npm run build
-//   node templates/mcp-app/build.js [messages.json] [--title "My app"] [--theme ocean] > app.html
+//   node templates/mcp-app/build.js [messages.json] [--title "My app"] [--theme ocean]
+//                                   [--host-origin https://host.example] > app.html
 //
 // messages.json may hold one A2UI envelope, an array, or {messages:[...]}. The output
 // inlines dist/bitwrench-a2ui.bundle.min.js (bitwrench + bitwrench-a2ui) and the messages
@@ -16,6 +17,8 @@ const args = process.argv.slice(2);
 const flag = name => { const i = args.indexOf(name); return i >= 0 ? args.splice(i, 2)[1] : undefined; };
 const title = flag('--title') ?? 'A2UI surface';
 const theme = flag('--theme') ?? 'teal';
+const hostOrigin = flag('--host-origin') ?? null;
+if (hostOrigin !== null && new URL(hostOrigin).origin !== hostOrigin) { console.error(`--host-origin must be an origin such as https://host.example, not ${hostOrigin}`); process.exit(1); }
 const file = args[0];
 
 const bundlePath = path.join(root, 'dist/bitwrench-a2ui.bundle.min.js');
@@ -35,5 +38,6 @@ const html = readFileSync(path.join(here, 'template.html'), 'utf8')
   .replace('{{TITLE}}', () => escapeHtml(title))
   .replace('{{BUNDLE}}', () => inlineSafe(readFileSync(bundlePath, 'utf8')))
   .replace('{{MESSAGES}}', () => inlineSafe(JSON.stringify(messages)))
-  .replace('{{THEME}}', () => JSON.stringify(theme));
+  .replace('{{THEME}}', () => JSON.stringify(theme))
+  .replace('{{HOST_ORIGIN}}', () => inlineSafe(JSON.stringify(hostOrigin)));
 process.stdout.write(html);

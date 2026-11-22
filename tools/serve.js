@@ -16,10 +16,24 @@ const types = {
   '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.txt': 'text/plain; charset=utf-8',
 };
 
+// Map a URL path to a file inside base, or null. Decodes once, normalizes, then checks the
+// result is really under base (a plain startsWith would accept a sibling such as base-other).
+function resolveInside(base, urlPath) {
+  let decoded;
+  try { decoded = decodeURIComponent(urlPath); } catch { return null; }   // malformed %-escapes
+  if (decoded.includes('\0')) return null;
+  const full = path.resolve(base, '.' + path.posix.normalize('/' + decoded));
+  const rel = path.relative(base, full);
+  if (rel === '' || rel.startsWith('..') || path.isAbsolute(rel)) return rel === '' ? full : null;
+  // No dotfiles or dot-directories (.git, .env, .claude ...).
+  if (rel.split(path.sep).some(part => part.startsWith('.'))) return null;
+  return full;
+}
+
 http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
-  let file = path.normalize(path.join(root, decodeURIComponent(url.pathname)));
-  if (!file.startsWith(root)) { res.writeHead(403).end(); return; }
+  let file = resolveInside(root, url.pathname);
+  if (!file) { res.writeHead(404, { 'content-type': 'text/plain' }).end('not found'); return; }
   try {
     if ((await stat(file)).isDirectory()) file = path.join(file, 'index.html');
     const data = await readFile(file);

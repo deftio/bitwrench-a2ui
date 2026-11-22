@@ -164,10 +164,12 @@
     return { t: 'div', a: { class: 'site-panel', ...attrs }, c: [{ t: 'div', a: { class: 'site-panel-title' }, c: title }, content] };
   }
 
+  let tabSeq = 0;
+
   /** Simple tab strip: tabs = [{label, render(): TACO}] mounted into a container element. */
   function tabs(items, onSelect) {
     let active = 0;
-    const id = `tabs-${Math.random().toString(36).slice(2)}`;
+    const id = `site-tabs-${++tabSeq}`;
     const draw = () => {
       const host = document.getElementById(id);
       if (!host) return;

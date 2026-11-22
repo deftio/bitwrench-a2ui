@@ -16,12 +16,15 @@
 // in the .bundle file), so pages load the pinned, published bitwrench file unchanged.
 import { build } from 'esbuild';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { gzipSync, brotliCompressSync } from 'node:zlib';
 import path from 'node:path';
 
 const root = path.dirname(new URL(import.meta.url).pathname);
 const pkg = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
+// src/version.js is generated from package.json, the single source of truth.
+execFileSync(process.execPath, [path.join(root, 'tools/gen-version.js')], { stdio: 'inherit' });
 const dep = name => JSON.parse(readFileSync(path.join(root, 'node_modules', name, 'package.json'), 'utf8'));
 const dist = path.join(root, 'dist');
 mkdirSync(dist, { recursive: true });

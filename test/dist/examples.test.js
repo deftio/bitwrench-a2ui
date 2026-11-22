@@ -4,6 +4,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { JSDOM, VirtualConsole } from 'jsdom';
+import { splitScripts } from '../helpers/page.js';
 
 const root = new URL('../../', import.meta.url);
 const read = p => fs.readFileSync(new URL(p, root), 'utf8');
@@ -17,13 +18,14 @@ describe('examples', { skip: !built && 'run npm run build first' }, () => {
       const errors = [];
       const vc = new VirtualConsole();
       vc.on('jsdomError', e => errors.push(e.message));
-      const dom = new JSDOM(html.replace(/<script\b[\s\S]*?<\/script>/g, ''), { runScripts: 'outside-only', virtualConsole: vc, pretendToBeVisual: true });
+      const split = splitScripts(html);
+      const dom = new JSDOM(split.html, { runScripts: 'outside-only', virtualConsole: vc, pretendToBeVisual: true });
       const w = dom.window;
       // Browser globals jsdom does not provide.
       Object.assign(w, { TextEncoder, TextDecoder, ReadableStream });
       w.eval(read('node_modules/bitwrench/dist/bitwrench.umd.min.js'));
       w.eval(read('dist/bitwrench-a2ui.min.js'));
-      const inline = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
+      const inline = split.scripts.filter(s => !s.src).map(s => s.code);
       assert.ok(inline.length > 0);
       try {
         for (const code of inline) w.eval(code);

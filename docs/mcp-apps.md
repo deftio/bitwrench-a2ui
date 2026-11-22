@@ -12,18 +12,19 @@ The official guide inlines a framework renderer into one file with a bundler plu
 
 ```sh
 npm run build
-node templates/mcp-app/build.js my-surface.json --title "Booking" --theme ocean > my-app.html
+node templates/mcp-app/build.js my-surface.json --title "Booking" --theme ocean --host-origin https://host.example > my-app.html
 ```
 
-The script inlines the bundle and your initial A2UI messages into `templates/mcp-app/template.html` and writes one HTML file to stdout, which your MCP server returns as the `ui://` resource. The messages file may hold one envelope, an array, or `{ "messages": [...] }` (the format of the upstream examples). Both options are optional; the defaults are "A2UI surface" and the `teal` preset.
+The script inlines the bundle and your initial A2UI messages into `templates/mcp-app/template.html` and writes one HTML file to stdout, which your MCP server returns as the `ui://` resource. The messages file may hold one envelope, an array, or `{ "messages": [...] }` (the format of the upstream examples). All the flags are optional: the title defaults to "A2UI surface" and the theme to the `teal` preset.
 
 Inside the page, the renderer is wired to the host with `postMessage`:
 
 * **Ready** - once the initial messages render, the page posts `{ a2uiReady: true, capabilities }` to the parent, so the host can tell the agent what this renderer supports.
-* **Incoming** - messages from the parent frame (`event.source === window.parent`; anything else is ignored) with an `a2ui` field are filtered through `collectEnvelopes`, so only valid v1.0 envelopes are passed to `renderer.receive()`.
+* **Origin** - the bridge talks only to the host origin: give it with `--host-origin https://host.example` at build time, or the page takes it from the embedding page when the browser exposes it (`location.ancestorOrigins`, then `document.referrer`). With no known origin the bridge stays closed; it never posts to `'*'`.
+* **Incoming** - messages from the parent frame at the host origin (`event.source === window.parent` and `event.origin`; anything else is ignored) with an `a2ui` field are filtered through `collectEnvelopes`, so only valid v1.0 envelopes are passed to `renderer.receive()`.
 * **Outgoing** - every renderer `send` is posted to the parent as `{ a2ui: message, metadata }`.
 
-`test/dist/dist.test.js` builds the template from an upstream example and checks all three, plus that the page loads no external scripts.
+`test/dist/dist.test.js` builds the template from an upstream example and checks the ready message, the origin and source checks, and that the page loads no external scripts.
 
 Adapt the bridge in the template to your host's MCP Apps API (tool calls, host context and its CSS variables) as needed; the template keeps it minimal and readable.
 

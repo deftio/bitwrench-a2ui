@@ -7,6 +7,7 @@
 // renders the core's node tree with bitwrench views, and forwards everything the core
 // emits (actions, errors, RPC) to `send` as v1.0 renderer-to-agent envelopes.
 import bwDefault from 'bitwrench';
+import { VERSION } from './version.js';
 
 import { BASIC_CATALOG_ID, NodeResolver, PROTOCOL_VERSION, buildBasicCatalog, createCore, effect, getValue } from './core/webcore.js';
 import { BASIC_COMPONENTS } from './catalog/basic/components.js';
@@ -255,7 +256,10 @@ export function createRenderer(opts = {}) {
       unmount: surfaceId => unmountSurface(surfaceId ?? api.surfaceIds()[0]),
     },
     catalogId: BASIC_CATALOG_ID,
-    version: PROTOCOL_VERSION,
+    /** The A2UI protocol version this renderer speaks ('1.0'). */
+    protocolVersion: PROTOCOL_VERSION,
+    /** The bitwrench-a2ui package version. */
+    version: VERSION,
   };
   return api;
 }

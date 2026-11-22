@@ -181,6 +181,7 @@ describe('a2a', () => {
     const saved = globalThis.crypto;
     Object.defineProperty(globalThis, 'crypto', { value: undefined, configurable: true });
     assert.match(toA2AMessage(E()).messageId, /^m-/);
+    assert.notEqual(toA2AMessage(E()).messageId, toA2AMessage(E()).messageId);
     Object.defineProperty(globalThis, 'crypto', { value: saved, configurable: true });
     assert.equal(A2A_EXTENSION_HEADER['X-A2A-Extensions'], A2A_EXTENSION_URI);
   });

@@ -35,6 +35,23 @@ function welcome() {
 
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.css': 'text/css' };
 
+// Map a URL path to a file inside base, or null (see the same helper in tools/serve.js).
+function resolveInside(base, urlPath) {
+  let decoded;
+  try { decoded = decodeURIComponent(urlPath); } catch { return null; }   // malformed %-escapes
+  if (decoded.includes('\0')) return null;
+  const full = path.resolve(base, '.' + path.posix.normalize('/' + decoded));
+  const rel = path.relative(base, full);
+  if (rel === '' || rel.startsWith('..') || path.isAbsolute(rel)) return rel === '' ? full : null;
+  // No dotfiles or dot-directories (.git, .env, .claude ...).
+  if (rel.split(path.sep).some(part => part.startsWith('.'))) return null;
+  return full;
+}
+
+// Only these directories are served: the client page and the built renderer.
+const PUBLIC = ['examples', 'dist'];
+const MAX_BODY = 1 << 20;   // 1 MB is far more than any action needs
+
 http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   if (url.pathname === '/events') {
@@ -46,8 +63,12 @@ http.createServer(async (req, res) => {
   }
   if (url.pathname === '/action' && req.method === 'POST') {
     let body = '';
-    for await (const chunk of req) body += chunk;
-    const { message, metadata } = JSON.parse(body || '{}');
+    for await (const chunk of req) {
+      body += chunk;
+      if (body.length > MAX_BODY) { res.writeHead(413).end(); req.destroy(); return; }
+    }
+    let message, metadata;
+    try { ({ message, metadata } = JSON.parse(body || '{}')); } catch { res.writeHead(400).end('invalid JSON'); return; }
     console.log('from renderer:', JSON.stringify(message), metadata?.a2uiRendererDataModel ? '(with data model)' : '');
     if (message?.action?.name === 'plan') {
       const { city, nights } = message.action.context;
@@ -60,8 +81,9 @@ http.createServer(async (req, res) => {
   }
   // Static files from the repository root (the client page and the built scripts).
   const file = url.pathname === '/' ? '/examples/agent-client.html' : url.pathname;
-  const full = path.normalize(path.join(root, file));
-  if (!full.startsWith(root)) { res.writeHead(403).end(); return; }
+  const full = resolveInside(root, file);
+  const top = full && path.relative(root, full).split(path.sep)[0];
+  if (!full || !PUBLIC.includes(top)) { res.writeHead(404).end('not found'); return; }
   try {
     const data = await readFile(full);
     res.writeHead(200, { 'content-type': types[path.extname(full)] || 'application/octet-stream' }).end(data);

@@ -34,6 +34,8 @@ jobs:
       # --ignore-scripts: dependency install scripts are the classic supply-chain vector,
       # and nothing here needs them (esbuild ships its binary as an optional dependency).
       - run: npm ci --ignore-scripts
+      - name: src/version.js matches package.json (the single source of truth)
+        run: node tools/gen-version.js --check
       # Build first: test/dist loads the built browser files.
       - run: npm run build
       - name: Committed dist/ matches a fresh build

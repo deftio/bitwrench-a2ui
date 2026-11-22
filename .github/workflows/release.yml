@@ -41,6 +41,17 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - name: Pushed by a release maintainer
+        # The v* tag ruleset already limits who can create release tags; this is a second
+        # lock. RELEASE_MAINTAINERS is an optional repository variable (space separated logins).
+        env:
+          ACTOR: ${{ github.triggering_actor }}
+          MAINTAINERS: ${{ vars.RELEASE_MAINTAINERS || 'deftio' }}
+        run: |
+          case " $MAINTAINERS " in
+            *" $ACTOR "*) echo "release triggered by $ACTOR" ;;
+            *) echo "::error::$ACTOR is not a release maintainer ($MAINTAINERS)"; exit 1 ;;
+          esac
       - name: Tag matches package.json and is on main
         id: meta
         env:

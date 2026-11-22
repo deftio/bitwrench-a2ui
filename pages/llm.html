@@ -20,7 +20,7 @@
 
   // ---- providers ---------------------------------------------------------------
   // Calls go straight from this page to the provider you choose, with your key.
-  // Keys live in sessionStorage only (cleared when the tab closes or with "Forget key").
+  // Keys live in page memory only (gone when the page reloads or with "Forget key").
   const PROVIDERS = {
     claude: {
       label: 'Claude (Anthropic)',
@@ -124,7 +124,9 @@ ${catalogSummary()}`;
 
   // ---- state -----------------------------------------------------------------------
   const keyName = p => `a2ui-llm-key-${p}`;
-  const session = { get: k => { try { return sessionStorage.getItem(k) || ''; } catch { return ''; } }, set: (k, v) => { try { v ? sessionStorage.setItem(k, v) : sessionStorage.removeItem(k); } catch { /* ignore */ } } };
+  // Keys are held in this page's memory only: never written to storage, gone on reload.
+  const keys = new Map();
+  const session = { get: k => keys.get(k) || '', set: (k, v) => { if (v) keys.set(k, v); else keys.delete(k); } };
   const state = { provider: 'claude', model: 'claude-opus-5-5', history: [], busy: false, renderer: null, wire: [], diags: [], outbound: [] };
 
   function newRenderer() {
@@ -212,7 +214,7 @@ ${catalogSummary()}`;
     site.header('LLM sandbox', 'Describe a UI and let a model build it as A2UI v1.0, rendered live by bitwrench-a2ui. Click the buttons it generates: the action goes back to the model, which updates the surface.'),
     { t: 'div', a: { class: 'site-card', style: 'margin-bottom:16px' }, c: [
       { t: 'strong', c: 'Your key stays in this browser. ' },
-      { t: 'span', a: { class: 'site-muted' }, c: 'It is kept in sessionStorage for this tab only and sent only to the provider you pick, directly from this page; there is no server in between. Use a restricted or development key. Model calls cost money on your account, and results vary.' },
+      { t: 'span', a: { class: 'site-muted' }, c: 'It is held in this page’s memory only, never stored, and sent only to the provider you pick, directly from this page; there is no server in between. Use a restricted or development key. Model calls cost money on your account, and results vary.' },
     ] },
     { t: 'div', a: { id: 'llm-controls', class: 'site-toolbar' } },
     { t: 'div', a: { class: 'site-toolbar' }, c: [

@@ -20,4 +20,4 @@ export { fromA2A, toA2APart, toA2AMessage, A2A_EXTENSION_URI, A2A_EXTENSION_HEAD
 export { fromAgUiEvent, connectAgUi } from './transport/agui.js';
 export { renderToHTML, renderToDocument } from './static/index.js';
 
-export const VERSION = '0.9.0';
+export { VERSION, getVersion } from './version.js';

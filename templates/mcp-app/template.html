@@ -21,9 +21,21 @@
   var INITIAL = {{MESSAGES}};
 
   // The postMessage bridge. Adapt this to your MCP host's MCP Apps API; it is kept
-  // minimal and readable on purpose. Accept messages only from the parent frame.
+  // minimal and readable on purpose.
+  //
+  // Messages go only to the host's origin and are accepted only from it. Pass the origin at
+  // build time (--host-origin); otherwise it is taken from the embedding page, when the
+  // browser exposes it. Without a known origin the bridge stays closed rather than using '*'.
+  var HOST_ORIGIN = {{HOST_ORIGIN}} || (function () {
+    try {
+      if (location.ancestorOrigins && location.ancestorOrigins.length) return location.ancestorOrigins[0];
+      return document.referrer ? new URL(document.referrer).origin : null;
+    } catch (e) { return null; }
+  })();
+  if (!HOST_ORIGIN) console.warn('bitwrench-a2ui MCP app: host origin unknown; build with --host-origin to enable the bridge.');
+
   function post(payload) {
-    if (window.parent && window.parent !== window) window.parent.postMessage(payload, '*');
+    if (HOST_ORIGIN && window.parent && window.parent !== window) window.parent.postMessage(payload, HOST_ORIGIN);
   }
 
   var renderer = bwA2UI.createRenderer({
@@ -34,7 +46,7 @@
   });
 
   window.addEventListener('message', function (event) {
-    if (event.source !== window.parent) return;          // only the host frame
+    if (event.source !== window.parent || event.origin !== HOST_ORIGIN) return;   // only the host frame, at its origin
     var data = event.data;
     if (!data || typeof data !== 'object' || !('a2ui' in data)) return;
     renderer.receive(bwA2UI.collectEnvelopes(data.a2ui)); // untrusted: only valid v1.0 envelopes pass

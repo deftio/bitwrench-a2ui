@@ -47,7 +47,7 @@ The returned object has these members:
 * **`destroy()`** - remove all DOM and release everything.
 * **`processor`** - the underlying web_core `MessageProcessor` (advanced).
 * **`debug`** - `rootView(id)`, `findView(componentId, id)`, `unmount(id)`. For tests, the playground and devtools; not a stable API.
-* **`version`** - the A2UI protocol version (`'1.0'`). **`catalogId`** - the basic catalog id.
+* **`version`** - the bitwrench-a2ui package version (`'0.9.0'`). **`protocolVersion`** - the A2UI protocol version (`'1.0'`). **`catalogId`** - the basic catalog id.
 
 ## Catalogs and components
 
@@ -89,4 +89,4 @@ Also exported:
 * **`themeCss(bw, theme)`, `resolveThemeConfig(bw, theme)`** - theme CSS for static pages.
 * **`ICONS`, `ICON_VIEWBOX`** - the icon path data.
 * **`viewTree(view)`** - builds a view tree from a view.
-* **`VERSION`** - this package's version.
+* **`VERSION`**, **`getVersion()`** - this package's version, from `package.json` (the single source of truth; `src/version.js` is generated from it at build time). Also on the script-tag global: `bwA2UI.VERSION`, `bwA2UI.getVersion()`.

@@ -40,8 +40,8 @@ for (const [key, target] of Object.entries(pkg.exports)) {
 
 // 3. One version everywhere.
 const v = pkg.version;
-const indexVersion = /export const VERSION = '([^']+)'/.exec(readFileSync(path.join(root, 'src/index.js'), 'utf8'))?.[1];
-check(indexVersion === v, `src/index.js VERSION is ${indexVersion}, package.json is ${v}`);
+const srcVersion = /export const VERSION = "([^"]+)"/.exec(readFileSync(path.join(root, 'src/version.js'), 'utf8'))?.[1];
+check(srcVersion === v, `src/version.js VERSION is ${srcVersion}, package.json is ${v}: run npm run build`);
 const builds = JSON.parse(readFileSync(path.join(root, 'dist/builds.json'), 'utf8'));
 check(builds.version === v, `dist/builds.json is for ${builds.version}, package.json is ${v}: rebuild`);
 for (const f of ['bitwrench-a2ui.min.js', 'bitwrench-a2ui.esm.min.js', 'bitwrench-a2ui.bundle.min.js']) {

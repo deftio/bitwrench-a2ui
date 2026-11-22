@@ -47,6 +47,6 @@ The project site has a sandbox page (`pages/llm.html`) where you paste an API ke
 * **Prompt** - built from the basic catalog document, as above.
 * **Loop** - the model's JSON Lines render as they arrive; clicking a button sends the action back as the next turn.
 * **Inspection** - the same panes as the playground show the wire messages, data model, TACO and diagnostics, so model mistakes are visible.
-* **Keys** - kept in `sessionStorage` in your browser only, sent only to the provider you choose, and cleared with one button. Use a restricted or development key. Anthropic requires its `anthropic-dangerous-direct-browser-access` header for direct browser calls; the page sets it, because the call is the user's own key in the user's own browser.
+* **Keys** - held in the page's memory only (never written to browser storage, gone on reload), sent only to the provider you choose, and cleared with one button. Use a restricted or development key. Anthropic requires its `anthropic-dangerous-direct-browser-access` header for direct browser calls; the page sets it, because the call is the user's own key in the user's own browser.
 
 The page is a demo: results vary with the model and the prompt.

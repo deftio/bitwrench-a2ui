@@ -36,8 +36,12 @@ export function toA2APart(envelopes) {
  * @param {object} metadata  renderer.metadata()
  * @param {{messageId?: string, contextId?: string, taskId?: string}} [ids]
  */
+// Message ids only need to be unique per sender; without crypto.randomUUID a time + counter id
+// is enough (and is not a security token, so no weak randomness is involved).
+let messageSeq = 0;
+
 export function toA2AMessage(envelopes, metadata = {}, ids = {}) {
-  const messageId = ids.messageId ?? (globalThis.crypto?.randomUUID?.() ?? `m-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`);
+  const messageId = ids.messageId ?? (globalThis.crypto?.randomUUID?.() ?? `m-${Date.now().toString(36)}-${++messageSeq}`);
   return {
     kind: 'message', role: 'user', messageId,
     ...(ids.contextId ? { contextId: ids.contextId } : {}),
