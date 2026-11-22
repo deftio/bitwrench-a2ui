@@ -77,7 +77,8 @@ jobs:
           VERSION: ${{ steps.meta.outputs.version }}
         run: |
           mkdir -p release
-          TARBALL="$(npm pack --ignore-scripts --pack-destination release --json | node -p 'JSON.parse(require("fs").readFileSync(0, "utf8"))[0].filename')"
+          # npm pack --json is an array up to npm 11 and an object keyed by name from npm 12.
+          TARBALL="$(npm pack --ignore-scripts --pack-destination release --json | node -p 'const j = JSON.parse(require("fs").readFileSync(0, "utf8")); (Array.isArray(j) ? j[0] : Object.values(j)[0]).filename')"
           cp dist/bitwrench-a2ui.js dist/bitwrench-a2ui.min.js dist/bitwrench-a2ui.esm.min.js dist/bitwrench-a2ui.bundle.min.js dist/builds.json dist/THIRD_PARTY_LICENSES release/
           (cd release && sha256sum -- * > SHA256SUMS)
           # The CHANGELOG section for this version, without its heading.

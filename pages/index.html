@@ -30,7 +30,7 @@
     t: 'div', a: { class: 'site-hero' }, c: { t: 'div', a: { class: 'site-hero-inner' }, c: [
       { t: 'div', c: ['A2UI v1.0', 'No build step', 'No framework', 'DOM or HTML', 'Apache-2.0'].map(x => ({ t: 'span', a: { class: 'site-pill' }, c: x })) },
       { t: 'h1', c: 'A2UI renderer for plain JavaScript' },
-      { t: 'p', c: 'Render agent-generated interfaces with bitwrench. Google\'s A2UI core handles the protocol; bitwrench draws it as plain JavaScript data, to live DOM or to an HTML string.' },
+      { t: 'p', c: ['Render agent-generated interfaces with ', { t: 'a', a: { href: 'https://deftio.github.io/bitwrench/pages/', style: 'color:inherit;text-decoration:underline;text-underline-offset:3px' }, c: 'bitwrench' }, '. Google\'s A2UI core handles the protocol; bitwrench draws it as plain JavaScript data, to live DOM or to an HTML string.'] },
       { t: 'a', a: { class: 'site-cta primary', href: 'playground.html' }, c: 'Open the playground' },
       { t: 'a', a: { class: 'site-cta ghost', href: 'docs.html?doc=quick-start' }, c: 'Quick start' },
       { t: 'a', a: { class: 'site-cta ghost', href: site.SITE.repo }, c: 'GitHub' },

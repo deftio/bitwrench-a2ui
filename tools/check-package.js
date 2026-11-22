@@ -17,8 +17,17 @@ const pkg = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
 const problems = [];
 const check = (ok, msg) => { if (!ok) problems.push(msg); };
 
+// `npm pack --json` prints an array of results up to npm 11 and an object keyed by package
+// name from npm 12. Accept both, and fail clearly on anything else.
+export function packResult(json) {
+  const v = typeof json === 'string' ? JSON.parse(json) : json;
+  const r = Array.isArray(v) ? v[0] : v && typeof v === 'object' && !v.error ? Object.values(v)[0] : null;
+  if (!r || !Array.isArray(r.files) || !r.filename) throw new Error(`unexpected npm pack --json output: ${JSON.stringify(v).slice(0, 300)}`);
+  return r;
+}
+
 // 1. Contents of the tarball, as npm would pack it.
-const [packed] = JSON.parse(execFileSync(npm, ['pack', '--dry-run', '--json', '--ignore-scripts'], { cwd: root, encoding: 'utf8' }));
+const packed = packResult(execFileSync(npm, ['pack', '--dry-run', '--json', '--ignore-scripts'], { cwd: root, encoding: 'utf8' }));
 const files = new Set(packed.files.map(f => f.path));
 const REQUIRED = [
   'package.json', 'README.md', 'LICENSE', 'NOTICE', 'SECURITY.md', 'CHANGELOG.md',
@@ -54,7 +63,7 @@ check(/^## (Unreleased|\d)/m.test(readFileSync(path.join(root, 'CHANGELOG.md'), 
 if (process.argv.includes('--install') && problems.length === 0) {
   const dir = mkdtempSync(path.join(tmpdir(), 'bwa2ui-pack-'));
   try {
-    const [{ filename }] = JSON.parse(execFileSync(npm, ['pack', '--json', '--ignore-scripts', '--pack-destination', dir], { cwd: root, encoding: 'utf8' }));
+    const { filename } = packResult(execFileSync(npm, ['pack', '--json', '--ignore-scripts', '--pack-destination', dir], { cwd: root, encoding: 'utf8' }));
     writeFileSync(path.join(dir, 'package.json'), JSON.stringify({ name: 'pack-check', private: true, type: 'module' }));
     execFileSync(npm, ['install', '--ignore-scripts', '--no-audit', '--no-fund', path.join(dir, filename)], { cwd: dir, stdio: 'inherit' });
     writeFileSync(path.join(dir, 'smoke.js'), `
