@@ -3,11 +3,31 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { JSDOM, VirtualConsole } from 'jsdom';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const built = fs.existsSync(path.join(root, 'dist/bitwrench-a2ui.min.js'));
+
+// CDN scripts are served from node_modules (the same bytes jsDelivr serves), after checking
+// that the pinned version matches package.json and the integrity hash matches the file.
+const pins = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).dependencies;
+function scriptSource(page, src, attrs) {
+  const cdn = /^https:\/\/cdn\.jsdelivr\.net\/npm\/([\w-]+)@([^/]+)\/(.+)$/.exec(src);
+  if (!cdn) {
+    assert.ok(!src.includes('node_modules'), `${src}: load bitwrench and quikdown from the CDN`);
+    return fs.readFileSync(path.join(path.dirname(page), src), 'utf8');
+  }
+  const [, pkg, version, file] = cdn;
+  assert.equal(version, pins[pkg], `${src}: version differs from package.json`);
+  const body = fs.readFileSync(path.join(root, 'node_modules', pkg, file));
+  const integrity = /integrity="([^"]+)"/.exec(attrs)?.[1];
+  assert.equal(integrity, `sha384-${createHash('sha384').update(body).digest('base64')}`, `${src}: integrity`);
+  assert.match(attrs, /crossorigin="anonymous"/);
+  return body.toString('utf8');
+}
 
 async function load(page, query = '') {
   const file = path.join(root, 'pages', page);
@@ -27,8 +47,8 @@ async function load(page, query = '') {
     const body = fs.readFileSync(target, 'utf8');
     return { ok: true, json: async () => JSON.parse(body), text: async () => body };
   };
-  for (const m of html.matchAll(/<script(?:\s+src="([^"]+)")?\s*>([\s\S]*?)<\/script>/g)) {
-    w.eval(m[1] ? fs.readFileSync(path.join(path.dirname(file), m[1]), 'utf8') : m[2]);
+  for (const m of html.matchAll(/<script(?:\s+src="([^"]+)"([^>]*))?\s*>([\s\S]*?)<\/script>/g)) {
+    w.eval(m[1] ? scriptSource(file, m[1], m[2]) : m[3]);
   }
   await new Promise(r => setTimeout(r, 120));
   return { w, errors };
@@ -105,5 +125,18 @@ describe('site pages', { skip: !built && 'run npm run build first' }, () => {
     const ids = [...html.matchAll(/\['([\w-]+)', '[^']+'\]/g)].map(m => m[1]);
     assert.ok(ids.length > 10);
     for (const id of ids) assert.ok(fs.existsSync(path.join(root, 'docs', `${id}.md`)), `docs/${id}.md missing`);
+  });
+});
+
+describe('CDN script tags', () => {
+  it('every page and example loads bitwrench and quikdown from the pinned CDN with SRI', () => {
+    execFileSync(process.execPath, ['tools/cdn-tags.js', '--check'], { cwd: root, encoding: 'utf8' });
+    for (const dir of ['pages', 'examples']) {
+      for (const f of fs.readdirSync(path.join(root, dir)).filter(x => x.endsWith('.html'))) {
+        const html = fs.readFileSync(path.join(root, dir, f), 'utf8');
+        assert.ok(!/<script[^>]+node_modules/.test(html), `${dir}/${f} loads from node_modules`);
+        assert.match(html, /cdn\.jsdelivr\.net\/npm\/bitwrench@/, `${dir}/${f} has no bitwrench CDN tag`);
+      }
+    }
   });
 });

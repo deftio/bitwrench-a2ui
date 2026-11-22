@@ -17,7 +17,7 @@
 </main>
 <footer id="site-footer" class="site-footer"></footer>
 
-<script src="../node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitwrench@2.1.15/dist/bitwrench.umd.min.js" integrity="sha384-udDmcsr7TEJzzxbXOV5b0EaJuEcmQjGTZNDr8fNdR/xEMq7raSMWAGgLZOqU6JLu" crossorigin="anonymous"></script>
 <script src="../dist/bitwrench-a2ui.min.js"></script>
 <script src="site.js"></script>
 <script src="fixtures.js"></script>
@@ -51,9 +51,8 @@
     timers.forEach(clearTimeout); timers = [];
     wire.length = 0; outbound.length = 0;
     current = FIXTURES.find(f => f.id === id);
-    const mount = document.getElementById('demo-surface');
-    mount.innerHTML = '';
     renderer && renderer.destroy();
+    const mount = bw.clear('#demo-surface');
     renderer = bwA2UI.createRenderer({
       mount, theme: { primary: '#0f766e' }, validation: 'relaxed',
       send: m => {
@@ -103,7 +102,7 @@
     'No bundler, no framework, no npm needed. Load bitwrench and bitwrench-a2ui, create a renderer, and feed it A2UI messages from your agent.',
     site.code(`<div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/bitwrench@2.1.15/dist/bitwrench.umd.min.js"><\/script>
-<script src="https://cdn.jsdelivr.net/npm/bitwrench-a2ui@0.1.0/dist/bitwrench-a2ui.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/bitwrench-a2ui@0.9.0/dist/bitwrench-a2ui.min.js"><\/script>
 <script>
   const renderer = bwA2UI.createRenderer({
     mount: '#app',

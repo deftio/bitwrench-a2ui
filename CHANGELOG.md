@@ -6,9 +6,9 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 Nothing yet.
 
-## 0.1.0 - 2026-11-22
+## 0.9.0 - 2026-11-22
 
-First release. A2UI v1.0 renderer for plain JavaScript, built on bitwrench.
+First public release, a pre-1.0 preview: the API may still change before 1.0. A2UI v1.0 renderer for plain JavaScript, built on bitwrench.
 
 Pins: A2UI spec `a2ui-project/a2ui@5ff1b05f`, `@a2ui/web_core` 0.15.0, bitwrench 2.1.15, quikdown 1.3.2.
 

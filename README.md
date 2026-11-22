@@ -1,6 +1,8 @@
 # bitwrench-a2ui
 
+[![npm](https://img.shields.io/npm/v/bitwrench-a2ui)](https://www.npmjs.com/package/bitwrench-a2ui)
 [![CI](https://github.com/deftio/bitwrench-a2ui/actions/workflows/ci.yml/badge.svg)](https://github.com/deftio/bitwrench-a2ui/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/deftio/bitwrench-a2ui/actions/workflows/codeql.yml/badge.svg)](https://github.com/deftio/bitwrench-a2ui/actions/workflows/codeql.yml)
 [![A2UI](https://img.shields.io/badge/A2UI-v1.0-4f46e5)](https://a2ui.org/)
 [![conformance](https://img.shields.io/badge/conformance-36%2F36-16a34a)](docs/conformance-report.md)
 [![coverage](https://img.shields.io/badge/coverage-100%25-16a34a)](docs/testing.md)
@@ -38,7 +40,7 @@ Save this as `hello.html` and open it:
 ```html
 <div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/bitwrench@2.1.15/dist/bitwrench.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bitwrench-a2ui@0.1.0/dist/bitwrench-a2ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitwrench-a2ui@0.9.0/dist/bitwrench-a2ui.min.js"></script>
 <script>
   const renderer = bwA2UI.createRenderer({
     mount: '#app',

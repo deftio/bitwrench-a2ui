@@ -13,7 +13,7 @@
 <h2>Sent to the agent</h2>
 <pre id="log">(nothing yet)</pre>
 
-<script src="../node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitwrench@2.1.15/dist/bitwrench.umd.min.js" integrity="sha384-udDmcsr7TEJzzxbXOV5b0EaJuEcmQjGTZNDr8fNdR/xEMq7raSMWAGgLZOqU6JLu" crossorigin="anonymous"></script>
 <script src="../dist/bitwrench-a2ui.min.js"></script>
 <script>
   const required = path => ({ condition: { '@call': 'required', args: { value: { '@path': path } } }, message: 'This field is required.' });

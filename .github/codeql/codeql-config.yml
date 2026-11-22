@@ -1,0 +1,13 @@
+# CodeQL configuration, used by .github/workflows/codeql.yml.
+#
+# dist/ is minified build output of src/, so every finding there duplicates one in src/
+# (bitwrench's alerts showed the minified copies drowning the real ones). test/upstream/
+# is pinned third-party fixture material, scanned upstream.
+name: bitwrench-a2ui
+paths-ignore:
+  - dist
+  - node_modules
+  - test/upstream
+  - coverage
+  - _site
+  - tmp

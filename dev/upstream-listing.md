@@ -9,7 +9,7 @@ Draft for adding bitwrench-a2ui to the A2UI community projects page. This file i
 
 Do these first, in order:
 
-1. **Publish the npm package** - register `bitwrench-a2ui`, set `"private": false`, tag `v0.1.0` (the release workflow publishes with provenance). The CDN links in the docs only resolve after this.
+1. **Publish the npm package** - published as 0.9.0 (a preview); cut releases with `npm run release`. The CDN links in the docs only resolve after this.
 2. **Make the repository public and enable Pages** - set the Pages source to GitHub Actions, and confirm the site, playground, gallery and LLM sandbox load at https://deftio.github.io/bitwrench-a2ui/.
 3. **Check that CI is green on `main`**, so the badges are real.
 4. **Sign the Google CLA** - under the `deftio` identity, the same account that opens the PR.

@@ -1,7 +1,8 @@
 // Minimal static server for working on the site locally.
 //   npm run pages        then open http://localhost:8080/pages/
-// Serves the repository root, so pages can load ../dist, ../docs and
-// ../node_modules/bitwrench/dist exactly as they do on GitHub Pages (see build-site.js).
+// Serves the repository root, so pages load ../dist, ../docs and ../test/upstream/examples
+// exactly as they do on GitHub Pages (see build-site.js).
+// bitwrench and quikdown load from jsDelivr (pinned, with SRI; see tools/cdn-tags.js).
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';

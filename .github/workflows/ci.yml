@@ -4,34 +4,77 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
+# Read-only by default; no job here needs more.
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
+    name: Test (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         node: [22, 24]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-      - run: npm ci
+      # --ignore-scripts: dependency install scripts are the classic supply-chain vector,
+      # and nothing here needs them (esbuild ships its binary as an optional dependency).
+      - run: npm ci --ignore-scripts
       # Build first: test/dist loads the built browser files.
       - run: npm run build
-      - name: Tests with 100% coverage gate
+      - name: Committed dist/ matches a fresh build
+        # dist/ is committed so CDN users and the site get exactly what CI built. Only the
+        # build timestamp in builds.json may differ.
+        run: |
+          git diff --exit-code -I '"built":' -- dist/ || { echo "::error::dist/ is stale: run npm run build and commit it"; exit 1; }
+      - name: Tests with the 100% coverage gate
         run: npm run test:coverage
       - name: Conformance report is current
         run: |
           npm run conformance:report
-          git diff --quiet -I '^\* \*\*Generated\*\*' -- docs/conformance-report.md || { echo "docs/conformance-report.md is stale: run npm run conformance:report"; git diff -- docs/conformance-report.md; exit 1; }
-      - uses: actions/upload-artifact@v4
+          git diff --exit-code -I '^\* \*\*Generated\*\*' -- docs/conformance-report.md || { echo "::error::docs/conformance-report.md is stale: run npm run conformance:report"; exit 1; }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: matrix.node == 22
         with:
-          name: dist
-          path: dist/
+          name: coverage
+          path: coverage/
+          retention-days: 14
+
+  package:
+    name: Package and supply chain
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - name: Package contents, exports, versions, and a real install of the tarball
+        run: node tools/check-package.js --install
+      - name: Registry signatures and provenance of installed dependencies
+        run: npm audit signatures
+      - name: Known vulnerabilities in runtime dependencies
+        # Runtime dependencies are what users install. Dev dependencies are covered by
+        # Dependabot alerts and dependency review on pull requests.
+        run: npm audit --omit=dev --audit-level=moderate
+      - name: Site builds
+        run: node tools/build-site.js

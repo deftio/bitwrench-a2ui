@@ -7,7 +7,7 @@
 
   const SITE = {
     name: 'bitwrench-a2ui',
-    version: '0.1.0',
+    version: (window.bwA2UI && window.bwA2UI.VERSION) || '',
     repo: 'https://github.com/deftio/bitwrench-a2ui',
     a2ui: 'https://a2ui.org',
     bitwrench: 'https://github.com/deftio/bitwrench',
@@ -39,11 +39,15 @@
     return bw.css({
       'html, body': { margin: '0', padding: '0' },
       body: { 'font-family': 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif', background: p.background, color: p.dark.base, 'line-height': '1.55' },
-      '.site-nav': { position: 'sticky', top: '0', 'z-index': '50', background: '#111827', color: '#e5e7eb', display: 'flex', 'align-items': 'center', gap: '4px', padding: '0 16px', 'min-height': '52px', 'flex-wrap': 'wrap' },
+      '.site-nav': { position: 'sticky', top: '0', 'z-index': '50', background: '#111827', color: '#e5e7eb' },
+      // Same width and side padding as .site-main, so the menu lines up with the body.
+      '.site-nav-inner': { 'max-width': '1200px', margin: '0 auto', padding: '0 16px', display: 'flex', 'align-items': 'center', gap: '4px', 'min-height': '52px', 'flex-wrap': 'wrap' },
+      '.site-nav-inner.wide': { 'max-width': '1440px' },
       '.site-nav a': { color: '#d1d5db', 'text-decoration': 'none', padding: '8px 10px', 'border-radius': '6px', 'font-size': '0.95rem' },
       '.site-nav a:hover': { background: '#1f2937', color: '#fff' },
       '.site-nav a.active': { background: p.primary.base, color: p.primary.textOn },
-      '.site-brand': { 'font-weight': '700', color: '#fff !important', 'margin-right': '12px', display: 'flex', 'align-items': 'center', gap: '8px' },
+      '.site-brand': { 'font-weight': '700', color: '#fff !important', 'margin-right': '12px', display: 'flex', 'align-items': 'center', gap: '8px', 'padding-left': '0 !important' },
+      '.site-nav a.site-brand:hover': { background: 'transparent' },
       '.site-brand-mark': { display: 'inline-grid', 'place-items': 'center', width: '26px', height: '26px', 'border-radius': '6px', background: p.primary.base, color: '#fff', 'font-family': 'ui-monospace, Menlo, monospace', 'font-size': '0.8rem' },
       '.site-spacer': { flex: '1' },
       '.site-nav button': { background: 'transparent', color: '#d1d5db', border: '1px solid #374151', 'border-radius': '6px', padding: '6px 10px', cursor: 'pointer' },
@@ -87,7 +91,7 @@
       '.site-badge.warn': { background: p.warning.light, color: p.warning.text },
       '.site-badge.err': { background: p.danger.light, color: p.danger.text },
       'a.site-link': { color: p.primary.text },
-      '@media (max-width: 720px)': { '.site-nav': { padding: '6px 8px' }, '.site-hero': { padding: '36px 16px 40px' } },
+      '@media (max-width: 720px)': { '.site-nav-inner': { padding: '6px 16px' }, '.site-hero': { padding: '36px 16px 40px' } },
       ...dark,
     });
   }
@@ -100,7 +104,7 @@
     bw.injectCSS(siteCss(styles.palette, styles.alternatePalette), { id: 'site-css', append: false });
     const mode = store.get('a2ui-site-mode') || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     setMode(mode);
-    bw.mount('#site-nav', nav(active));
+    bw.mount('#site-nav', nav(active, wide));
     const main = document.getElementById('app');
     if (main && wide) main.classList.add('wide');
     bw.mount('#site-footer', footer());
@@ -116,16 +120,16 @@
   }
   const modeListeners = [];
 
-  function nav(active) {
+  function nav(active, wide = false) {
     return {
       t: 'nav', a: { class: 'site-nav', 'aria-label': 'Site' },
-      c: [
+      c: { t: 'div', a: { class: `site-nav-inner${wide ? ' wide' : ''}` }, c: [
         { t: 'a', a: { href: 'index.html', class: 'site-brand' }, c: [{ t: 'span', a: { class: 'site-brand-mark', 'aria-hidden': 'true' }, c: '{}' }, 'bitwrench-a2ui'] },
         ...SITE.nav.map(n => ({ t: 'a', a: { href: n.href, class: n.href === active ? 'active' : '', 'aria-current': n.href === active ? 'page' : null }, c: n.label })),
         { t: 'span', a: { class: 'site-spacer' } },
         { t: 'a', a: { href: SITE.repo }, c: 'GitHub' },
         { t: 'button', a: { type: 'button', 'aria-label': 'Toggle dark mode', onclick: () => setMode(SITE.mode === 'dark' ? 'light' : 'dark') }, c: '◐' },
-      ],
+      ] },
     };
   }
 
@@ -194,10 +198,8 @@
   }
 
   function download(name, text, type = 'text/plain') {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([text], { type }));
-    a.download = name;
-    document.body.appendChild(a);
+    const a = bw.create({ t: 'a', a: { href: URL.createObjectURL(new Blob([text], { type })), download: name, style: 'display:none' } });
+    document.body.append(a);
     a.click();
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
   }

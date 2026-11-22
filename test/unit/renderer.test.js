@@ -1,5 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 
 import { window as w, freshMount, tick } from '../helpers/dom.js';
 import { create, update, data, del, render, BASIC_CATALOG_ID } from '../helpers/a2ui.js';
@@ -203,7 +204,7 @@ describe('createRenderer', () => {
     assert.equal(tree.children[0].state, 'pending');
     assert.equal(tree.children[0].occupiesLayout, false);
     assert.equal(typeof viewTree, 'function');
-    assert.equal(VERSION, '0.1.0');
+    assert.equal(VERSION, JSON.parse(fs.readFileSync(new URL('../../package.json', import.meta.url), 'utf8')).version);
     assert.ok(lib.ICONS.home && lib.ICON_VIEWBOX);
   });
 });

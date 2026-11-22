@@ -11,7 +11,7 @@
 <main id="app" class="site-main wide"></main>
 <footer id="site-footer" class="site-footer"></footer>
 
-<script src="../node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitwrench@2.1.15/dist/bitwrench.umd.min.js" integrity="sha384-udDmcsr7TEJzzxbXOV5b0EaJuEcmQjGTZNDr8fNdR/xEMq7raSMWAGgLZOqU6JLu" crossorigin="anonymous"></script>
 <script src="../dist/bitwrench-a2ui.min.js"></script>
 <script src="site.js"></script>
 <script>
@@ -129,8 +129,7 @@ ${catalogSummary()}`;
 
   function newRenderer() {
     state.renderer && state.renderer.destroy();
-    const mount = document.getElementById('llm-surface');
-    mount.innerHTML = '';
+    const mount = bw.clear('#llm-surface');
     state.wire = []; state.diags = []; state.outbound = [];
     state.renderer = bwA2UI.createRenderer({
       mount, theme: 'indigo', validation: 'relaxed',

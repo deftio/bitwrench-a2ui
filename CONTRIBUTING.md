@@ -49,7 +49,7 @@ The usual flow:
 1. **Open an issue first** for anything larger than a small fix, so we can agree on the approach.
 2. **Branch** from `main`.
 3. **Write tests with the change** - a bug fix starts with a failing test.
-4. **Run `npm run test:coverage` and `npm run build`** - both must pass.
+4. **Run `npm run build` and `npm run test:coverage`** - both must pass. Commit the rebuilt `dist/` with your change: CI fails if `dist/` differs from a fresh build.
 5. **Update the docs** - if behavior or API changes, update `docs/`, and the CHANGELOG under "Unreleased".
 6. **Open a pull request** with a short description of what and why. Link the issue.
 
@@ -72,3 +72,7 @@ This project follows the [Code of Conduct](CODE_OF_CONDUCT.md). By participating
 ## License
 
 By contributing, you agree that your contributions are licensed under the Apache License 2.0, the same license as the project.
+
+## Releases
+
+Releases are cut by the maintainer with `npm run release` and published by CI. See [RELEASE.md](RELEASE.md).

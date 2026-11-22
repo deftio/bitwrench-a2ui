@@ -21,10 +21,6 @@ copy('dist');
 copy('test/upstream/examples');
 copy('LICENSE');
 copy('NOTICE');
-for (const f of ['bitwrench.umd.min.js', 'bitwrench-code-edit.umd.min.js']) copy(`node_modules/bitwrench/dist/${f}`);
-copy('node_modules/bitwrench/LICENSE.txt');
-copy('node_modules/quikdown/dist/quikdown.umd.min.js');
-copy('node_modules/quikdown/LICENSE.txt');
 writeFileSync(path.join(out, '.nojekyll'), '');
 
 // sitemap for the static pages

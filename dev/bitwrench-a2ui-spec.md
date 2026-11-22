@@ -450,7 +450,7 @@ The no-build page:
 ```html
 <div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/bitwrench@2.1.15/dist/bitwrench.umd.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bitwrench-a2ui@0.1.0/dist/bitwrench-a2ui.umd.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitwrench-a2ui@0.9.0/dist/bitwrench-a2ui.umd.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
 <script>
   const r = bwA2UI.createRenderer({ mount: '#app', send: m => console.log(m) });
   r.receive({ version: '1.0', createSurface: { surfaceId: 'hello',

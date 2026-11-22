@@ -11,8 +11,8 @@
 <main id="app" class="site-main"></main>
 <footer id="site-footer" class="site-footer"></footer>
 
-<script src="../node_modules/bitwrench/dist/bitwrench.umd.min.js"></script>
-<script src="../node_modules/bitwrench/dist/bitwrench-code-edit.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitwrench@2.1.15/dist/bitwrench.umd.min.js" integrity="sha384-udDmcsr7TEJzzxbXOV5b0EaJuEcmQjGTZNDr8fNdR/xEMq7raSMWAGgLZOqU6JLu" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitwrench@2.1.15/dist/bitwrench-code-edit.umd.min.js" integrity="sha384-BKvFwUm5b6EmByFxZigsOWuYvpudxVE/1mWR2905yGRzWnRifFECXwg/08PALCLh" crossorigin="anonymous"></script>
 <script src="../dist/bitwrench-a2ui.min.js"></script>
 <script src="site.js"></script>
 <script src="fixtures.js"></script>
@@ -45,8 +45,7 @@
   function reset() {
     stop();
     state.renderer && state.renderer.destroy();
-    const mount = document.getElementById('pg-surface');
-    mount.innerHTML = '';
+    const mount = bw.clear('#pg-surface');
     state.pointer = 0; state.outbound = []; state.diags = [];
     state.renderer = bwA2UI.createRenderer({
       mount, theme: state.theme, validation: state.validation,
@@ -102,17 +101,10 @@
     try {
       const r = await fetch('data/upstream-examples.json');
       upstream = (await r.json()).examples;
-      const sel = document.getElementById('pg-preset');
-      const group = document.createElement('optgroup');
-      group.label = 'Upstream A2UI examples (Apache-2.0)';
-      for (const ex of upstream) {
-        const o = document.createElement('option');
-        o.value = `up:${ex.file}`;
-        o.textContent = ex.name;
-        o.title = ex.description;
-        group.appendChild(o);
-      }
-      sel.appendChild(group);
+      document.getElementById('pg-preset').append(bw.create({
+        t: 'optgroup', a: { label: 'Upstream A2UI examples (Apache-2.0)' },
+        c: upstream.map(ex => ({ t: 'option', a: { value: `up:${ex.file}`, title: ex.description }, c: ex.name })),
+      }));
     } catch { /* offline: local presets only */ }
   }
 

@@ -1,4 +1,4 @@
-/*! bitwrench-a2ui v0.1.0 | Apache-2.0 | https://github.com/deftio/bitwrench-a2ui
+/*! bitwrench-a2ui v0.9.0 | Apache-2.0 | https://github.com/deftio/bitwrench-a2ui
  *  Bundles @a2ui/web_core 0.15.0 (Apache-2.0, Google LLC) and quikdown 1.3.2 (BSD-2-Clause).
  *  Requires bitwrench 2.1.15 (BSD-2-Clause), loaded separately. See THIRD_PARTY_LICENSES. */
 var bwA2UI = (() => {
@@ -26983,6 +26983,6 @@ ${html}
   }
 
   // src/index.js
-  var VERSION = "0.1.0";
+  var VERSION = "0.9.0";
   return __toCommonJS(browser_exports);
 })();

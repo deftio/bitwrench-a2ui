@@ -1,0 +1,56 @@
+# Dependabot policy for bitwrench-a2ui.
+#
+# Unlike bitwrench, this package has runtime dependencies (@a2ui/web_core, bitwrench,
+# quikdown), so their updates reach users and are worth a pull request. All versions are
+# exact pins, and each update PR runs the full CI (conformance, coverage, package check).
+#
+# A cooldown delays version updates for a few days after a release appears: freshly
+# published versions are where compromised packages show up, and they are usually caught
+# and pulled within that window. Security updates are not delayed (they are governed by
+# the repository's Dependabot security updates setting, not by this file).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    commit-message:
+      prefix: deps
+      prefix-development: deps-dev
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+    groups:
+      # web_core moves with the A2UI spec: review it on its own, with the conformance run.
+      a2ui:
+        patterns: ['@a2ui/*']
+      runtime:
+        dependency-type: production
+        exclude-patterns: ['@a2ui/*']
+      dev:
+        dependency-type: development
+        update-types: [minor, patch]
+    ignore:
+      # The maintainer's machine runs Node 22.5; jsdom 27+ and c8 12+ need Node 22.12+.
+      # Lift these when the toolchain floor moves (engines in package.json).
+      - dependency-name: jsdom
+        versions: ['>=27.0.0']
+      - dependency-name: c8
+        versions: ['>=12.0.0']
+
+  # Actions run with repository credentials, so keeping their pinned SHAs current is real
+  # supply-chain hygiene. Dependabot updates the SHA and the version comment together.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: ci
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ['*']

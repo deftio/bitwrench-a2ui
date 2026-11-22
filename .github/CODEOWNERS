@@ -1,0 +1,7 @@
+# Every change needs the maintainer's review. Workflows and release tooling are listed
+# separately so the rule stays explicit if more owners are added for the rest.
+*                     @deftio
+/.github/             @deftio
+/tools/release.js     @deftio
+/package.json         @deftio
+/package-lock.json    @deftio
