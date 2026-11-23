@@ -2,7 +2,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { bumpCdn, changelogSection, compareVersions, findStaged, nextVersion, promoteChangelog, releaseState } from '../../tools/release.js';
+import { bumpCdn, changelogSection, compareVersions, findStaged, nextVersion, promoteChangelog, releaseState, tidyPlan } from '../../tools/release.js';
 import { advisories, evaluate } from '../../tools/audit.js';
 import { JOBS } from '../../tools/ci.js';
 
@@ -52,6 +52,15 @@ describe('release tooling', () => {
     assert.equal(releaseState({ tagOnOrigin: false, pr: { state: 'OPEN' } }), 'checks');
     assert.equal(releaseState({ tagOnOrigin: false, pr: { state: 'CLOSED' } }), 'new');
     assert.equal(releaseState({ tagOnOrigin: false, pr: null }), 'new');
+  });
+
+  it('tidies the checkout only when that is safe', () => {
+    assert.equal(tidyPlan({ current: 'main', base: 'main', clean: true }), 'pull');
+    assert.equal(tidyPlan({ current: 'fix', base: 'main', clean: true, inRelease: true }), 'switch-delete');
+    assert.equal(tidyPlan({ current: 'fix', base: 'main', clean: true, inRelease: false }), 'none');
+    assert.equal(tidyPlan({ current: 'fix', base: 'main', clean: false, inRelease: true }), 'none');
+    assert.equal(tidyPlan({ current: 'HEAD', base: 'main', clean: true }), 'none');
+    assert.equal(tidyPlan({ current: null, base: 'main', clean: true }), 'none');
   });
 
   it('finds a staged npm version', () => {

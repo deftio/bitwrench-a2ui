@@ -75,4 +75,4 @@ By contributing, you agree that your contributions are licensed under the Apache
 
 ## Releases
 
-Releases are cut by the maintainer with `npm run release -- patch` (or `minor`, `major`), which goes through a release pull request like any other change, and are published by CI. See [RELEASE.md](RELEASE.md).
+Releases are cut by the maintainer with `npm run release` (a patch; or `-- minor`, `-- major`), which goes through a release pull request like any other change, and are published by CI. See [RELEASE.md](RELEASE.md).

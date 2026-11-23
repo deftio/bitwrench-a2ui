@@ -18,12 +18,13 @@ CI and the package check fail if any of these disagree with `package.json`.
 
 ## Cutting a release
 
-One command does it, from a clean checkout of `main` (or of a branch that contains `main`, whose commits then go into the release PR):
+One command does it, from a clean checkout of `main` or of a feature branch that contains `main`. You do not push anything yourself: the script pushes the release branch (with your branch's commits in it), and re-running it is always safe, because it continues from where GitHub says the release is, and reports a finished release as done:
 
 ```sh
-npm run release -- patch        # or minor, major, or an explicit 0.10.0-rc.1
-npm run release:dry -- patch    # rehearse steps 1-4 in a scratch worktree; nothing is pushed
-npm run release -- 0.9.1        # resume a release that stopped part way
+npm run release                 # a patch release (0.9.0 -> 0.9.1)
+npm run release -- minor        # or major, or an explicit 0.10.0-rc.1
+npm run release:dry             # rehearse steps 1-4 in a scratch worktree; nothing is pushed
+npm run release -- 0.9.1        # resume a stopped release from a checkout whose version moved on
 ```
 
 Your checkout is never modified: the release is built in a fresh `git worktree` of the committed `HEAD`. The script:
@@ -45,7 +46,7 @@ Your checkout is never modified: the release is built in a fresh `git worktree` 
 7. **Asks**, then squash-merges the PR as `release: vX.Y.Z (#N)`, pinned to the head commit that passed. As the only maintainer you cannot approve your own PR, so it merges with admin rights (`gh pr merge --admin`) after the script has seen every required check pass. With a second maintainer, `--auto-merge` waits for their approval instead.
 8. **Asks**, then tags the merge commit `vX.Y.Z` (annotated, or signed when git has a signing key) and pushes the tag, after checking that the merge commit is on `main`, has the version, and has the tree that passed CI.
 9. **Follows `publish.yml`** to the end. If npm staged the version, the script shows the staged entry and approves it in the terminal (`npm stage approve`, which asks for your 2FA code): no npmjs.com or GitHub web UI step. If the run failed, re-running the script offers to re-run its failed jobs.
-10. **Cleans up** the release branch and prints the npm, GitHub Release and CDN links.
+10. **Cleans up** - deletes the release branch, prints the npm, GitHub Release and CDN links, and offers to tidy your checkout: on `main`, fast-forward it; on a feature branch whose commits all went into the release, switch to the updated `main` and delete that branch (locally and on origin).
 
 Every step that changes something on GitHub or npm asks first (`--yes` skips the questions).
 
@@ -102,7 +103,7 @@ The steps on npmjs.com:
 ## The first releases
 
 * **0.9.0** - published by hand. npm staged it, and the first tag run (under the workflow's old name, `release.yml`) failed at npm, as expected with no trusted publisher yet. `npm run release -- 0.9.0` finishes it: it approves the staged version in the terminal, re-runs the failed jobs, which skip npm and create the GitHub Release.
-* **0.9.1** - set up the trusted publisher just before (it expires after 2 days unused), then `npm run release -- patch`. This tests the whole path, including the OIDC publish with provenance.
+* **0.9.1** - set up the trusted publisher just before (it expires after 2 days unused), then `npm run release`. This tests the whole path, including the OIDC publish with provenance.
 
 ## After a release
 

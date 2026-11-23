@@ -11,7 +11,7 @@ Security:
 
 Release process:
 
-* **Releases go through a pull request** - `npm run release -- patch` builds a fresh worktree, bumps the version, runs the full CI locally, opens a release PR, waits for the required checks, merges it, tags the merge commit, follows the publish workflow, and approves a staged npm version in the terminal. Re-running with the version resumes a release that stopped.
+* **Releases go through a pull request** - `npm run release` builds a fresh worktree, bumps the version, runs the full CI locally, opens a release PR, waits for the required checks, merges it, tags the merge commit, follows the publish workflow, and approves a staged npm version in the terminal. Re-running with the version resumes a release that stopped.
 * **One CI definition** - `npm run ci` (`tools/ci.js`) runs exactly the checks of `ci.yml`, which now calls it, as does the publish workflow on the tag.
 * **`publish.yml`** - the tag workflow is renamed from `release.yml`, and publishes to npm with trusted publishing (OIDC) only.
 

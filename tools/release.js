@@ -3,10 +3,11 @@
 // version (the single source of truth); src/version.js is generated from it. Nothing is
 // published from a laptop: CI publishes the tagged commit.
 //
-//   npm run release -- patch|minor|major     0.9.0 -> 0.9.1 / 0.10.0 / 1.0.0
+//   npm run release                          a patch release: 0.9.0 -> 0.9.1
+//   npm run release -- minor|major           0.9.0 -> 0.10.0 / 1.0.0
 //   npm run release -- 0.10.0-rc.1           an explicit version (pre-releases go to "next")
 //   npm run release -- 0.9.1                 resume a release that stopped part way
-//   npm run release:dry -- patch             steps 1-4 in a scratch worktree, then clean up
+//   npm run release:dry                      steps 1-4 in a scratch worktree, then clean up
 //   flags: --yes (no prompts)  --auto-merge (wait for an approving review instead of
 //          merging with admin rights)
 //
@@ -24,10 +25,12 @@
 //   8. Tag         an annotated (or signed) tag vX.Y.Z on the merge commit, pushed
 //   9. Publish     follow publish.yml (npm with provenance, GitHub Release); approve the
 //                  npm version in the terminal (2FA) if npm staged it
-//  10. Clean up    remove the worktree and the release branch
+//  10. Clean up    remove the worktree and the release branch; offer to move your checkout
+//                  to the updated main and delete a feature branch the release contains
 //
 // The state lives on GitHub (the branch, the PR, the tag), so running the same version
-// again picks up where it stopped. Your own checkout is never modified.
+// again picks up where it stopped, and running it after a release is done just reports
+// it. Your checkout is only touched at the very end, and only after asking.
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
@@ -41,7 +44,8 @@ const args = process.argv.slice(2);
 const DRY = args.includes('--dry-run') || args.includes('-n');
 const YES = args.includes('--yes') || args.includes('-y');
 const AUTO_MERGE = args.includes('--auto-merge');
-const target = args.find(a => !a.startsWith('-'));
+// No argument means a patch release: the CHANGELOG check stops a run that has nothing new.
+const target = args.find(a => !a.startsWith('-')) ?? 'patch';
 
 // The GitHub owner, and the git user.name, that may release this package. Commits under
 // another identity are an IP problem for the maintainer, so the script refuses them.
@@ -151,7 +155,6 @@ function cdnFiles(cwd) {
 
 // ---- main ------------------------------------------------------------------------------
 async function main() {
-  if (!target) fail('say what to release: npm run release -- patch|minor|major|X.Y.Z (see RELEASE.md)');
   const pkg = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
   let version;
   try { version = nextVersion(pkg.version, target); } catch (e) { fail(e.message); }
@@ -358,17 +361,54 @@ async function resume(pkg, version) {
   ok(`${pkg.name}@${version} is on npm (dist-tags: ${trySh(npm, ['view', pkg.name, 'dist-tags', '--json'])?.replace(/\s+/g, ' ')})`);
 
   // 10. Clean up -----------------------------------------------------------------------------
-  step(10, 'Done');
+  step(10, 'Clean up');
   if (git('ls-remote', '--heads', 'origin', branch)) tryRun('git', ['push', 'origin', '--delete', branch]);
   tryGit('fetch', '--quiet', '--tags', 'origin', BASE);
+  await tidyCheckout(pr);
   console.log(`
 ✓ released ${tag}
   npm:     https://www.npmjs.com/package/${pkg.name}/v/${version}
   GitHub:  https://github.com/${REPO}/releases/tag/${tag}
   CDN:     https://cdn.jsdelivr.net/npm/${pkg.name}@${version}/dist/bitwrench-a2ui.min.js
-
-  Your checkout was not changed. To pick up the release commit: git switch ${BASE} && git pull --ff-only
 `);
+}
+
+/**
+ * What to do with the maintainer's checkout once a release is out: on main, fast-forward
+ * it; on a branch whose commits all went into the release PR, switch to main and delete
+ * the branch (its work is on main now, squashed). Anything else is left alone.
+ */
+export function tidyPlan({ current, base, clean, inRelease }) {
+  if (!clean || !current || current === 'HEAD') return 'none';
+  if (current === base) return 'pull';
+  return inRelease ? 'switch-delete' : 'none';
+}
+
+async function tidyCheckout(pr) {
+  const current = tryGit('rev-parse', '--abbrev-ref', 'HEAD');
+  const clean = tryGit('status', '--porcelain') === '';
+  let inRelease = false;
+  if (current && current !== BASE && pr) {
+    // The tested head of the release PR; a squash merge does not contain it, so ask it directly.
+    tryGit('fetch', '--quiet', 'origin', `refs/pull/${pr.number}/head`);
+    inRelease = tryGit('merge-base', '--is-ancestor', 'HEAD', pr.headRefOid) !== null;
+  }
+  const plan = tidyPlan({ current, base: BASE, clean, inRelease });
+  if (plan === 'none') {
+    if (current !== BASE) console.log(`  Your checkout (${current}${clean ? '' : ', with uncommitted changes'}) was left as is. For the release commit: git switch ${BASE} && git pull --ff-only`);
+    return;
+  }
+  if (plan === 'pull') {
+    if (await confirm(`Fast-forward your ${BASE} to origin/${BASE}?`)) tryRun('git', ['merge', '--ff-only', `origin/${BASE}`]);
+    return;
+  }
+  const remoteToo = Boolean(tryGit('ls-remote', '--heads', 'origin', current));
+  if (!await confirm(`Every commit on ${current} is in the release. Switch to ${BASE}, update it, and delete ${current}${remoteToo ? ' (here and on origin)' : ''}?`)) return;
+  if (!tryRun('git', ['switch', BASE])) return;
+  tryRun('git', ['merge', '--ff-only', `origin/${BASE}`]);
+  tryRun('git', ['branch', '-D', current]);
+  if (remoteToo) tryRun('git', ['push', 'origin', '--delete', current]);
+  ok(`now on ${BASE} at ${git('rev-parse', '--short', 'HEAD')}; ${current} deleted`);
 }
 
 // A version npm staged (by hand, or by a trusted publisher limited to staging) waits for
