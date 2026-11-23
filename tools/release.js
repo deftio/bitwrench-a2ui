@@ -292,18 +292,23 @@ async function resume(pkg, version) {
 
   // 6. Checks --------------------------------------------------------------------------------
   if (releaseState({ tagOnOrigin, pr }) === 'checks') {
-    step(6, `Required checks on #${pr.number}`);
+    step(6, `Checks on #${pr.number}`);
     // Checks take a moment to register after a push.
-    for (let i = 0; i < 36 && !JSON.parse(tryGh('pr', 'checks', String(pr.number), '--repo', REPO, '--required', '--json', 'name') || '[]').length; i++) await sleep(5000);
-    if (!tryRun('gh', ['pr', 'checks', String(pr.number), '--repo', REPO, '--required', '--watch', '--fail-fast', '--interval', '20'])) {
-      fail(`a required check failed on ${pr.url}\n  Push a fix to ${branch} and run npm run release -- ${version} again.`);
+    const registered = () => (JSON.parse(tryGh('pr', 'view', String(pr.number), '--repo', REPO, '--json', 'statusCheckRollup') || '{}').statusCheckRollup || []).length;
+    for (let i = 0; i < 36 && !registered(); i++) await sleep(5000);
+    // Watch the checks the ruleset requires. If it requires none (or gh cannot list them),
+    // watch every check instead: a release never merges past a red check.
+    const required = JSON.parse(tryGh('pr', 'checks', String(pr.number), '--repo', REPO, '--required', '--json', 'name') || '[]').length > 0;
+    if (!required) warn(`no required status checks reported for ${BASE}; waiting on every check on the PR`);
+    if (!tryRun('gh', ['pr', 'checks', String(pr.number), '--repo', REPO, ...(required ? ['--required'] : []), '--watch', '--fail-fast', '--interval', '20'])) {
+      fail(`a check failed on ${pr.url} (see its Checks tab)\n  Fix it on ${branch} and run npm run release -- ${version} again, or close the PR, fix it on your branch and run npm run release -- ${version}.`);
     }
-    ok('required checks passed');
+    ok(required ? 'required checks passed' : 'all checks passed');
 
     // 7. Merge -------------------------------------------------------------------------------
     step(7, `Merge #${pr.number}`);
     const how = AUTO_MERGE ? 'enable auto-merge (squash) once a review approves it' : 'squash-merge it now with admin rights (you cannot approve your own PR)';
-    if (!await confirm(`Required checks are green. ${how[0].toUpperCase()}${how.slice(1)}?`)) {
+    if (!await confirm(`Checks are green. ${how[0].toUpperCase()}${how.slice(1)}?`)) {
       console.log(`\n  Not merged. Run npm run release -- ${version} again to continue.\n`);
       return;
     }
