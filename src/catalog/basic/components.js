@@ -128,10 +128,13 @@ export const Image = component({
 
 function iconTaco(p, ctx) {
   const raw = p.name;
+  // web_core 0.16 resolves `name` (a union that includes DataBinding) to {value, path?}:
+  // the svgPath form arrives as {value: {svgPath}}.
+  const shape = raw?.value && typeof raw.value === 'object' ? raw.value : raw;
   let d = '';
   let name = '';
-  if (raw && typeof raw === 'object' && !Array.isArray(raw) && 'svgPath' in raw) {
-    d = safeSvgPath(str(ctx.read(raw.svgPath)));
+  if (shape && typeof shape === 'object' && !Array.isArray(shape) && 'svgPath' in shape) {
+    d = safeSvgPath(str(ctx.read(shape.svgPath)));
   } else {
     name = str(ctx.read(raw));
     d = Object.hasOwn(ICONS, name) ? ICONS[name] : '';

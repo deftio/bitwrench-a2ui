@@ -9,7 +9,7 @@
 import bwDefault from 'bitwrench';
 import { VERSION } from './version.js';
 
-import { BASIC_CATALOG_ID, NodeResolver, PROTOCOL_VERSION, buildBasicCatalog, createCore, effect, getValue } from './core/webcore.js';
+import { BASIC_CATALOG_ID, NodeResolver, PROTOCOL_VERSION, buildBasicCatalog, createCore, detach, effect, getValue } from './core/webcore.js';
 import { BASIC_COMPONENTS } from './catalog/basic/components.js';
 import { applyTheme, removeTheme } from './theme/theme.js';
 import { View, compose, stripHandlers } from './render/view.js';
@@ -79,11 +79,14 @@ export function createRenderer(opts = {}) {
     const meta = {};
     if (opts.includeCapabilities !== false) meta.a2uiRendererCapabilities = core.capabilities();
     const dm = core.dataModelMetadata();
-    if (dm) meta.a2uiRendererDataModel = dm;
+    if (dm) meta.a2uiRendererDataModel = detach(dm);   // a snapshot, not the live model
     return meta;
   }
 
-  function emit(message) {
+  function emit(live) {
+    // Outbound messages can hold live data-model values; send a snapshot, so a logged or
+    // queued message keeps the values it was sent with.
+    const message = detach(live);
     outbound.push(message);
     if (outbound.length > OUTBOUND_KEEP) outbound.shift();
     try { send(message, metadata()); } catch (e) { diagnostics({ level: 'error', code: 'SEND_FAILED', message: String(e?.message ?? e) }); }

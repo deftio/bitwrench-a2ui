@@ -17,10 +17,12 @@
     { name: 'Icon', group: 'Display', note: '59 Material Symbols names, or an svgPath.', components: [
       { id: 'root', component: 'Row', align: 'center', children: ['i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7'] },
       ...['home', 'search', 'mail', 'favorite', 'settings', 'shoppingCart', 'warning'].map((name, i) => ({ id: `i${i + 1}`, component: 'Icon', name }))] },
-    { name: 'Video', group: 'Display', note: 'Native video with controls; poster image.', components: [
-      { id: 'root', component: 'Video', url: 'https://example.invalid/video.mp4', posterUrl: img }] },
-    { name: 'AudioPlayer', group: 'Display', note: 'Native audio with a caption.', components: [
-      { id: 'root', component: 'AudioPlayer', url: 'https://example.invalid/episode.mp3', description: 'Episode 12: Agents and interfaces' }] },
+    // Media made for this site (generated with ffmpeg, no third-party content): a 5 s test
+    // pattern with a tone, and a 6 s chime. See pages/media/README.md.
+    { name: 'Video', group: 'Display', note: 'Native video with controls and a poster image. Plays a 5-second generated test pattern.', components: [
+      { id: 'root', component: 'Video', url: 'media/sample-video.mp4', posterUrl: img }] },
+    { name: 'AudioPlayer', group: 'Display', note: 'Native audio with a caption. Plays a 6-second generated chime.', components: [
+      { id: 'root', component: 'AudioPlayer', url: 'media/sample-audio.mp3', description: 'Sample chime (6 s)' }] },
     { name: 'Divider', group: 'Display', note: 'Horizontal or vertical.', components: [
       { id: 'root', component: 'Column', children: ['t1', 'd', 'r'] },
       { id: 't1', component: 'Text', text: 'Above' }, { id: 'd', component: 'Divider' },

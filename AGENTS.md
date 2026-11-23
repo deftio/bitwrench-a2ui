@@ -8,7 +8,7 @@ An A2UI v1.0 renderer. `@a2ui/web_core` does protocol work (message processing, 
 
 ## Layout
 
-* **`src/core/webcore.js`** - the only file that imports `@a2ui/web_core`. Catalog building, message normalization, and the workarounds for web_core 0.15 gaps (see `docs/compatibility.md`).
+* **`src/core/webcore.js`** - the only file that imports `@a2ui/web_core`. Catalog building, message size limits and copies, and the remaining workaround for a web_core 0.16.1 gap (see `docs/compatibility.md`).
 * **`src/render/view.js`** - `View`: one per component node; mounts, updates in place or re-renders, manages child slots.
 * **`src/catalog/basic/components.js`** - the 18 basic catalog components as `{ render, update?, slots? }` objects that return TACO (`{t, a, c, o}`).
 * **`src/renderer.js`** - `createRenderer`, the public browser API.

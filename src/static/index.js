@@ -27,7 +27,7 @@ import { themeCss } from '../theme/theme.js';
  */
 export function renderToHTML(messages, opts = {}) {
   const bw = opts.bw ?? bwDefault;
-  const core = createCore({ catalogs: opts.catalogs ?? [createBasicCatalog()], validation: opts.validation, limits: opts.limits, onOutbound: () => {} });
+  const core = createCore({ catalogs: opts.catalogs ?? [createBasicCatalog()], validation: opts.validation, limits: opts.limits });
   const errors = [...core.process(messages)];
   const ids = opts.surfaceId ? [opts.surfaceId] : [...core.surfaces().keys()];
   const parts = [];
@@ -52,7 +52,8 @@ export function renderToHTML(messages, opts = {}) {
     html: opts.includeCss ? `<style>${css}</style>\n${body}` : body,
     css,
     surfaces: ids,
-    errors,
+    // The same failure can be reported while resolving and while composing: list it once.
+    errors: [...new Map(errors.map(e => [JSON.stringify(e), e])).values()],
     taco: tacos,
   };
 }

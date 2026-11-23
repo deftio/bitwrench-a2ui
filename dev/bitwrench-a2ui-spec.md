@@ -3,7 +3,7 @@
 Date: November 22, 2026 (revision 2)  
 Status: implemented through phase 4 (web_core build, site, docs, examples, conformance); the standalone core (section 5.1) is still planned. See `README.md` and `dev/upstream-listing.md` for the current state.  
 Inputs: `tmp/bitwrench-a2ui-implementation-brief.md` (the owner brief), owner notes of November 22 (the web_core option, license, size, v1.0 only), and the research notes in `tmp/research/` (`a2ui-spec-brief.md`, `bitwrench-brief.md`, `ecosystem-brief.md`)  
-Pinned sources: A2UI `a2ui-project/a2ui` at `5ff1b05f` (2026-11-20), `@a2ui/web_core` 0.15.0 on npm (0.16.0 in the repo, unpublished), bitwrench `2.1.15` (npm gitHead `41235484`)
+Pinned sources (updated for 0.9.4): A2UI `a2ui-project/a2ui` at `7a776e7a` (2026-11-23), `@a2ui/web_core` 0.16.1 on npm (the design below was written against 0.15.0), bitwrench `2.1.15` (npm gitHead `41235484`)
 
 Changes from revision 1:
 
@@ -64,7 +64,7 @@ The official web renderers are template-based (Lit, React, Angular), which is a 
 These are the points the demos and docs should show, not just state:
 
 * **No build, no framework** - two pinned script tags and a div. Nothing else in the ecosystem offers this today.
-* **Google's core, bitwrench's rendering** - protocol semantics come from `@a2ui/web_core`, so behavior matches the official renderers. The rendering, styling and inspection come from bitwrench.
+* **Google's core, bitwrench's rendering** - protocol semantics come from `@a2ui/web_core`, the core the official renderers share; the documented adaptations for the published version are in `docs/compatibility.md`. The rendering, styling and inspection come from bitwrench.
 * **Composable theming** - a theme from a few seed colors, light and dark, scoped per surface, with styles a host can merge and override as objects. v1.0 left theming to the host, and several official renderers have open theming issues (#602, #3257).
 * **HTML output** - static export, email-safe snapshots, SSR and golden tests without a browser. Nobody in the A2UI ecosystem has this. Vercel's json-render markets email and PDF output, so it is the closest comparison.
 * **Single-file MCP Apps build** - the official guide inlines a renderer with `vite-plugin-singlefile` because the iframe allows no external scripts. We can ship a ready template.

@@ -190,7 +190,7 @@ ${catalogSummary()}`;
     { label: 'Wire messages', render: () => site.code(state.wire.map(m => JSON.stringify(m)).join('\n') || '(none yet)') },
     { label: 'Transcript', render: () => site.code(state.history.map(m => `${m.role.toUpperCase()}:\n${m.text}`).join('\n\n') || '(empty)') },
     { label: 'Data model', render: () => site.code(state.renderer && state.renderer.surfaceIds().length ? site.pretty(state.renderer.inspect().dataModel) : '{}') },
-    { label: 'TACO', render: () => site.code(state.renderer && state.renderer.surfaceIds().length ? site.pretty(state.renderer.inspect().taco) : '(nothing rendered)') },
+    { label: 'UI objects (TACO)', render: () => site.code(state.renderer && state.renderer.surfaceIds().length ? site.pretty(state.renderer.inspect().taco) : '(nothing rendered)') },
     { label: 'Diagnostics', render: () => ({ t: 'ul', a: { class: 'site-log' }, c: state.diags.length ? state.diags.map(d => ({ t: 'li', c: [{ t: 'span', a: { class: `site-badge ${d.level === 'error' ? 'err' : 'warn'}` }, c: d.code || d.level }, ' ', String(d.message || '').slice(0, 300)] })) : [{ t: 'li', c: 'None.' }] }) },
     { label: 'System prompt', render: () => site.code(SYSTEM) },
   ]);

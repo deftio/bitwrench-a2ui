@@ -1,37 +1,37 @@
 {
   "name": "bitwrench-a2ui",
   "version": "0.9.3",
-  "built": "2026-11-23T16:02:34.589Z",
+  "built": "2026-11-23T19:22:34.392Z",
   "pins": {
     "bitwrench": "2.1.15",
-    "@a2ui/web_core": "0.15.0",
+    "@a2ui/web_core": "0.16.1",
     "quikdown": "1.3.2",
-    "a2uiSpecCommit": "5ff1b05f02d39f969b52a942e78e864ef3ac01fa"
+    "a2uiSpecCommit": "7a776e7a476b61215ec68c6511f3b8f1921d6e24"
   },
   "files": {
     "bitwrench-a2ui.bundle.min.js": {
-      "bytes": 662653,
-      "gzip": 188710,
-      "brotli": 156455,
-      "integrity": "sha384-voYrcVMb+er/XY1VO61AI2XqY2HsejvNF29wkDYDJo6LjR3vp9wBm7w07BO7r34z"
+      "bytes": 675067,
+      "gzip": 188063,
+      "brotli": 155814,
+      "integrity": "sha384-lloJnDzqzbnnOmg3d3hQiGoTzqcicCAPCunzD3FmNBa1vIyaopiBkiyf6dB01gXT"
     },
     "bitwrench-a2ui.esm.min.js": {
-      "bytes": 486512,
-      "gzip": 140701,
-      "brotli": 115269,
-      "integrity": "sha384-xnuX2XvWL6j+zhjNgSfSnrJP1dBfXHh5OCOcJJ/5tN7u+DDB9RqPj5Nw9LhQKoei"
+      "bytes": 498926,
+      "gzip": 139904,
+      "brotli": 114472,
+      "integrity": "sha384-dmEKiU6znO3eOnpokmNiYjPsKuFMC0Gk71SjADvWrf9WknHnbNkG2O0ZgEgY3Sbm"
     },
     "bitwrench-a2ui.js": {
-      "bytes": 1056733,
-      "gzip": 213279,
-      "brotli": 168986,
-      "integrity": "sha384-4/sLT7UQjrsLSvaQGkVK2VXF3x5sqoldHaagiPoY4M09TMm9fGbvl52mQR0OYCUb"
+      "bytes": 1090943,
+      "gzip": 221906,
+      "brotli": 172355,
+      "integrity": "sha384-gln6KEMMB/17KdTsyVBLEw685hbVZ0R0SNrsks3uEfAqQdqHOcd5JLIzVkJm/k3x"
     },
     "bitwrench-a2ui.min.js": {
-      "bytes": 486933,
-      "gzip": 140860,
-      "brotli": 115414,
-      "integrity": "sha384-p8lanpdE0qqGTaXHCkuPkYpNqLai3iavUyWKEsi4OWGFaFk2M8HlnG75UHZO+vtQ"
+      "bytes": 499347,
+      "gzip": 140054,
+      "brotli": 114581,
+      "integrity": "sha384-eyl1NMMOT85YrFYGUB/KWdkgDkWvkHkKU6jebl1eOhs31zg4mWNbaWw93q+E7o5T"
     },
     "bitwrench.umd.min.js (pinned, loaded separately)": {
       "bytes": 175720,
@@ -57,7 +57,6 @@
     "@a2ui/web_core",
     "@preact/signals-core",
     "quikdown",
-    "redos-detector",
     "zod",
     "zod-to-json-schema"
   ]

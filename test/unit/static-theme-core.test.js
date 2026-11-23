@@ -112,24 +112,31 @@ describe('theme', () => {
 });
 
 describe('core wrapper', () => {
-  it('normalizes envelope keys, leaves conflicts and other messages alone', () => {
-    const m = normalizeMessage(create('s', [{ id: 'a', component: 'Text', text: 'x', '@checks': [], '@accessibility': { label: 'l' }, '@catalogId': 'c', '@metadata': {} }]));
-    assert.deepEqual(Object.keys(m.createSurface.components[0]).sort(), ['accessibility', 'catalogId', 'checks', 'component', 'id', 'metadata', 'text']);
-    const both = normalizeMessage({ version: '1.0', updateComponents: { surfaceId: 's', components: [{ id: 'a', checks: [], '@checks': [] }, 'junk', [1]] } });
-    assert.ok('@checks' in both.updateComponents.components[0]);
-    assert.equal(both.updateComponents.components[1], 'junk');
+  it('drops createSurface.theme outside strict mode and leaves everything else alone', () => {
+    // web_core 0.16 reads the v1.0 @ envelope keys itself: they pass through unchanged.
+    const comp = { id: 'a', component: 'Text', text: 'x', '@checks': [], '@accessibility': { label: 'l' }, '@catalogId': 'c', '@metadata': {} };
+    assert.deepEqual(normalizeMessage(create('s', [comp])).createSurface.components[0], comp);
     assert.deepEqual(normalizeMessage({ messages: [data('s', '/x', 1)] }).messages[0], data('s', '/x', 1));
     assert.deepEqual(normalizeMessage([data('s', '/x', 1)]), [data('s', '/x', 1)]);
     assert.equal(normalizeMessage(null), null);
     assert.equal(normalizeMessage('x'), 'x');
-    const noComps = normalizeMessage({ version: '1.0', createSurface: { surfaceId: 's', theme: {} } });
-    assert.ok('theme' in noComps.createSurface);
+    const kept = normalizeMessage({ version: '1.0', createSurface: { surfaceId: 's', theme: {} } });
+    assert.ok('theme' in kept.createSurface, 'kept without dropTheme (strict mode)');
     let dropped;
-    const themed = normalizeMessage({ version: '1.0', createSurface: { surfaceId: 's', theme: {} } }, { dropTheme: true, onDrop: id => { dropped = id; } });
-    assert.ok(!('theme' in themed.createSurface));
+    const themed = normalizeMessage({ version: '1.0', createSurface: { surfaceId: 's', theme: {}, catalogId: 'c' } }, { dropTheme: true, onDrop: id => { dropped = id; } });
+    assert.deepEqual(themed.createSurface, { surfaceId: 's', catalogId: 'c' });
     assert.equal(dropped, 's');
-    normalizeMessage({ version: '1.0', createSurface: { surfaceId: 's', theme: {} } }, { dropTheme: true });
+    assert.ok(!('theme' in normalizeMessage({ version: '1.0', createSurface: { surfaceId: 's', theme: {} } }, { dropTheme: true }).createSurface));
+    const plain = { version: '1.0', createSurface: { surfaceId: 's' } };
+    assert.equal(normalizeMessage(plain, { dropTheme: true }), plain);
     assert.deepEqual(normalizeMessage({ version: '1.0', updateComponents: { surfaceId: 's' } }), { version: '1.0', updateComponents: { surfaceId: 's' } });
+  });
+
+  it('web_core rejects a component that sends both spellings of an envelope key, as v1.0 requires', () => {
+    const core = createCore({ catalogs: [buildBasicCatalog({})], validation: 'relaxed', onOutbound: () => {} });
+    const errs = core.process(create('s', [{ id: 'root', component: 'Text', text: 'x', checks: [], '@checks': [] }]));
+    assert.equal(errs[0]?.error?.code, 'VALIDATION_FAILED');
+    core.dispose();
   });
 
   it('measures message size: total array items and depth (GHSA-mrhx-c7xc-m3w5)', () => {

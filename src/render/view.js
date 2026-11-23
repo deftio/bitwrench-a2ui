@@ -17,9 +17,8 @@ const nextUid = () => `a2ui${(++uidCounter).toString(36)}`;
 const SLOT_ATTR = 'data-a2ui-slot';
 
 /**
- * Read the accessibility envelope from props (bare key on web_core 0.15, `@` later).
- * `read` resolves values the core may leave raw: for components from custom catalogs,
- * web_core 0.15 does not resolve bindings inside the accessibility envelope.
+ * Read the accessibility envelope from props (`@accessibility` in v1.0; the bare key is
+ * still read for older cores). `read` unwraps resolved {value} bindings.
  */
 export function a11yOf(p, read = val) {
   const a = p?.['@accessibility'] ?? p?.accessibility;

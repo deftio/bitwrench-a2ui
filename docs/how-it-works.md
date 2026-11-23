@@ -31,13 +31,24 @@ There are three layers, each with one job:
 * **The adapter** - this package. It draws that tree with bitwrench, forwards user input and clicks back into the core, maps accessibility attributes, applies the theme and reports everything the core emits to your `send` callback.
 * **bitwrench** - renders TACO objects to DOM or to HTML strings.
 
+### UI objects and CSS objects
+
+bitwrench builds both UI and CSS from ordinary JavaScript objects. A UI object is called **TACO** (Tag, Attributes, Content, Options): `{ t: 'button', a: { class: 'a2ui-button' }, c: 'Book' }` is a button. A CSS object maps selectors to declarations: `{ '.a2ui-button': { padding: '8px 16px' } }`. So the path from message to page has two parallel tracks:
+
+```text
+A2UI message ─▶ web_core ─▶ resolved nodes ─▶ adapter ─▶ UI objects (TACO) ─▶ DOM, or an HTML string
+renderer theme ─────────────────────────────▶ adapter ─▶ CSS objects ───────▶ <style>, or CSS text
+```
+
+Because both are plain data, they can be built, combined, inspected and transformed at runtime with ordinary JavaScript: the playground's "UI objects (TACO)" tab and `renderer.inspect().taco` show the objects for a surface. The objects built from A2UI messages are data only. Objects your own code writes may also carry trusted behavior such as event handlers; nothing executable comes from the wire. This site is built the same way: its pages, navigation and stylesheet are objects ([`pages/site.js`](../pages/site.js), [`pages/index.html`](../pages/index.html)).
+
 The design follows A2UI's own [framework adapter blueprint](https://github.com/a2ui-project/a2ui/blob/main/blueprints/modules/a2ui_framework_adapter.blueprint.md), using its "stateful instances" form, which fits bitwrench's mount-once-then-patch model.
 
 ## From message to DOM
 
 When you call `renderer.receive(message)`:
 
-1. **Normalize** - `src/core/webcore.js` rewrites v1.0 `@`-prefixed envelope keys to the spellings web_core 0.15 accepts, and drops a stray `theme` outside strict mode (see [Compatibility](compatibility.md)).
+1. **Copy and normalize** - `src/core/webcore.js` checks the message size, copies the message (so the caller's object never changes), and drops a stray `theme` outside strict mode, the one v1.0 gap left in web_core 0.16.1 (see [Compatibility](compatibility.md)).
 2. **Process** - the core validates the message and updates its state. Invalid messages come back as `error` envelopes, which the renderer sends to the agent.
 3. **Surface created** - for a new surface, the renderer creates a host element (`<div class="a2ui-surface">`), applies the theme to it, and creates a `NodeResolver`, which produces the live node tree.
 4. **Root view** - when the root node exists, a `View` is created for it.

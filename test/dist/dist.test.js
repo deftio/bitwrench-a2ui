@@ -29,7 +29,7 @@ describe('dist builds', { skip: !has('bitwrench-a2ui.min.js') && 'run npm run bu
     ['bitwrench UMD + bitwrench-a2ui.min.js', [bwFile, new URL('bitwrench-a2ui.min.js', dist)]],
     ['bitwrench-a2ui.bundle.min.js (single file)', [new URL('bitwrench-a2ui.bundle.min.js', dist)]],
   ]) {
-    it(`${label}: renders and sends actions from a plain page`, () => {
+    it(`${label}: renders and sends actions from a plain page`, async () => {
       const { w, errors } = page(files);
       assert.equal(typeof w.bwA2UI?.createRenderer, 'function');
       const sent = [];
@@ -40,6 +40,7 @@ describe('dist builds', { skip: !has('bitwrench-a2ui.min.js') && 'run npm run bu
         document.querySelector('button').click();
       `);
       assert.equal(w.document.querySelector('[data-a2ui-id="t"]').textContent, 'Hello Ada');
+      await new Promise(r => setTimeout(r, 0));   // web_core resolves an action's context asynchronously
       assert.equal(sent[0].action.context.n, 'Ada');
       assert.deepEqual(errors, []);
     });
@@ -85,8 +86,9 @@ describe('dist builds', { skip: !has('bitwrench-a2ui.min.js') && 'run npm run bu
 
   it('builds.json records pins, integrity and the Lit check', () => {
     const report = JSON.parse(fs.readFileSync(new URL('builds.json', dist), 'utf8'));
-    assert.equal(report.pins.bitwrench, '2.1.15');
-    assert.equal(report.pins['@a2ui/web_core'], '0.15.0');
+    const deps = JSON.parse(fs.readFileSync(new URL('../../package.json', import.meta.url), 'utf8')).dependencies;
+    assert.equal(report.pins.bitwrench, deps.bitwrench);
+    assert.equal(report.pins['@a2ui/web_core'], deps['@a2ui/web_core']);
     for (const f of ['bitwrench-a2ui.min.js', 'bitwrench-a2ui.esm.min.js', 'bitwrench-a2ui.bundle.min.js']) {
       assert.match(report.files[f].integrity, /^sha384-/);
     }

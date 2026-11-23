@@ -4,11 +4,13 @@
 [![CI](https://github.com/deftio/bitwrench-a2ui/actions/workflows/ci.yml/badge.svg)](https://github.com/deftio/bitwrench-a2ui/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/deftio/bitwrench-a2ui/actions/workflows/codeql.yml/badge.svg)](https://github.com/deftio/bitwrench-a2ui/actions/workflows/codeql.yml)
 [![A2UI](https://img.shields.io/badge/A2UI-v1.0-4f46e5)](https://a2ui.org/)
-[![conformance](https://img.shields.io/badge/conformance-36%2F36-16a34a)](docs/conformance-report.md)
-[![coverage](https://img.shields.io/badge/coverage-100%25-16a34a)](docs/testing.md)
+[![upstream suites](https://img.shields.io/badge/upstream%20suites-36%2F36-16a34a)](docs/conformance-report.md)
+[![coverage](https://img.shields.io/badge/src%20coverage-100%25-16a34a)](docs/testing.md)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
-**An [A2UI](https://a2ui.org/) v1.0 renderer for plain JavaScript, built on [bitwrench](https://github.com/deftio/bitwrench).** Add one script tag to show the interfaces your agent sends, with no framework and no build step. The same renderer also produces HTML strings in Node.
+**An [A2UI](https://a2ui.org/) v1.0 renderer for plain JavaScript, built on [bitwrench](https://github.com/deftio/bitwrench).** A2UI rendering in an ordinary browser page: add a script tag to show the interfaces your agent sends, with no framework, JSX or build step on your side. The same renderer also produces static HTML strings in Node.
+
+> **Now on `@a2ui/web_core` 0.16.1** (released 2026-11-23). Since bitwrench-a2ui 0.9.4 the renderer uses the latest A2UI core, which handles `@` envelope keys, agent-function routing and full-replacement updates itself, so four of the adapter's five workarounds for 0.15 are gone. The upgrade changes a few behaviors hosts may notice (actions arrive a microtask after the click; stricter validation of `TextField`, booleans and regex patterns): see [compatibility](docs/compatibility.md#behavior-changes-from-web_core-016-that-hosts-may-notice).
 
 [Site](https://deftio.github.io/bitwrench-a2ui/) · [Playground](https://deftio.github.io/bitwrench-a2ui/pages/playground.html) · [Components](https://deftio.github.io/bitwrench-a2ui/pages/gallery.html) · [LLM sandbox](https://deftio.github.io/bitwrench-a2ui/pages/llm.html) · [Docs](docs/README.md)
 
@@ -19,10 +21,31 @@ A2UI is Google's open protocol for agent-generated UI. An agent does not send HT
 bitwrench-a2ui is that renderer for the plain web:
 
 * **Protocol** - A2UI **v1.0**, the basic catalog (all 18 components and 14 functions), custom catalogs, and the full set of agent and renderer messages.
-* **Core** - it is built on Google's [`@a2ui/web_core`](https://www.npmjs.com/package/@a2ui/web_core), the same message processor, data model and validation that the official Lit, React and Angular renderers use. bitwrench-a2ui is the view layer on top of it.
-* **Conformance** - it passes all 36 cases of the upstream conformance suites and renders all 43 upstream basic catalog examples; see the [conformance report](docs/conformance-report.md).
-* **Rendering** - bitwrench represents UI and CSS as plain JavaScript objects. Each A2UI component becomes such an object, is mounted, and updates in place as data arrives. That same object can be turned into an HTML string, which is how [static rendering](docs/static-html.md) works.
-* **Delivery** - one script tag (or two, with bitwrench separate), or `npm install`. No framework, no custom elements, no build step required.
+* **Core** - it is built on Google's [`@a2ui/web_core`](https://www.npmjs.com/package/@a2ui/web_core), the same message processor, data model and validation that the official Lit, React and Angular renderers use. bitwrench-a2ui is the view layer on top of it. Where published web_core 0.15 and the v1.0 spec disagree, the renderer adapts, and every adaptation and known difference is listed in [compatibility](docs/compatibility.md).
+* **Tested against upstream** - all 36 applicable cases of the pinned upstream renderer suites (adapter, accessibility and Markdown, A2UI commit `7a776e7a`, `@a2ui/web_core` 0.16.1) pass, and all 43 upstream basic catalog examples render, live and as static HTML; see the [conformance report](docs/conformance-report.md). The accessibility suite checks structure (roles, labels, states) in jsdom; it is not a real-browser accessibility audit.
+* **Rendering** - each A2UI component becomes a plain JavaScript object (see [UI as objects](#ui-as-objects) below), is mounted, and updates in place as data arrives. That same object can be turned into an HTML string, which is how [static rendering](docs/static-html.md) works. Static HTML is a snapshot, not hydrated: the live renderer replaces it.
+* **Delivery** - one script tag (or two, with bitwrench separate), or `npm install`. No framework, no custom elements, and no build step for you: the published files are built and tested in this repository.
+
+## UI as objects
+
+[bitwrench](https://github.com/deftio/bitwrench) builds user interfaces and CSS from ordinary JavaScript objects. UI trees, component properties and style rules can be built, combined, inspected and transformed at runtime with normal data operations. bitwrench calls its UI object form **TACO**: **T**ag, **A**ttributes, **C**ontent, **O**ptions.
+
+```js
+const ui = {
+  t: 'div',
+  a: { class: 'card' },
+  c: [
+    { t: 'h2', c: 'Hello' },
+    { t: 'p', c: 'UI as data.' },
+  ],
+};
+const css = { '.card': { padding: '1rem', borderRadius: '8px' } };
+
+bw.injectCSS(bw.css(css));
+bw.DOM('#app', ui);   // or bw.html(ui) for an HTML string
+```
+
+This renderer turns each A2UI component into a data-only TACO object like `ui` above: you can see them in the playground's "UI objects (TACO)" tab, and `renderer.inspect().taco` returns them. Objects written by your own code may also carry trusted behavior, such as event handlers; nothing executable is ever accepted from the A2UI wire. The [site](https://deftio.github.io/bitwrench-a2ui/) itself, its layout and its CSS, is built the same way: see [`pages/site.js`](pages/site.js).
 
 ## Supported versions
 
@@ -102,7 +125,7 @@ The [quick start](docs/quick-start.md) covers each of these in more detail.
 | `dist/bitwrench-a2ui.esm.min.js` | Browser ES module |
 | `src/` (npm) | ES module source for bundlers and Node |
 
-Each release's `dist/builds.json` lists exact sizes, the pinned dependency versions, and `integrity` hashes for subresource integrity. About 140 KB gzipped for the renderer, most of which is the A2UI core and its validator. None of the builds contains Lit.
+Each release's `dist/builds.json` lists exact sizes, the pinned dependency versions, and `integrity` hashes for subresource integrity. The renderer script is about 140 KB gzipped, plus 48 KB for bitwrench when loaded separately (189 KB for the single-file bundle). This adapter is about 30 KB of that; the rest is `@a2ui/web_core` (0.16.1) and its validator, zod. None of the builds contains Lit (the build checks).
 
 ## Documentation
 
