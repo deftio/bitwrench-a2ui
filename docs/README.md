@@ -31,6 +31,6 @@ For contributors and the curious:
 
 * **[How it works](how-it-works.md)** - the architecture: web_core, the adapter, views and slots, reactivity, static composition.
 * **[Security](security.md)** - the trust model and what is protected.
-* **[Compatibility](compatibility.md)** - conformance results and known differences, including the web_core 0.15 gaps the adapter works around.
+* **[Compatibility](compatibility.md)** - conformance results and known differences, including the web_core 0.16.1 upgrade and the one gap the adapter still works around.
 * **[Testing](testing.md)** - the unit, conformance, golden and dist test suites.
 * **[FAQ](faq.md)** - common questions.

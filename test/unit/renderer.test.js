@@ -193,13 +193,6 @@ describe('createRenderer', () => {
     assert.equal(r.host('s').textContent, 'from agent');
   });
 
-  it('an agent proxy with no connection throws a clear error', () => {
-    const catalog = buildCatalog({ catalogId: 'https://example.test/x.json', protocolVersion: '1.0', components: {},
-      functions: { far: { type: 'object', returnType: 'string', properties: { '@call': { const: 'far' }, args: { type: 'object' } }, required: ['@call'] } } });
-    const fn = catalog.functions.get('far');
-    assert.throws(() => fn.execute({}, {}), /no agent connection/);
-  });
-
   it('viewTree reports non-resolved nodes and exports', () => {
     const t = render([{ id: 'root', component: 'Column', children: ['missing'] }]);
     const tree = t.r.viewTree();

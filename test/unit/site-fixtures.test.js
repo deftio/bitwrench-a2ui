@@ -76,4 +76,12 @@ describe('gallery entries', () => {
   it('covers all 18 basic components', () => {
     assert.equal(new Set(GALLERY.map(g => g.name)).size, 18);
   });
+  it('plays media that ships with the site, not placeholder URLs', () => {
+    const urls = GALLERY.flatMap(g => g.components).filter(c => c.component === 'Video' || c.component === 'AudioPlayer').map(c => c.url);
+    assert.equal(urls.length, 2);
+    for (const url of urls) {
+      assert.ok(!/^[a-z]+:/i.test(url), `${url} is a site file`);
+      assert.ok(fs.statSync(new URL(`../../pages/${url}`, import.meta.url)).size > 1000, `pages/${url} exists`);
+    }
+  });
 });

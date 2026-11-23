@@ -5,7 +5,6 @@
 // We import only from the public `@a2ui/web_core/v1_0` facade, and only the names the
 // A2UI framework adapter blueprint allows adapters to use.
 import {
-  A2uiExpressionError,
   BASIC_FUNCTIONS,
   Catalog,
   MessageProcessor,
@@ -38,60 +37,14 @@ export function buildCatalog(json, implementations = {}, functions = []) {
     ...api,
     bw: implementations[api.name],
   }));
+  // Functions the document declares without an implementation stay schema-only: web_core
+  // (0.16+) routes a call to one to the agent with callAgentFunction, the spec's fallback
+  // routing, sharing identical in-flight calls from bindings and checks.
   const fns = [...functions];
-  const proxies = [];
-  // Functions the document declares without an implementation are routed to the agent
-  // (spec: fallback routing). web_core 0.15 has no agent-function implementation of its
-  // own, so we give each one an execute() that forwards through the processor's public
-  // callAgentFunction(). agentOnly functions are left schema-only: they may not be bound
-  // in the UI, and the core reports that.
   for (const f of schemaOnly.functions.values()) {
-    if (fns.some(x => x.name === f.name)) continue;
-    if (f.allowedCallers === 'agentOnly') { fns.push(f); continue; }
-    const proxy = {
-      ...f,
-      execute(args, ctx) {
-        const call = proxy.callAgent;
-        const surfaceId = ctx?.surface?.id;
-        if (!call || !surfaceId) throw new Error(`Agent function "${f.name}" called with no agent connection`);
-        // Reactive evaluations (bindings, checks) share an identical in-flight call, as
-        // the spec allows; actions (user activated) always send a fresh call.
-        const reactive = !ctx.isUserActivated;
-        const key = reactive ? `${surfaceId}\u0000${f.name}\u0000${stableJson(args)}` : null;
-        if (key && proxy.inflight.has(key)) return proxy.inflight.get(key);
-        // We choose the call id so a failure can be reported against it.
-        const functionCallId = newCallId();
-        const p = Promise.resolve(call(surfaceId, { '@call': f.name, catalogId: json.catalogId, args }, { functionCallId }))
-          .catch(e => {
-            throw new A2uiExpressionError(`[${e?.code ?? 'EXECUTION_ERROR'}] ${e?.message ?? e}`, f.name, { functionCallId, code: e?.code });
-          })
-          .finally(() => { if (key) proxy.inflight.delete(key); });
-        if (key) proxy.inflight.set(key, p);
-        return p;
-      },
-      inflight: new Map(),
-    };
-    proxies.push(proxy);
-    fns.push(proxy);
+    if (!fns.some(x => x.name === f.name)) fns.push(f);
   }
-  const catalog = new Catalog(json.catalogId, PROTOCOL_VERSION, components, fns);
-  AGENT_PROXIES.set(catalog, proxies);
-  return catalog;
-}
-
-const AGENT_PROXIES = new WeakMap();
-
-/** JSON with sorted object keys, for comparing argument objects. */
-function stableJson(v) {
-  if (Array.isArray(v)) return `[${v.map(stableJson).join(',')}]`;
-  if (v && typeof v === 'object') return `{${Object.keys(v).sort().map(k => `${JSON.stringify(k)}:${stableJson(v[k])}`).join(',')}}`;
-  return JSON.stringify(v) ?? 'null';
-}
-
-let callCounter = 0;
-function newCallId() {
-  const rnd = globalThis.crypto?.randomUUID?.();
-  return rnd ? `bw-${rnd}` : `bw-${Date.now().toString(36)}-${(++callCounter).toString(36)}`;
+  return new Catalog(json.catalogId, PROTOCOL_VERSION, components, fns);
 }
 
 /** The basic catalog with the given component implementations and the core's functions. */
@@ -132,61 +85,30 @@ export function makeFunction({ name, execute, args, returnType = 'any', allowedC
 }
 
 // ---------------------------------------------------------------------------------
-// Envelope key normalizer
+// Theme normalizer
 //
-// The A2UI v1.0 spec writes the component envelope mixins with an `@` sigil:
-// `@checks`, `@accessibility`, `@metadata`, `@catalogId`. @a2ui/web_core 0.15.0 (the
-// latest release on npm) still accepts only the pre-1.0 bare spellings (`checks`,
-// `accessibility`, ...), and rejects the `@` forms as unrecognized keys. The upstream
-// repository fixes this in 0.16.0, which is not yet published.
-//
-// Until then we rewrite the envelope keys of each component to the bare form before
-// handing messages to the core. A component that sends both spellings of one key is left
-// alone so the core reports it, as the spec requires.
-// TODO(web_core>=0.16): delete this normalizer and its tests.
+// A2UI v1.0 removed `theme` from createSurface; the spec has strict renderers reject it
+// and relaxed renderers drop it. @a2ui/web_core (0.16.1) still rejects the whole message
+// in every mode, so outside strict mode we drop the key first. (web_core 0.16 reads the
+// v1.0 `@checks`, `@accessibility`, `@metadata` and `@catalogId` keys itself, so the
+// envelope-key rewrite 0.15 needed is gone.)
+// TODO(web_core): delete when relaxed validation drops createSurface.theme itself.
 // ---------------------------------------------------------------------------------
-const ENVELOPE_KEYS = ['@checks', '@accessibility', '@metadata', '@catalogId'];
-
-function normalizeComponent(c) {
-  if (!c || typeof c !== 'object' || Array.isArray(c)) return c;
-  let out = c;
-  for (const key of ENVELOPE_KEYS) {
-    if (!(key in c)) continue;
-    const bare = key.slice(1);
-    if (bare in c) continue;
-    if (out === c) out = { ...c };
-    out[bare] = out[key];
-    delete out[key];
-  }
-  return out;
-}
-
-function normalizeComponents(list) {
-  return Array.isArray(list) ? list.map(normalizeComponent) : list;
-}
 
 /**
- * Rewrite v1.0 `@`-prefixed component envelope keys to the form web_core 0.15 accepts.
- *
- * With `dropTheme`, also remove a `theme` from v1.0 createSurface messages: v1.0 removed
- * theming from the wire, and the spec has relaxed renderers drop it, but web_core 0.15
- * rejects the whole message. `onDrop` is called for each theme removed.
+ * Prepare messages for the core. With `dropTheme`, remove `theme` from createSurface
+ * messages (v1.0 removed it; relaxed renderers drop it) and call `onDrop(surfaceId)` for
+ * each. Anything else is returned unchanged. Accepts one message, an array, or
+ * `{messages: [...]}`.
  */
 export function normalizeMessage(msg, opts = {}) {
   if (!msg || typeof msg !== 'object') return msg;
   if (Array.isArray(msg)) return msg.map(m => normalizeMessage(m, opts));
   if (Array.isArray(msg.messages)) return { ...msg, messages: msg.messages.map(m => normalizeMessage(m, opts)) };
-  if (msg.createSurface && typeof msg.createSurface === 'object') {
-    const cs = { ...msg.createSurface };
-    if (opts.dropTheme && 'theme' in cs) {
-      delete cs.theme;
-      opts.onDrop?.(cs.surfaceId);
-    }
-    if (cs.components) cs.components = normalizeComponents(cs.components);
+  if (opts.dropTheme && msg.createSurface && typeof msg.createSurface === 'object' && 'theme' in msg.createSurface) {
+    const { theme, ...cs } = msg.createSurface;
+    opts.onDrop?.(cs.surfaceId);
     return { ...msg, createSurface: cs };
-  }
-  if (msg.updateComponents?.components) {
-    return { ...msg, updateComponents: { ...msg.updateComponents, components: normalizeComponents(msg.updateComponents.components) } };
   }
   return msg;
 }
@@ -194,8 +116,9 @@ export function normalizeMessage(msg, opts = {}) {
 // ---------------------------------------------------------------------------------
 // Message size limits.
 //
-// web_core 0.15 validates with zod 3, which keeps every issue of every failing array
-// element (GHSA-mrhx-c7xc-m3w5, fixed only in zod 4, which web_core 0.15 cannot use).
+// web_core (0.16.1, like 0.15) validates with zod 3, which keeps every issue of every
+// failing array element (GHSA-mrhx-c7xc-m3w5, fixed only in zod 4, which web_core does
+// not use yet).
 // A 250 KB message of 20,000 invalid components costs about 116 MB of heap, and 100,000
 // overflow the stack. Agent output is untrusted, so each message is measured before the
 // core sees it, and one over the limits is rejected as VALIDATION_FAILED.
@@ -226,6 +149,16 @@ export function checkLimits(msg, limits = DEFAULT_LIMITS) {
   return null;
 }
 
+/**
+ * A deep copy of a message or data-model value. structuredClone where the platform has it
+ * (browsers, Node); jsdom windows do not, so fall back to a JSON round trip, which loses
+ * nothing for A2UI messages (they are JSON). Primitives are returned as they are.
+ */
+export function detach(value) {
+  if (!value || typeof value !== 'object') return value;
+  return typeof structuredClone === 'function' ? structuredClone(value) : JSON.parse(JSON.stringify(value));
+}
+
 // The envelopes of a receive() call: one message, an array, or {messages: [...]}.
 const envelopes = input => Array.isArray(input) ? input
   : Array.isArray(input?.messages) ? input.messages : [input];
@@ -250,19 +183,16 @@ export const VALIDATION = {
  * @param {object} opts
  * @param {Array} opts.catalogs           Catalogs from buildCatalog / buildBasicCatalog.
  * @param {'strict'|'relaxed'|object} [opts.validation]
- * @param {(msg: object) => void} opts.onOutbound  Receives RPC envelopes (callAgentFunction, rendererFunctionResponse).
+ * @param {(msg: object) => void} [opts.onOutbound]  Receives RPC envelopes (callAgentFunction, rendererFunctionResponse). Omit it when there is no agent (static rendering).
  */
 export function createCore({ catalogs, validation, limits, onOutbound, onNote = () => {} }) {
   const validationConfig = typeof validation === 'string' ? VALIDATION[validation] : validation;
   const processor = new MessageProcessor(catalogs, undefined, {
     ...(validationConfig ? { validationConfig } : {}),
-    outboundListener: msg => onOutbound(msg),
+    // Without onOutbound (static rendering), web_core has no agent to call: a function that
+    // needs the agent fails locally and is reported, instead of being sent nowhere.
+    ...(onOutbound ? { outboundListener: msg => onOutbound(msg) } : {}),
   });
-  for (const c of catalogs) {
-    for (const proxy of AGENT_PROXIES.get(c) ?? []) {
-      proxy.callAgent = (surfaceId, call, options) => processor.callAgentFunction(surfaceId, call, options);
-    }
-  }
   const dropTheme = validation !== 'strict';
   const onDrop = surfaceId => onNote({ level: 'warning', code: 'THEME_DROPPED', surfaceId,
     message: 'createSurface.theme is not part of A2UI v1.0; it was ignored. Style surfaces with the renderer theme option.' });
@@ -282,9 +212,12 @@ export function createCore({ catalogs, validation, limits, onOutbound, onNote = 
         } });
         return false;
       });
-      // Pass the input through untouched when nothing was rejected.
-      const input = rejected.length ? accepted : messages;
-      const errors = accepted.length ? processor.processMessagesWithErrors(normalizeMessage(input, { dropTheme, onDrop })) : [];
+      // web_core keeps the data-model objects of createSurface and updateDataModel and
+      // writes user edits into them. Give it copies, so the caller's messages (a log, a
+      // fixture, a replay buffer) stay exactly as received. Copied after checkLimits, so an
+      // oversized message is never cloned.
+      const detached = accepted.map(detach);
+      const errors = detached.length ? processor.processMessagesWithErrors(normalizeMessage(detached, { dropTheme, onDrop })) : [];
       return [...rejected, ...errors];
     },
     capabilities(options = {}) {

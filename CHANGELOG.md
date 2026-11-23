@@ -6,6 +6,28 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 Nothing yet.
 
+## 0.9.4 - 2026-11-23
+
+**Upgraded to `@a2ui/web_core` 0.16.1** (released 2026-11-23), from 0.15.0, and moved the upstream spec pin to `a2ui-project/a2ui@7a776e7a`, the commit 0.16.1 was released from (the pinned spec, catalog, examples and conformance files are unchanged). All 36 upstream suite cases and all 43 examples pass as before.
+
+* **Four workarounds removed** - web_core now handles the v1.0 `@` envelope keys, routes calls to catalog functions without an implementation to the agent, resolves custom-catalog accessibility bindings and bound Icon names reactively, and removes properties left out of an `updateComponents`. The adapter's own versions of these are gone; `normalizeMessage` now only drops `createSurface.theme` (still rejected by 0.16.1) and leaves `@` keys alone. Removed properties are now actually removed (a known difference with 0.15).
+* **Behavior changes from web_core 0.16** - actions reach `send` a microtask after the click (the core resolves the action context asynchronously); a `TextField` must have `value`; `DynamicBoolean` values are coerced as the spec says; `regex` patterns must use the portable A2UI dialect; undeclared function arguments are rejected. See [compatibility](docs/compatibility.md).
+* **Static rendering and agent functions** - `renderToHTML` has no agent, so a function that needs one is reported once in `errors` (`EXPRESSION_ERROR`) instead of being silently dropped. Identical errors are listed once.
+* **Smaller dependency tree** - web_core 0.16 drops `redos-detector`; the renderer bundle stays about 140 KB gzipped, as the core itself grew.
+* **zod** - web_core 0.16.1 still uses zod 3 (forcing zod 4 fails 73 of our 278 tests), so the size limits and the reviewed advisory exception stay.
+
+Fixed:
+
+* **Received and sent messages are never modified** - `@a2ui/web_core` keeps the data-model objects of `createSurface` and `updateDataModel` and writes user edits into them, so a host's message log, fixtures or replay buffer changed as the user typed (seen in the site inspector, where the original `createSurface` showed the typed name). The renderer and `renderToHTML` now hand web_core copies, taken after the size check. Outbound messages, `renderer.outbound()` and the `a2uiRendererDataModel` metadata are snapshots too, so a logged action keeps the values it was sent with. The copies use `structuredClone`, or a JSON round trip where it is missing (jsdom).
+* **Gallery media plays** - the Video and AudioPlayer entries used placeholder `example.invalid` URLs; they now play small files made for the site with ffmpeg (`pages/media/`, no third-party content).
+
+Docs and site:
+
+* **Claims match the evidence** - "36/36" is described as the pinned upstream adapter, accessibility and Markdown suites (renderer suites, not all of A2UI core conformance), with the accessibility checks named as structural checks in jsdom; coverage is labelled as `src/` coverage; "no build step" means none on your side; static HTML is a snapshot, not hydrated; "matches the official renderers" now says the core is shared and links the documented adaptations; "Safe by construction" became "Declarative, catalog-controlled", with the measures listed, and the security docs no longer make absolute guarantees.
+* **UI as objects, explained first** - the README, the home page and "How it works" introduce bitwrench's objects for UI and CSS (TACO) with a small runnable example before using the term, and point to the site's own source as an example.
+* **Inspector** - the home page and playground show the received wire JSON, the messages sent to the agent, the data model and the UI objects as separate, explained tabs ("UI objects (TACO)"); the home page has a "Watch a stream" button.
+* **Size** - the README gives measured sizes: about 30 KB gzipped for this adapter, the rest of the 140 KB being web_core with zod and redos-detector, plus 48 KB for bitwrench.
+
 ## 0.9.3 - 2026-11-23
 
 Security:

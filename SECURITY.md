@@ -1,6 +1,6 @@
 # Security Policy
 
-bitwrench-a2ui renders user interfaces described by AI agents. Agent output is untrusted input, so the renderer is built to keep the A2UI promise: an agent can describe UI, but it cannot run code in the page. This document explains what the renderer protects, what it leaves to you, and how to report a problem.
+bitwrench-a2ui renders user interfaces described by AI agents. Agent output is untrusted input, so the renderer is designed to keep the A2UI promise: an agent can describe UI from catalogs the host approves, but not supply code or markup for the page. The measures below are how it does that, and what is left to you; please report anything that gets past them. This document explains what the renderer protects, what it leaves to you, and how to report a problem.
 
 ## Reporting a vulnerability
 
@@ -21,7 +21,7 @@ Security fixes go into the latest release. The project is pre-1.0, so there are 
 
 ## What the renderer protects
 
-These guarantees hold for the components in this package and for anything rendered through its view layer:
+These measures apply to the components in this package and to anything rendered through its view layer:
 
 * **No code from the wire** - messages can only select components and functions that the host registered in a catalog. Nothing in a message is evaluated as JavaScript. There is no `eval`, `new Function` or string event handler anywhere in the shipped code (the build checks this).
 * **No raw HTML** - agent strings are placed in text nodes or in a fixed set of attributes. Text Markdown is parsed to a tree (quikdown's AST) and rebuilt from an allowlist of element types; raw HTML in Markdown stays visible text, and links and images render as plain text. bitwrench's raw-HTML escape hatch (`bw.raw`) is never used.
@@ -41,7 +41,7 @@ The renderer cannot know what your actions do. Please keep these in mind:
 * **Custom components** - components you register run with full page privileges. Build their TACO from typed values, never spread agent objects into attributes, and never pass agent strings to `bw.raw` or `innerHTML`.
 * **Custom functions** - functions you register can be invoked by agent messages (within `allowedCallers`). Treat their arguments as untrusted.
 * **Transport security** - use HTTPS/WSS and your normal authentication for the channel between the page and the agent.
-* **Model output** - an LLM can be prompted into producing misleading UI (for example a fake login form). The renderer guarantees the UI cannot run code; it cannot guarantee the content is honest. Show agent-generated surfaces in a clearly labelled area of your app.
+* **Model output** - an LLM can be prompted into producing misleading UI (for example a fake login form). The renderer keeps the UI to approved components; it cannot make the content honest. Show agent-generated surfaces in a clearly labelled area of your app.
 * **API keys** - the LLM sandbox page keeps keys in memory only: they are gone when you close or reload the tab, and are sent only to the provider you picked. Use restricted or development keys there.
 
 ## Dependencies

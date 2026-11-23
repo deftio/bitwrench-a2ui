@@ -25,12 +25,13 @@
   function card(entry, i) {
     const messages = [{ version: '1.0', createSurface: { surfaceId: `g-${entry.name}`, catalogId: CAT, components: entry.components, ...(entry.data ? { dataModel: entry.data } : {}) } }];
     entry._messages = messages;
-    return { t: 'article', a: { class: 'site-card', id: entry.name.toLowerCase() }, c: [
+    // A flex column, so the playground link sits on the bottom edge of every card in a row.
+    return { t: 'article', a: { class: 'site-card', id: entry.name.toLowerCase(), style: 'display:flex;flex-direction:column' }, c: [
       { t: 'h3', c: entry.name },
       { t: 'p', a: { class: 'site-muted', style: 'margin:0 0 10px' }, c: entry.note },
       { t: 'div', a: { id: `gal-${i}`, style: 'min-height:48px;margin-bottom:10px' } },
       { t: 'details', c: [{ t: 'summary', c: 'A2UI JSON' }, site.code(JSON.stringify(messages[0], null, 2))] },
-      { t: 'p', a: { style: 'margin:8px 0 0;font-size:0.9rem' }, c: [
+      { t: 'p', a: { style: 'margin:auto 0 0;padding-top:12px;font-size:0.9rem' }, c: [
         { t: 'a', a: { class: 'site-link', href: `playground.html#m=${site.encodeShare(JSON.stringify(messages, null, 2))}` }, c: 'Open in playground →' }] },
     ] };
   }
@@ -41,7 +42,7 @@
     ...groups.map(g => site.section(g, null, { t: 'div', a: { class: 'site-grid', style: 'grid-template-columns:repeat(auto-fill,minmax(340px,1fr))' },
       c: window.A2UI_GALLERY.map((e, i) => e.group === g ? card(e, i) : null).filter(Boolean) })),
     site.section('Notes', null, { t: 'p', c: [
-      'Media examples point at placeholder URLs, so the players show no content. Component details are in the ',
+      'The Video and AudioPlayer examples play short clips made for this site (pages/media). Component details are in the ',
       { t: 'a', a: { class: 'site-link', href: 'docs.html?doc=components' }, c: 'components guide' }, '.'] }),
   ]);
 

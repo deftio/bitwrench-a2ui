@@ -6,7 +6,7 @@ import { freshMount, tick } from '../helpers/dom.js';
 import { create, update, data, render, fire, BASIC_CATALOG_ID } from '../helpers/a2ui.js';
 import { Catalog } from '@a2ui/web_core/v1_0';
 
-const { createRenderer, createBasicCatalog, component, buildCatalog, renderToHTML } = await import('../../src/index.js');
+const { createRenderer, createBasicCatalog, component, buildCatalog, makeFunction, renderToHTML } = await import('../../src/index.js');
 const { frameError, frameAction } = await import('../../src/renderer.js');
 const { normalizeMessage, createCore, buildBasicCatalog } = await import('../../src/core/webcore.js');
 
@@ -56,6 +56,21 @@ describe('custom component contracts', () => {
     r.receive(data('s', '/d', ''));
     assert.equal(el.getAttribute('aria-label'), null);
     assert.equal(el.getAttribute('aria-description'), null);
+  });
+
+  it('ctx.read reads a binding a custom component finds inside its own props, live and static', () => {
+    // web_core resolves declared bindings; a binding nested in a free-form value stays raw,
+    // and ctx.read resolves it against the data model (reactively when live).
+    const Box = component({
+      render: (p, ctx) => ({ t: 'output', c: String(ctx.read({ '@path': '/x' })) }),
+      update: (el, p, prev, ctx) => { el.textContent = String(ctx.read({ '@path': '/x' })); return true; },
+    });
+    const { r, mount } = box({ Box }, [{ id: 'root', component: 'Box', label: 'l' }], { x: 'one' });
+    assert.equal(mount.querySelector('output').textContent, 'one');
+    const out = renderToHTML([{ version: '1.0', createSurface: { surfaceId: 's', catalogId: CUSTOM_ID, components: [{ id: 'root', component: 'Box' }], dataModel: { x: 'static' } } }],
+      { catalogs: [createBasicCatalog(), customCatalog({ Box })] });
+    assert.ok(out.html.includes('>static</output>'));
+    r.destroy();
   });
 
   it('static compose of a component whose render has no attributes', () => {
@@ -164,26 +179,24 @@ describe('core wrapper fallbacks', () => {
     assert.equal(odd.updateComponents.components, 'nope');
   });
 
-  it('agent proxies: plain rejections, array and undefined args, no crypto', async () => {
+  it('a declared function without an implementation stays schema-only, for web_core to route to the agent', () => {
     const catalog = buildCatalog({ catalogId: 'https://example.test/a.json', protocolVersion: '1.0', components: {},
       functions: { far: { type: 'object', returnType: 'string', properties: { '@call': { const: 'far' }, args: { type: 'object' } }, required: ['@call'] } } });
     const fn = catalog.functions.get('far');
-    fn.callAgent = () => Promise.reject('plain');
-    await assert.rejects(fn.execute({ list: [1, { b: 2, a: undefined }] }, { surface: { id: 's' }, isUserActivated: false }), /\[EXECUTION_ERROR\] plain/);
-    const saved = globalThis.crypto;
-    Object.defineProperty(globalThis, 'crypto', { value: undefined, configurable: true });
-    let seen;
-    fn.callAgent = (s, c, o) => { seen = o.functionCallId; return Promise.resolve('ok'); };
-    assert.equal(await fn.execute({}, { surface: { id: 's' }, isUserActivated: true }), 'ok');
-    Object.defineProperty(globalThis, 'crypto', { value: saved, configurable: true });
-    assert.match(seen, /^bw-[a-z0-9]+-[a-z0-9]+$/);
+    assert.equal(fn.name, 'far');
+    assert.equal(typeof fn.execute, 'undefined');
+    const mine = makeFunction({ name: 'far', execute: () => 'local' });
+    assert.equal(buildCatalog({ catalogId: 'https://example.test/b.json', protocolVersion: '1.0', components: {}, functions: { far: {} } }, {}, [mine]).functions.get('far').execute(), 'local');
   });
 
-  it('static export can route agent function calls (and drops them)', () => {
+  it('static export reports an agent function it cannot call (there is no agent), once', () => {
     const catalog = buildCatalog({ catalogId: 'https://example.test/s.json', protocolVersion: '1.0', components: {},
       functions: { far: { type: 'object', returnType: 'string', properties: { '@call': { const: 'far' }, args: { type: 'object' } }, required: ['@call'] } } });
     const out = renderToHTML([create('s', [{ id: 'root', component: 'Text', text: { '@call': 'far', catalogId: 'https://example.test/s.json' } }])], { catalogs: [createBasicCatalog(), catalog] });
     assert.ok(out.html.includes('data-a2ui-id="root"'));
+    assert.equal(out.errors.length, 1);
+    assert.equal(out.errors[0].error.code, 'EXPRESSION_ERROR');
+    assert.match(out.errors[0].error.message, /far/);
   });
 });
 

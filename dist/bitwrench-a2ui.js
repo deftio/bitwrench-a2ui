@@ -1,5 +1,5 @@
-/*! bitwrench-a2ui v0.9.3 | Apache-2.0 | https://github.com/deftio/bitwrench-a2ui
- *  Bundles @a2ui/web_core 0.15.0 (Apache-2.0, Google LLC) and quikdown 1.3.2 (BSD-2-Clause).
+/*! bitwrench-a2ui v0.9.4 | Apache-2.0 | https://github.com/deftio/bitwrench-a2ui
+ *  Bundles @a2ui/web_core 0.16.1 (Apache-2.0, Google LLC) and quikdown 1.3.2 (BSD-2-Clause).
  *  Requires bitwrench 2.1.15 (BSD-2-Clause), loaded separately. See THIRD_PARTY_LICENSES. */
 var bwA2UI = (() => {
   var __defProp = Object.defineProperty;
@@ -139,7 +139,7 @@ var bwA2UI = (() => {
     A2UI_MIME_TYPE: () => A2UI_MIME_TYPE,
     BASIC_CATALOG_DOCUMENT: () => catalog_json_default,
     BASIC_CATALOG_ID: () => BASIC_CATALOG_ID,
-    BASIC_COMPONENTS: () => BASIC_COMPONENTS,
+    BASIC_COMPONENTS: () => BASIC_COMPONENTS2,
     DEFAULT_LIMITS: () => DEFAULT_LIMITS,
     ICONS: () => ICONS,
     ICON_VIEWBOX: () => ICON_VIEWBOX,
@@ -183,7 +183,7 @@ var bwA2UI = (() => {
   var bitwrench_default = bw;
 
   // src/version.js
-  var VERSION = "0.9.3";
+  var VERSION = "0.9.4";
   function getVersion() {
     return VERSION;
   }
@@ -362,9 +362,9 @@ var bwA2UI = (() => {
   })(util || (util = {}));
   var objectUtil;
   (function(objectUtil2) {
-    objectUtil2.mergeShapes = (first, second) => {
+    objectUtil2.mergeShapes = (first2, second) => {
       return {
-        ...first,
+        ...first2,
         ...second
         // second overwrites first
       };
@@ -657,8 +657,8 @@ var bwA2UI = (() => {
 
   // node_modules/zod/v3/errors.js
   var overrideErrorMap = en_default;
-  function setErrorMap(map2) {
-    overrideErrorMap = map2;
+  function setErrorMap(map) {
+    overrideErrorMap = map;
   }
   function getErrorMap() {
     return overrideErrorMap;
@@ -681,8 +681,8 @@ var bwA2UI = (() => {
     }
     let errorMessage = "";
     const maps = errorMaps.filter((m2) => !!m2).slice().reverse();
-    for (const map2 of maps) {
-      errorMessage = map2(fullIssue, { data, defaultError: errorMessage }).message;
+    for (const map of maps) {
+      errorMessage = map(fullIssue, { data, defaultError: errorMessage }).message;
     }
     return {
       ...issueData,
@@ -3286,10 +3286,10 @@ var bwA2UI = (() => {
     get element() {
       return this._def.valueType;
     }
-    static create(first, second, third) {
+    static create(first2, second, third) {
       if (second instanceof ZodType) {
         return new _ZodRecord({
-          keyType: first,
+          keyType: first2,
           valueType: second,
           typeName: ZodFirstPartyTypeKind.ZodRecord,
           ...processCreateParams(third)
@@ -3297,7 +3297,7 @@ var bwA2UI = (() => {
       }
       return new _ZodRecord({
         keyType: ZodString.create(),
-        valueType: first,
+        valueType: first2,
         typeName: ZodFirstPartyTypeKind.ZodRecord,
         ...processCreateParams(second)
       });
@@ -4229,6 +4229,33 @@ var bwA2UI = (() => {
   };
   var NEVER = INVALID;
 
+  // node_modules/@a2ui/web_core/src/v1_0/schema/common-types.js
+  var common_types_exports = {};
+  __export(common_types_exports, {
+    AccessibilityAttributesSchema: () => AccessibilityAttributesSchema,
+    ActionSchema: () => ActionSchema,
+    CallIdSchema: () => CallIdSchema,
+    CheckRuleSchema: () => CheckRuleSchema,
+    CheckableSchema: () => CheckableSchema,
+    ChildListSchema: () => ChildListSchema,
+    ChildSchema: () => ChildSchema,
+    CommonSchemas: () => CommonSchemas,
+    ComponentCommonSchema: () => ComponentCommonSchema,
+    ComponentIdSchema: () => ComponentIdSchema,
+    DataBindingSchema: () => DataBindingSchema,
+    DynamicBooleanSchema: () => DynamicBooleanSchema,
+    DynamicNumberSchema: () => DynamicNumberSchema,
+    DynamicStringListSchema: () => DynamicStringListSchema,
+    DynamicStringSchema: () => DynamicStringSchema,
+    DynamicValueSchema: () => DynamicValueSchema,
+    ExtensionsSchema: () => ExtensionsSchema,
+    FunctionCallSchema: () => FunctionCallSchema,
+    FunctionCommonSchema: () => FunctionCommonSchema,
+    FunctionResponseSchema: () => FunctionResponseSchema,
+    IndexSystemFunctionSchema: () => IndexSystemFunctionSchema,
+    SurfaceSchema: () => SurfaceSchema
+  });
+
   // node_modules/@a2ui/web_core/src/errors.js
   var A2uiError = class extends Error {
     /**
@@ -4357,6 +4384,7 @@ var bwA2UI = (() => {
     RpcErrorCode2["DISPOSED"] = "DISPOSED";
     RpcErrorCode2["DUPLICATE"] = "DUPLICATE";
     RpcErrorCode2["NO_LISTENER"] = "NO_LISTENER";
+    RpcErrorCode2["TOO_MANY_PENDING"] = "TOO_MANY_PENDING";
   })(RpcErrorCode || (RpcErrorCode = {}));
   var A2uiRpcError = class extends A2uiError {
     /**
@@ -4373,6 +4401,7 @@ var bwA2UI = (() => {
       this.functionCallId = functionCallId;
       this.details = details;
       this.name = "A2uiRpcError";
+      this.rawMessage = message;
     }
   };
 
@@ -4437,10 +4466,11 @@ var bwA2UI = (() => {
   }).describe("REF:#/$defs/Extensions|Optional extension metadata. Keys MUST be Unicode identifiers (UAX #31). Keys starting with 'a2ui_' are reserved for official extensions.");
   var ComponentCommonSchema = external_exports.object({
     "id": ComponentIdSchema,
-    "catalogId": external_exports.string().describe("The catalog ID for this component, overriding any surface-level default catalogId.").optional(),
-    "accessibility": AccessibilityAttributesSchema.optional(),
-    "metadata": external_exports.object({ "extensions": ExtensionsSchema.optional() }).strict().describe("Optional component-level metadata for vendor extensions.").optional()
+    "@catalogId": external_exports.string().describe("The catalog ID for this component, overriding any surface-level default catalogId.").optional(),
+    "@accessibility": AccessibilityAttributesSchema.optional(),
+    "@metadata": external_exports.object({ "extensions": ExtensionsSchema.optional() }).strict().describe("Optional component-level metadata for vendor extensions.").optional()
   }).describe("REF:#/$defs/ComponentCommon");
+  var ChildSchema = ComponentIdSchema;
   var ChildListSchema = markChildRef(external_exports.union([
     external_exports.array(ComponentIdSchema).describe("A static list of child component IDs."),
     external_exports.object({
@@ -4471,7 +4501,7 @@ var bwA2UI = (() => {
     "message": external_exports.string().describe("Optional fallback error message.").optional()
   }).strict().describe("REF:#/$defs/CheckRule|A single validation check rule applied to an input component. The condition function or path evaluates to a structured validation result object or a boolean (which is coerced to a validation result object).");
   var CheckableSchema = external_exports.object({
-    "checks": external_exports.array(CheckRuleSchema).describe("A list of validation check rules to perform on the component.").optional()
+    "@checks": external_exports.array(CheckRuleSchema).describe("A list of validation check rules to perform on the component.").optional()
   }).describe("REF:#/$defs/Checkable|Properties for components that support renderer-side checks.");
   var ActionSchema = external_exports.union([
     external_exports.object({
@@ -4498,13 +4528,36 @@ var bwA2UI = (() => {
       });
     }
   }).describe("REF:#/$defs/FunctionResponse|The return response matching a callAgentFunction or callRendererFunction invocation.");
+  var CommonSchemas = {
+    ComponentId: ComponentIdSchema,
+    CallId: CallIdSchema,
+    DataBinding: DataBindingSchema,
+    FunctionCommon: FunctionCommonSchema,
+    FunctionCall: FunctionCallSchema,
+    DynamicString: DynamicStringSchema,
+    DynamicBoolean: DynamicBooleanSchema,
+    AccessibilityAttributes: AccessibilityAttributesSchema,
+    Extensions: ExtensionsSchema,
+    ComponentCommon: ComponentCommonSchema,
+    Child: ChildSchema,
+    ChildList: ChildListSchema,
+    DynamicValue: DynamicValueSchema,
+    DynamicNumber: DynamicNumberSchema,
+    DynamicStringList: DynamicStringListSchema,
+    IndexSystemFunction: IndexSystemFunctionSchema,
+    CheckRule: CheckRuleSchema,
+    Checkable: CheckableSchema,
+    Action: ActionSchema,
+    Surface: SurfaceSchema,
+    FunctionResponse: FunctionResponseSchema
+  };
 
   // node_modules/@a2ui/web_core/src/v1_0/schema/helpers.js
   var TemplateChildListSchema = external_exports.object({
     "componentId": external_exports.lazy(() => ComponentIdSchema),
     "path": external_exports.string().describe("The path to the list of component property objects in the data model.")
   }).strict().describe("REF:#/$defs/TemplateChildList|A template for generating a dynamic list of children from a data model list. The `componentId` is the component to use as a template.");
-  var AnyComponentSchema = external_exports.lazy(() => ComponentCommonSchema.extend({
+  var AnyComponentSchema = external_exports.lazy(() => ComponentCommonSchema.pick({ id: true }).extend({
     component: external_exports.string()
   }).passthrough().refine((comp) => comp.component !== "Surface", {
     message: 'Component type cannot be "Surface". "Surface" is a top-level protocol container defined in createSurface, not a child component.'
@@ -4517,7 +4570,7 @@ var bwA2UI = (() => {
     "version": external_exports.literal("1.0"),
     "createSurface": external_exports.object({
       "surfaceId": external_exports.string().describe("The unique identifier for the UI surface to be rendered. It must be globally unique for the renderer's lifetime."),
-      "catalogId": external_exports.string().describe("A string that uniquely identifies the default catalog for this surface. It is recommended to prefix this with an internet domain that you own, to avoid conflicts e.g. 'mycompany.com:somecatalog'. Components and function calls that do not explicitly specify a catalogId will use this surface-level default catalogId.").optional(),
+      "catalogId": external_exports.string().describe("A string that uniquely identifies the default catalog for this surface. It is recommended to prefix this with an internet domain that you own, to avoid conflicts e.g. 'mycompany.com:somecatalog'. Components that do not explicitly specify @catalogId and function calls that do not explicitly specify catalogId will use this surface-level default catalogId.").optional(),
       "sendDataModel": external_exports.boolean().describe("If true, the renderer will send the full data model of this surface in the metadata of every A2A message sent to the agent that created the surface. Defaults to false.").optional(),
       "components": ComponentsListSchema.optional(),
       "dataModel": external_exports.record(external_exports.string(), external_exports.any()).describe("The initial root data model object for the surface.").optional(),
@@ -4616,14 +4669,14 @@ var bwA2UI = (() => {
         "id": {
           "$ref": "#/$defs/ComponentId"
         },
-        "catalogId": {
+        "@catalogId": {
           "type": "string",
           "description": "The catalog ID for this component, overriding any surface-level default catalogId."
         },
-        "accessibility": {
+        "@accessibility": {
           "$ref": "#/$defs/AccessibilityAttributes"
         },
-        "metadata": {
+        "@metadata": {
           "type": "object",
           "description": "Optional component-level metadata for vendor extensions.",
           "properties": {
@@ -4812,7 +4865,8 @@ var bwA2UI = (() => {
         }
       },
       "required": ["@call"],
-      "unevaluatedProperties": false
+      "unevaluatedProperties": false,
+      "returnType": "number"
     },
     "FunctionCall": {
       "type": "object",
@@ -4861,7 +4915,7 @@ var bwA2UI = (() => {
       "type": "object",
       "description": "Properties for components that support renderer-side checks.",
       "properties": {
-        "checks": {
+        "@checks": {
           "type": "array",
           "description": "A list of validation check rules to perform on the component.",
           "items": {
@@ -4970,6 +5024,1089 @@ var bwA2UI = (() => {
       "additionalProperties": false
     }
   };
+
+  // node_modules/@preact/signals-core/dist/signals-core.module.js
+  var i = /* @__PURE__ */ Symbol.for("preact-signals");
+  function t() {
+    if (!(v > 1)) {
+      var i2, t2 = false;
+      !(function() {
+        var i3 = c;
+        c = void 0;
+        while (void 0 !== i3) {
+          var t3 = i3.S;
+          if (t3.v === i3.v) {
+            for (var r3 = t3.t; void 0 !== r3; r3 = r3.x) if (r3.i === i3.i) r3.i = t3.i;
+          }
+          i3 = i3.o;
+        }
+      })();
+      while (void 0 !== h) {
+        var r2 = h;
+        h = void 0;
+        s++;
+        while (void 0 !== r2) {
+          var n2 = r2.u;
+          r2.u = void 0;
+          r2.f &= -3;
+          if (!(8 & r2.f) && w(r2)) try {
+            r2.c();
+          } catch (r3) {
+            if (!t2) {
+              i2 = r3;
+              t2 = true;
+            }
+          }
+          r2 = n2;
+        }
+      }
+      s = 0;
+      v--;
+      if (t2) throw i2;
+    } else v--;
+  }
+  function r(i2) {
+    if (v > 0) return i2();
+    u = ++e;
+    v++;
+    try {
+      return i2();
+    } finally {
+      t();
+    }
+  }
+  var n;
+  var o = void 0;
+  function f(i2) {
+    var t2 = o, r2 = n;
+    o = void 0;
+    n = void 0;
+    try {
+      return i2();
+    } finally {
+      o = t2;
+      n = r2;
+    }
+  }
+  var h = void 0;
+  var v = 0;
+  var s = 0;
+  var e = 0;
+  var u = 0;
+  var c = void 0;
+  var a = 0;
+  function d(i2) {
+    if (void 0 !== o) {
+      var t2 = i2.n;
+      if (void 0 === t2 || t2.t !== o) {
+        t2 = { i: 0, S: i2, p: o.s, n: void 0, t: o, e: void 0, x: void 0, r: t2 };
+        if (void 0 !== o.s) o.s.n = t2;
+        o.s = t2;
+        i2.n = t2;
+        if (32 & o.f) i2.S(t2);
+        return t2;
+      } else if (-1 === t2.i) {
+        t2.i = 0;
+        if (void 0 !== t2.n) {
+          t2.n.p = t2.p;
+          if (void 0 !== t2.p) t2.p.n = t2.n;
+          t2.p = o.s;
+          t2.n = void 0;
+          o.s.n = t2;
+          o.s = t2;
+        }
+        return t2;
+      }
+    }
+  }
+  function l(i2, t2) {
+    this.v = i2;
+    this.i = 0;
+    this.n = void 0;
+    this.t = void 0;
+    this.l = 0;
+    this.W = null == t2 ? void 0 : t2.watched;
+    this.Z = null == t2 ? void 0 : t2.unwatched;
+    this.name = null == t2 ? void 0 : t2.name;
+  }
+  l.prototype.brand = i;
+  l.prototype.h = function() {
+    return true;
+  };
+  l.prototype.S = function(i2) {
+    var t2 = this, r2 = this.t;
+    if (r2 !== i2 && void 0 === i2.e) {
+      i2.x = r2;
+      this.t = i2;
+      if (void 0 !== r2) r2.e = i2;
+      else f(function() {
+        var i3;
+        null == (i3 = t2.W) || i3.call(t2);
+      });
+    }
+  };
+  l.prototype.U = function(i2) {
+    var t2 = this;
+    if (void 0 !== this.t) {
+      var r2 = i2.e, n2 = i2.x;
+      if (void 0 !== r2) {
+        r2.x = n2;
+        i2.e = void 0;
+      }
+      if (void 0 !== n2) {
+        n2.e = r2;
+        i2.x = void 0;
+      }
+      if (i2 === this.t) {
+        this.t = n2;
+        if (void 0 === n2) f(function() {
+          var i3;
+          null == (i3 = t2.Z) || i3.call(t2);
+        });
+      }
+    }
+  };
+  l.prototype.subscribe = function(i2) {
+    var t2 = this;
+    return x(function() {
+      var r2 = t2.value;
+      f(function() {
+        return i2(r2);
+      });
+    }, { name: "sub" });
+  };
+  l.prototype.valueOf = function() {
+    return this.value;
+  };
+  l.prototype.toString = function() {
+    return this.value + "";
+  };
+  l.prototype.toJSON = function() {
+    return this.value;
+  };
+  l.prototype.peek = function() {
+    var i2 = this;
+    return f(function() {
+      return i2.value;
+    });
+  };
+  Object.defineProperty(l.prototype, "value", { get: function() {
+    var i2 = d(this);
+    if (void 0 !== i2) i2.i = this.i;
+    return this.v;
+  }, set: function(i2) {
+    if (i2 !== this.v) {
+      if (s > 100) throw new Error("Cycle detected");
+      !(function(i3) {
+        if (0 !== v && 0 === s) {
+          if (i3.l !== u) {
+            i3.l = u;
+            c = { S: i3, v: i3.v, i: i3.i, o: c };
+          }
+        }
+      })(this);
+      this.v = i2;
+      this.i++;
+      a++;
+      v++;
+      try {
+        for (var r2 = this.t; void 0 !== r2; r2 = r2.x) r2.t.N();
+      } finally {
+        t();
+      }
+    }
+  } });
+  function y(i2, t2) {
+    return new l(i2, t2);
+  }
+  function w(i2) {
+    for (var t2 = i2.s; void 0 !== t2; t2 = t2.n) if (t2.S.i !== t2.i || !t2.S.h() || t2.S.i !== t2.i) return true;
+    return false;
+  }
+  function b(i2) {
+    for (var t2 = i2.s; void 0 !== t2; t2 = t2.n) {
+      var r2 = t2.S.n;
+      if (void 0 !== r2) t2.r = r2;
+      t2.S.n = t2;
+      t2.i = -1;
+      if (void 0 === t2.n) {
+        i2.s = t2;
+        break;
+      }
+    }
+  }
+  function _(i2) {
+    var t2 = i2.s, r2 = void 0;
+    while (void 0 !== t2) {
+      var n2 = t2.p;
+      if (-1 === t2.i) {
+        t2.S.U(t2);
+        if (void 0 !== n2) n2.n = t2.n;
+        if (void 0 !== t2.n) t2.n.p = n2;
+      } else r2 = t2;
+      t2.S.n = t2.r;
+      if (void 0 !== t2.r) t2.r = void 0;
+      t2 = n2;
+    }
+    i2.s = r2;
+  }
+  function j(i2, t2) {
+    l.call(this, void 0, t2);
+    this.x = i2;
+    this.s = void 0;
+    this.g = a - 1;
+    this.f = 4;
+  }
+  j.prototype = new l();
+  j.prototype.h = function() {
+    this.f &= -3;
+    if (1 & this.f) return false;
+    if (32 == (36 & this.f)) return true;
+    this.f &= -5;
+    if (this.g === a) return true;
+    this.g = a;
+    this.f |= 1;
+    if (this.i > 0 && !w(this)) {
+      this.f &= -2;
+      return true;
+    }
+    var i2 = o;
+    try {
+      b(this);
+      o = this;
+      var t2 = this.x();
+      if (16 & this.f || this.v !== t2 || 0 === this.i) {
+        this.v = t2;
+        this.f &= -17;
+        this.i++;
+      }
+    } catch (i3) {
+      this.v = i3;
+      this.f |= 16;
+      this.i++;
+    }
+    o = i2;
+    _(this);
+    this.f &= -2;
+    return true;
+  };
+  j.prototype.S = function(i2) {
+    if (void 0 === this.t) {
+      this.f |= 36;
+      for (var t2 = this.s; void 0 !== t2; t2 = t2.n) t2.S.S(t2);
+    }
+    l.prototype.S.call(this, i2);
+  };
+  j.prototype.U = function(i2) {
+    if (void 0 !== this.t) {
+      l.prototype.U.call(this, i2);
+      if (void 0 === this.t) {
+        this.f &= -33;
+        for (var t2 = this.s; void 0 !== t2; t2 = t2.n) t2.S.U(t2);
+      }
+    }
+  };
+  j.prototype.N = function() {
+    if (!(2 & this.f)) {
+      this.f |= 6;
+      for (var i2 = this.t; void 0 !== i2; i2 = i2.x) i2.t.N();
+    }
+  };
+  Object.defineProperty(j.prototype, "value", { get: function() {
+    if (1 & this.f) throw new Error("Cycle detected");
+    var i2 = d(this);
+    this.h();
+    if (void 0 !== i2) i2.i = this.i;
+    if (16 & this.f) throw this.v;
+    return this.v;
+  } });
+  function O(i2, t2) {
+    return new j(i2, t2);
+  }
+  function p(i2) {
+    var r2 = i2.j;
+    i2.j = void 0;
+    if ("function" == typeof r2) {
+      v++;
+      var n2 = o;
+      o = void 0;
+      try {
+        r2();
+      } catch (t2) {
+        i2.f &= -2;
+        i2.f |= 8;
+        g(i2);
+        throw t2;
+      } finally {
+        o = n2;
+        t();
+      }
+    }
+  }
+  function g(i2) {
+    for (var t2 = i2.s; void 0 !== t2; t2 = t2.n) t2.S.U(t2);
+    i2.x = void 0;
+    i2.s = void 0;
+    p(i2);
+  }
+  function S(i2) {
+    if (o !== this) throw new Error("Out-of-order effect");
+    _(this);
+    o = i2;
+    this.f &= -2;
+    try {
+      if (8 & this.f) g(this);
+    } finally {
+      t();
+    }
+  }
+  function m(i2, t2) {
+    this.x = i2;
+    this.j = void 0;
+    this.s = void 0;
+    this.u = void 0;
+    this.f = 32;
+    this.name = null == t2 ? void 0 : t2.name;
+    if (n) n.push(this);
+  }
+  m.prototype.c = function() {
+    var i2 = this.S();
+    try {
+      if (8 & this.f) return;
+      if (void 0 === this.x) return;
+      var t2 = this.x();
+      if ("function" == typeof t2) this.j = t2;
+    } finally {
+      i2();
+    }
+  };
+  m.prototype.S = function() {
+    if (1 & this.f) throw new Error("Cycle detected");
+    this.f |= 1;
+    this.f &= -9;
+    p(this);
+    b(this);
+    v++;
+    var i2 = o;
+    o = this;
+    return S.bind(this, i2);
+  };
+  m.prototype.N = function() {
+    if (!(2 & this.f)) {
+      this.f |= 2;
+      this.u = h;
+      h = this;
+    }
+  };
+  m.prototype.d = function() {
+    this.f |= 8;
+    if (!(1 & this.f)) g(this);
+  };
+  m.prototype.dispose = function() {
+    this.d();
+  };
+  function x(i2, t2) {
+    var r2 = new m(i2, t2);
+    try {
+      r2.c();
+    } catch (i3) {
+      r2.d();
+      throw i3;
+    }
+    var n2 = r2.d.bind(r2);
+    n2[Symbol.dispose] = n2;
+    return n2;
+  }
+
+  // node_modules/@a2ui/web_core/src/reactivity/signals.js
+  var signalImpl;
+  var computedImpl;
+  var effectImpl;
+  var batchWriteImpl;
+  var isSignalImpl;
+  var getValueImpl;
+  var setValueImpl;
+  var peekValueImpl;
+  var _PRIVATE_DEFAULT_SIGNAL_IMPLEMENTATION = {
+    signal: y,
+    computed: O,
+    effect: x,
+    batchWrite: r,
+    isSignal: (val2) => typeof val2 === "function" || !!val2 && typeof val2 === "object" && ("value" in val2 || "peek" in val2),
+    getValue: (signal2) => {
+      if (typeof signal2 === "function") {
+        return signal2();
+      }
+      return signal2.value;
+    },
+    setValue: (signal2, value) => {
+      if (typeof signal2?.set === "function") {
+        signal2.set(value);
+        return;
+      }
+      if (signal2 instanceof j || typeof signal2 === "function") {
+        throw new TypeError("Cannot set value of a read-only computed signal.");
+      }
+      signal2.value = value;
+    },
+    peekValue: (signal2) => {
+      if (typeof signal2?.peek === "function") {
+        return signal2.peek();
+      }
+      if (typeof signal2 === "function") {
+        return signal2();
+      }
+      if (signal2 && typeof signal2 === "object" && "value" in signal2) {
+        return signal2.value;
+      }
+      return signal2;
+    }
+  };
+  setSignalImplementation(_PRIVATE_DEFAULT_SIGNAL_IMPLEMENTATION);
+  function setSignalImplementation(impl) {
+    signalImpl = impl.signal;
+    computedImpl = impl.computed;
+    effectImpl = impl.effect;
+    batchWriteImpl = impl.batchWrite;
+    isSignalImpl = impl.isSignal;
+    getValueImpl = impl.getValue;
+    setValueImpl = impl.setValue;
+    peekValueImpl = impl.peekValue;
+  }
+  function signal(initialValue) {
+    return signalImpl(initialValue);
+  }
+  function computed(computeFn) {
+    return computedImpl(computeFn);
+  }
+  function effect(effectFn) {
+    return effectImpl(effectFn);
+  }
+  function batchWrite(batchFn) {
+    return batchWriteImpl(batchFn);
+  }
+  function isSignal(val2) {
+    return isSignalImpl(val2);
+  }
+  function getValue(signal2) {
+    return getValueImpl(signal2);
+  }
+  function setValue(signal2, value) {
+    setValueImpl(signal2, value);
+  }
+  function peekValue(signal2) {
+    return peekValueImpl(signal2);
+  }
+
+  // node_modules/@a2ui/web_core/src/state/data-model.js
+  function isNumeric(value) {
+    return /^(0|[1-9]\d*)$/.test(value);
+  }
+  var MAX_ARRAY_INDEX = 1e4;
+  var FORBIDDEN_KEYS = /* @__PURE__ */ new Set(["__proto__", "constructor", "prototype"]);
+  function cloneValue(val2) {
+    if (val2 === null || val2 === void 0 || typeof val2 !== "object") {
+      return val2;
+    }
+    if (Array.isArray(val2)) {
+      return val2.map((item) => cloneValue(item));
+    }
+    const proto = Object.getPrototypeOf(val2);
+    if (proto === Object.prototype || proto === null) {
+      const out = {};
+      for (const [k, v2] of Object.entries(val2)) {
+        Object.defineProperty(out, k, {
+          value: cloneValue(v2),
+          enumerable: true,
+          writable: true,
+          configurable: true
+        });
+      }
+      return out;
+    }
+    return val2;
+  }
+  var DataModel = class {
+    /**
+     * Initializes a new `DataModel` instance.
+     *
+     * @param initialData Initial data for the model. Defaults to an empty object.
+     */
+    constructor(initialData = {}) {
+      this.data = {};
+      this.signals = /* @__PURE__ */ new Map();
+      this.subscriptions = /* @__PURE__ */ new Set();
+      this.data = cloneValue(initialData);
+    }
+    /**
+     * Retrieves a Preact Signal for a specific data path.
+     *
+     * This provides a reactive way to access a value. If the value at the path
+     * changes via `set()`, the signal will automatically be updated.
+     *
+     * @param path The JSON pointer path to create or retrieve a signal for.
+     * @returns A Preact Signal representing the value at the specified path.
+     * @throws {A2uiDataError} If path is null, undefined, or contains forbidden
+     *     segments (`__proto__`, `constructor`, `prototype`).
+     */
+    getSignal(path) {
+      const normalizedPath = this.normalizePath(path);
+      if (!this.signals.has(normalizedPath)) {
+        this.signals.set(normalizedPath, signal(this.get(normalizedPath)));
+      }
+      return this.signals.get(normalizedPath);
+    }
+    /**
+     * Updates the model at the specific path and notifies all relevant signals.
+     * If path is '/' or empty, replaces the entire root.
+     *
+     * Note on `undefined` values:
+     * - For objects: Setting a property to `undefined` removes the key from the
+     * object.
+     * - For arrays: Setting an index to `undefined` sets that index to
+     * `undefined` but preserves the array length (sparse array).
+     *
+     * @param path The JSON pointer path to set value for.
+     * @param value The value to set at the specified path.
+     * @param preserveNull Whether to store `null` as a value instead of treating
+     *     it like `undefined`. Pre-1.0 data models stored `null`; the v1.0
+     *     protocol removes the entry.
+     * @returns This `DataModel` instance for chaining.
+     * @throws {A2uiDataError} If path is null, undefined, invalid for
+     *     arrays/primitives, exceeds max array bounds, or contains forbidden
+     *     segments (`__proto__`, `constructor`, `prototype`).
+     */
+    set(path, value, preserveNull = false) {
+      if (path === null || path === void 0) {
+        throw new A2uiDataError("Path cannot be null or undefined.");
+      }
+      const segments = this.parsePath(path);
+      if (segments.length === 0) {
+        this.data = value === null || value === void 0 ? {} : cloneValue(value);
+        this.notifyAllSignals();
+        return this;
+      }
+      const lastSegment = segments.pop();
+      const removes = value === void 0 || !preserveNull && value === null;
+      if (removes && this.get(path) === void 0) {
+        return this;
+      }
+      if (this.data === void 0 || this.data === null) {
+        this.data = {};
+      } else if (typeof this.data !== "object") {
+        throw new A2uiDataError(`Cannot set path '${path}': the data model root is a primitive value.`, path);
+      }
+      let current = this.data;
+      for (let i2 = 0; i2 < segments.length; i2++) {
+        const segment = segments[i2];
+        if (Array.isArray(current)) {
+          if (!isNumeric(segment)) {
+            throw new A2uiDataError(`Cannot use non-numeric segment '${segment}' on an array in path '${path}'.`, path);
+          }
+          const index = parseInt(segment, 10);
+          if (index > MAX_ARRAY_INDEX) {
+            throw new A2uiDataError(`Cannot set path '${path}': array index '${segment}' exceeds maximum supported index (${MAX_ARRAY_INDEX}).`, path);
+          }
+          const val2 = current[index];
+          if (val2 !== void 0 && val2 !== null && typeof val2 !== "object") {
+            throw new A2uiDataError(`Cannot set path '${path}': segment '${segment}' is a primitive value.`, path);
+          }
+          if (val2 === void 0 || val2 === null) {
+            const nextSegment = i2 < segments.length - 1 ? segments[i2 + 1] : lastSegment;
+            if (isNumeric(nextSegment)) {
+              const nextIdx = parseInt(nextSegment, 10);
+              if (nextIdx > MAX_ARRAY_INDEX) {
+                throw new A2uiDataError(`Cannot set path '${path}': array index '${nextSegment}' exceeds maximum supported index (${MAX_ARRAY_INDEX}).`, path);
+              }
+              current[index] = [];
+            } else {
+              current[index] = {};
+            }
+          }
+        } else {
+          const hasOwnProp = Object.prototype.hasOwnProperty.call(current, segment);
+          if (hasOwnProp) {
+            const propVal = current[segment];
+            if (propVal !== void 0 && propVal !== null && typeof propVal !== "object") {
+              throw new A2uiDataError(`Cannot set path '${path}': segment '${segment}' is a primitive value.`, path);
+            }
+          }
+          if (!hasOwnProp || current[segment] === void 0 || current[segment] === null) {
+            const nextSegment = i2 < segments.length - 1 ? segments[i2 + 1] : lastSegment;
+            if (isNumeric(nextSegment)) {
+              const nextIdx = parseInt(nextSegment, 10);
+              if (nextIdx > MAX_ARRAY_INDEX) {
+                throw new A2uiDataError(`Cannot set path '${path}': array index '${nextSegment}' exceeds maximum supported index (${MAX_ARRAY_INDEX}).`, path);
+              }
+              current[segment] = [];
+            } else {
+              current[segment] = {};
+            }
+          }
+        }
+        current = current[segment];
+      }
+      if (Array.isArray(current)) {
+        if (!isNumeric(lastSegment)) {
+          throw new A2uiDataError(`Cannot use non-numeric segment '${lastSegment}' on an array in path '${path}'.`, path);
+        }
+        const lastIndex = parseInt(lastSegment, 10);
+        if (lastIndex > MAX_ARRAY_INDEX) {
+          throw new A2uiDataError(`Cannot set path '${path}': array index '${lastSegment}' exceeds maximum supported index (${MAX_ARRAY_INDEX}).`, path);
+        }
+      }
+      if (removes) {
+        if (Array.isArray(current)) {
+          const idx = parseInt(lastSegment, 10);
+          if (idx < current.length) {
+            current[idx] = void 0;
+          }
+        } else {
+          delete current[lastSegment];
+        }
+      } else {
+        current[lastSegment] = cloneValue(value);
+      }
+      this.notifySignals(path);
+      return this;
+    }
+    /**
+     * Deletes the value at the specified JSON pointer path.
+     *
+     * If `path` is `'/'` or empty, resets the root data model to an empty object.
+     *
+     * @param path The JSON pointer path to remove.
+     * @returns This `DataModel` instance for chaining.
+     */
+    delete(path) {
+      return this.set(path, void 0);
+    }
+    /**
+     * Resolves a relative path against a base context path.
+     *
+     * @param path The path to resolve.
+     * @param contextPath The base path (optional).
+     * @returns The resolved absolute path.
+     */
+    static resolvePath(path, contextPath) {
+      if (path.startsWith("/")) {
+        return path;
+      }
+      if (contextPath) {
+        const base = contextPath.endsWith("/") ? contextPath : `${contextPath}/`;
+        return `${base}${path}`;
+      }
+      return `/${path}`;
+    }
+    /**
+     * Retrieves data at a specific JSON pointer path.
+     *
+     * @template T The expected type of the returned value. Defaults to `any`.
+     * @param path The JSON pointer path to read from.
+     * @returns The value at the specified path, or undefined if not found.
+     * @throws {A2uiDataError} If path is null, undefined, or contains forbidden
+     *     segments (`__proto__`, `constructor`, `prototype`).
+     */
+    get(path) {
+      if (path === null || path === void 0) {
+        throw new A2uiDataError("Path cannot be null or undefined.");
+      }
+      if (path === "/" || path === "") {
+        return this.data;
+      }
+      const segments = this.parsePath(path);
+      let current = this.data;
+      for (const segment of segments) {
+        if (current === void 0 || current === null || typeof current !== "object") {
+          return void 0;
+        }
+        if (Array.isArray(current)) {
+          if (!isNumeric(segment)) {
+            return void 0;
+          }
+          const index = parseInt(segment, 10);
+          if (index < 0 || index >= current.length) {
+            return void 0;
+          }
+          current = current[index];
+        } else {
+          if (!Object.prototype.hasOwnProperty.call(current, segment)) {
+            return void 0;
+          }
+          current = current[segment];
+        }
+      }
+      return current;
+    }
+    /**
+     * Checks whether a JSON pointer path physically exists in the data model.
+     *
+     * Differentiates between a path holding an explicit `null` value (`true`) and
+     * a path that is absent from the object or array hierarchy (`false`).
+     *
+     * @param path Absolute JSON pointer path to check.
+     * @returns Whether every segment along `path` exists in the hierarchy.
+     */
+    hasPath(path) {
+      if (path === null || path === void 0) {
+        return false;
+      }
+      return this.get(path) !== void 0;
+    }
+    /**
+     * Subscribes to changes at the specified data path.
+     *
+     * This is a backwards-compatible layer using Preact Signals internally. It
+     * allows listeners to be notified whenever the value at the specified path
+     * (or any of its ancestors/descendants) changes.
+     *
+     * @param path The JSON pointer path to observe.
+     * @param onChange A callback fired whenever the value changes.
+     * @returns A `DataSubscription` containing the initial value and an
+     *     `unsubscribe` method.
+     * @throws {A2uiDataError} If path is null, undefined, or contains forbidden
+     *     segments (`__proto__`, `constructor`, `prototype`).
+     */
+    subscribe(path, onChange) {
+      const sig = this.getSignal(path);
+      let isSync = true;
+      let currentValue = peekValue(sig);
+      const dispose = effect(() => {
+        const val2 = getValue(sig);
+        currentValue = val2;
+        if (!isSync) {
+          onChange(val2);
+        }
+      });
+      isSync = false;
+      this.subscriptions.add(dispose);
+      return {
+        get value() {
+          return currentValue;
+        },
+        unsubscribe: () => {
+          dispose();
+          this.subscriptions.delete(dispose);
+        }
+      };
+    }
+    /**
+     * Clears all internal subscriptions and active signals.
+     */
+    dispose() {
+      for (const dispose of this.subscriptions) {
+        dispose();
+      }
+      this.subscriptions.clear();
+      this.signals.clear();
+    }
+    normalizePath(path) {
+      const segments = path.split("/").filter((p2) => p2.length > 0);
+      return segments.length === 0 ? "/" : `/${segments.join("/")}`;
+    }
+    parsePath(path) {
+      return path.split("/").filter((p2) => p2.length > 0).map((rawSegment) => {
+        const segment = rawSegment.replace(/~([01])/g, (_2, g2) => g2 === "1" ? "/" : "~");
+        if (FORBIDDEN_KEYS.has(segment)) {
+          throw new A2uiDataError(`Forbidden path segment '${segment}' in path '${path}'.`, path);
+        }
+        return segment;
+      });
+    }
+    notifySignals(path) {
+      const normalizedPath = this.normalizePath(path);
+      batchWrite(() => {
+        this.updateSignal(normalizedPath);
+        let parentPath = normalizedPath;
+        while (parentPath !== "/" && parentPath !== "") {
+          parentPath = parentPath.substring(0, parentPath.lastIndexOf("/")) || "/";
+          this.updateSignal(parentPath);
+        }
+        for (const subPath of this.signals.keys()) {
+          if (this.isDescendant(subPath, normalizedPath)) {
+            this.updateSignal(subPath);
+          }
+        }
+      });
+    }
+    updateSignal(path) {
+      const sig = this.signals.get(path);
+      if (sig) {
+        const val2 = this.get(path);
+        if (Array.isArray(val2)) {
+          setValue(sig, val2.slice());
+        } else if (typeof val2 === "object" && val2 !== null) {
+          setValue(sig, { ...val2 });
+        } else {
+          setValue(sig, val2);
+        }
+      }
+    }
+    notifyAllSignals() {
+      batchWrite(() => {
+        for (const path of this.signals.keys()) {
+          this.updateSignal(path);
+        }
+      });
+    }
+    isDescendant(childPath, parentPath) {
+      if (parentPath === "/" || parentPath === "") {
+        return childPath !== "/";
+      }
+      return childPath.startsWith(parentPath + "/");
+    }
+  };
+
+  // node_modules/@a2ui/web_core/src/types/common-types.js
+  var common_types_exports2 = {};
+  __export(common_types_exports2, {
+    AccessibilityAttributesSchema: () => AccessibilityAttributesSchema2,
+    ActionSchema: () => ActionSchema2,
+    CallIdSchema: () => CallIdSchema2,
+    CheckRuleSchema: () => CheckRuleSchema2,
+    CheckableSchema: () => CheckableSchema2,
+    ChildListSchema: () => ChildListSchema2,
+    ChildSchema: () => ChildSchema2,
+    CommonSchemas: () => CommonSchemas2,
+    ComponentCommonSchema: () => ComponentCommonSchema2,
+    ComponentIdSchema: () => ComponentIdSchema2,
+    DataBindingSchema: () => DataBindingSchema2,
+    DynamicBooleanSchema: () => DynamicBooleanSchema2,
+    DynamicNumberSchema: () => DynamicNumberSchema2,
+    DynamicStringListSchema: () => DynamicStringListSchema2,
+    DynamicStringSchema: () => DynamicStringSchema2,
+    DynamicValueSchema: () => DynamicValueSchema2,
+    ExtensionsSchema: () => ExtensionsSchema2,
+    FunctionCallSchema: () => FunctionCallSchema2,
+    FunctionCommonSchema: () => FunctionCommonSchema2,
+    FunctionResponseSchema: () => FunctionResponseSchema2,
+    IndexSystemFunctionSchema: () => IndexSystemFunctionSchema2,
+    SurfaceSchema: () => SurfaceSchema2
+  });
+  var ComponentIdSchema2 = markChildRef(external_exports.string().describe("REF:common_types.json#/$defs/ComponentId|The unique identifier for a component, used for both definitions and references within the same surface."), "component-id");
+  var DataBindingSchema2 = external_exports.object({
+    "path": external_exports.string().describe("A JSON Pointer path to a value in the data model.").optional(),
+    "@path": external_exports.string().describe("A JSON Pointer path to a value in the data model.").optional()
+  }).refine((data) => data["@path"] !== void 0 || data.path !== void 0, {
+    message: "Either '@path' or 'path' must be provided."
+  }).describe("REF:common_types.json#/$defs/DataBinding");
+  var FunctionCallSchema2 = external_exports.object({
+    "call": external_exports.string().describe("The name of the function to call.").optional(),
+    "@call": external_exports.string().describe("The name of the function to call.").optional(),
+    "args": external_exports.record(external_exports.string(), external_exports.unknown()).describe("Arguments passed to the function.").optional(),
+    "returnType": external_exports.enum(["string", "number", "boolean", "array", "object", "any", "void"]).describe("The expected return type of the function call.").optional(),
+    "catalogId": external_exports.string().describe("The catalog ID for this function, overriding any surface-level default catalogId.").optional()
+  }).strict().refine((data) => data["@call"] !== void 0 || data.call !== void 0, {
+    message: "Either '@call' or 'call' must be provided."
+  }).describe("REF:common_types.json#/$defs/FunctionCall|Invokes a named function, combining common function properties with the catalog function definition.");
+  var DynamicStringSchema2 = external_exports.union([external_exports.string(), DataBindingSchema2, FunctionCallSchema2]).describe("REF:common_types.json#/$defs/DynamicString|Represents a string");
+  var DynamicBooleanSchema2 = external_exports.union([external_exports.boolean(), DataBindingSchema2, FunctionCallSchema2]).describe("REF:common_types.json#/$defs/DynamicBoolean|A boolean value that can be a literal, a path, or a function call returning a boolean or a validation result object (coerced to its \\'valid\\' boolean).");
+  var AccessibilityAttributesSchema2 = external_exports.object({
+    "label": DynamicStringSchema2.optional(),
+    "description": DynamicStringSchema2.optional(),
+    "live": external_exports.enum(["off", "polite", "assertive"]).default("off").describe("Controls screen reader announcements for dynamic updates (WAI-ARIA aria-live). 'polite' waits for user pause; 'assertive' interrupts immediately for alerts.").optional(),
+    "hidden": DynamicBooleanSchema2.optional()
+  }).describe("REF:common_types.json#/$defs/AccessibilityAttributes|Attributes to enhance accessibility when using assistive technologies like screen readers or model understanding.");
+  var ExtensionsSchema2 = external_exports.record(external_exports.string(), external_exports.unknown()).superRefine((value, ctx) => {
+    for (const key in value) {
+      if (!isValidUax31Identifier(key)) {
+        ctx.addIssue({
+          path: [key],
+          code: external_exports.ZodIssueCode.custom,
+          message: `Invalid extension key "${key}": Keys MUST be Unicode identifiers (UAX #31).`
+        });
+      }
+    }
+  }).describe("REF:#/$defs/Extensions|Optional extension metadata. Keys MUST be Unicode identifiers (UAX #31). Keys starting with 'a2ui_' are reserved for official extensions.");
+  var ComponentCommonSchema2 = external_exports.object({
+    "id": ComponentIdSchema2,
+    "accessibility": AccessibilityAttributesSchema2.optional(),
+    "@catalogId": external_exports.string().describe("The catalog ID for this component, overriding any surface-level default catalogId.").optional(),
+    "@accessibility": AccessibilityAttributesSchema2.optional(),
+    "@metadata": external_exports.object({
+      "extensions": ExtensionsSchema2.optional()
+    }).strict().describe("Optional component-level metadata for vendor extensions.").optional()
+  }).describe("REF:common_types.json#/$defs/ComponentCommon");
+  var ChildListSchema2 = markChildRef(external_exports.union([
+    external_exports.array(ComponentIdSchema2).describe("A static list of child component IDs."),
+    external_exports.object({
+      "componentId": ComponentIdSchema2,
+      "path": external_exports.string().describe("The path to the list of component property objects in the data model.")
+    }).describe("A template for generating a dynamic list of children.")
+  ]).describe("REF:common_types.json#/$defs/ChildList"), "child-list");
+  var DynamicValueSchema2 = external_exports.union([
+    external_exports.string(),
+    external_exports.number(),
+    external_exports.boolean(),
+    external_exports.array(external_exports.unknown()),
+    DataBindingSchema2,
+    FunctionCallSchema2,
+    external_exports.record(external_exports.string(), external_exports.unknown()).refine((obj) => !obj || !("@path" in obj) && !("path" in obj) && !("@call" in obj) && !("call" in obj))
+  ]).describe("REF:common_types.json#/$defs/DynamicValue|A value that can be a literal, a path, or a function call returning any type.");
+  var DynamicNumberSchema2 = external_exports.union([external_exports.number(), DataBindingSchema2, FunctionCallSchema2]).describe("REF:common_types.json#/$defs/DynamicNumber|Represents a value that can be either a literal number, a path to a number in the data model, or a function call returning a number.");
+  var DynamicStringListSchema2 = external_exports.union([external_exports.array(external_exports.string()), DataBindingSchema2, FunctionCallSchema2]).describe("REF:common_types.json#/$defs/DynamicStringList|Represents a value that can be either a literal array of strings, a path to a string array in the data model, or a function call returning a string array.");
+  var CheckRuleSchema2 = external_exports.object({
+    "condition": external_exports.union([DynamicBooleanSchema2, DataBindingSchema2, FunctionCallSchema2]).describe("Path or function call evaluating to a structured validation result object or a boolean."),
+    "message": external_exports.string().describe("Optional fallback error message.").optional()
+  }).describe("REF:common_types.json#/$defs/CheckRule|A single validation check rule applied to an input component. The condition function or path evaluates to a structured validation result object or a boolean (which is coerced to a validation result object).");
+  var CheckableSchema2 = external_exports.object({
+    "checks": external_exports.array(CheckRuleSchema2).describe("A list of checks to perform. These are function calls that must return a boolean indicating validity.").optional(),
+    "@checks": external_exports.array(CheckRuleSchema2).describe("A list of validation check rules to perform on the component.").optional()
+  }).describe("REF:common_types.json#/$defs/Checkable|Properties for components that support renderer-side checks.");
+  var ActionSchema2 = external_exports.union([
+    external_exports.object({
+      "event": external_exports.object({
+        "name": external_exports.string().describe("The name of the action to be dispatched to the server."),
+        "context": external_exports.record(external_exports.string(), external_exports.unknown()).describe("A JSON object containing the key-value pairs for the action context. Values can be literals or paths. Use literal values unless the value must be dynamically bound to the data model. Do NOT use paths for static IDs.").optional()
+      }).strict().describe("The event to dispatch to the server.")
+    }).strict().describe("Triggers a server-side event."),
+    external_exports.object({
+      "functionCall": FunctionCallSchema2
+    }).strict().describe("Executes a local client-side function."),
+    external_exports.object({
+      "event": external_exports.object({
+        "name": external_exports.string().describe("The name of the action to be dispatched to the agent."),
+        "userMessage": DynamicStringSchema2.optional(),
+        "context": external_exports.record(external_exports.string(), external_exports.unknown()).describe("A JSON object containing the key-value pairs for the action context. Values can be literals or paths. Use literal values unless the value must be dynamically bound to the data model. Do NOT use paths for static IDs.").optional()
+      }).strict().describe("The event to dispatch to the agent.")
+    }).strict().describe("Triggers an agent-side event."),
+    external_exports.object({
+      "functionCall": FunctionCallSchema2
+    }).strict().describe("Executes a renderer or agent-side function.")
+  ]).describe("REF:common_types.json#/$defs/Action|Defines an interaction handler that can either trigger an agent-side event or execute a local renderer-side function.");
+  var CallIdSchema2 = external_exports.string().describe("REF:common_types.json#/$defs/CallId|The unique identifier for a function call.");
+  var ChildSchema2 = ComponentIdSchema2;
+  var FunctionCommonSchema2 = external_exports.object({
+    "call": external_exports.string().describe("The name of the function to call.").optional(),
+    "@call": external_exports.string().describe("The name of the function to call.").optional(),
+    "catalogId": external_exports.string().describe("The catalog ID for this function, overriding any surface-level default catalogId.").optional()
+  }).refine((data) => data["@call"] !== void 0 || data.call !== void 0, {
+    message: "Either '@call' or 'call' must be provided."
+  }).describe("REF:common_types.json#/$defs/FunctionCommon|Baseline envelope properties common to all function calls. Function-specific argument schemas ('args') are defined individually by each function in the active catalog.");
+  var IndexSystemFunctionSchema2 = external_exports.object({
+    "call": external_exports.literal("@index").optional(),
+    "@call": external_exports.literal("@index").optional(),
+    "args": external_exports.object({
+      "offset": DynamicNumberSchema2.optional()
+    }).optional()
+  }).refine((data) => data["@call"] !== void 0 || data.call !== void 0, {
+    message: "Either '@call' or 'call' must be '@index'."
+  }).describe("REF:common_types.json#/$defs/IndexSystemFunction|Returns the 0-based index of the current item when rendering a dynamic list from a template. This function MUST ONLY be available when evaluating template items within a list context.");
+  var SurfaceSchema2 = external_exports.object({
+    "component": external_exports.literal("Surface").optional(),
+    "child": external_exports.literal("root").optional()
+  }).strict().describe("REF:common_types.json#/$defs/Surface|The reserved canonical container component representing an A2UI surface. The Surface component is immutable and always has \\'child\\': \\'root\\'.");
+  var FunctionResponseSchema2 = external_exports.object({
+    "functionCallId": CallIdSchema2,
+    "value": external_exports.unknown().describe("The return value of the function.").optional(),
+    "error": external_exports.object({
+      "code": external_exports.string(),
+      "message": external_exports.string()
+    }).strict().describe("An error object indicating failure of the function execution.").optional()
+  }).strict().describe("REF:common_types.json#/$defs/FunctionResponse|The return response matching a callAgentFunction or callRendererFunction invocation.");
+  var CommonSchemas2 = {
+    ComponentId: ComponentIdSchema2,
+    DataBinding: DataBindingSchema2,
+    FunctionCall: FunctionCallSchema2,
+    DynamicString: DynamicStringSchema2,
+    DynamicBoolean: DynamicBooleanSchema2,
+    AccessibilityAttributes: AccessibilityAttributesSchema2,
+    Extensions: ExtensionsSchema2,
+    ComponentCommon: ComponentCommonSchema2,
+    ChildList: ChildListSchema2,
+    DynamicValue: DynamicValueSchema2,
+    DynamicNumber: DynamicNumberSchema2,
+    DynamicStringList: DynamicStringListSchema2,
+    CheckRule: CheckRuleSchema2,
+    Checkable: CheckableSchema2,
+    Action: ActionSchema2,
+    CallId: CallIdSchema2,
+    Child: ChildSchema2,
+    FunctionCommon: FunctionCommonSchema2,
+    IndexSystemFunction: IndexSystemFunctionSchema2,
+    Surface: SurfaceSchema2,
+    FunctionResponse: FunctionResponseSchema2
+  };
+
+  // node_modules/@a2ui/web_core/src/types/helpers.js
+  var MAX_FUNCTION_CALL_ARGS = 1e3;
+  var AnyComponentSchema2 = external_exports.object({
+    "component": external_exports.string().describe("The type name of the component."),
+    "id": external_exports.lazy(() => ComponentIdSchema2).optional(),
+    "weight": external_exports.number().optional()
+  }).passthrough().describe("A generic A2UI component definition.");
+
+  // node_modules/@a2ui/web_core/src/common/canonical_json.js
+  var NonJsonValueError = class extends Error {
+    constructor(message) {
+      super(message);
+      this.name = "NonJsonValueError";
+    }
+  };
+  function toJsonValue(value, sortKeys = false) {
+    return copyJson(value, sortKeys, /* @__PURE__ */ new Set(), "");
+  }
+  function canonicalJsonKey(value) {
+    try {
+      return JSON.stringify(toJsonValue(value, true));
+    } catch {
+      return void 0;
+    }
+  }
+  function copyJson(value, sortKeys, seen, path) {
+    if (value === null || typeof value === "string" || typeof value === "boolean") {
+      return value;
+    }
+    if (typeof value === "number") {
+      if (!Number.isFinite(value)) {
+        throw new NonJsonValueError(`${describe(path)} is ${String(value)}`);
+      }
+      return value;
+    }
+    if (typeof value !== "object") {
+      throw new NonJsonValueError(`${describe(path)} is a ${typeof value}`);
+    }
+    if (seen.has(value)) {
+      throw new NonJsonValueError(`${describe(path)} is a circular reference`);
+    }
+    seen.add(value);
+    try {
+      if (Array.isArray(value)) {
+        return value.map((item, i2) => {
+          if (item === void 0) {
+            throw new NonJsonValueError(`${describe(`${path}/${i2}`)} is undefined`);
+          }
+          return copyJson(item, sortKeys, seen, `${path}/${i2}`);
+        });
+      }
+      const proto = Object.getPrototypeOf(value);
+      if (proto !== Object.prototype && proto !== null) {
+        const typeName = value.constructor?.name || "object";
+        throw new NonJsonValueError(`${describe(path)} is a ${typeName}, not a plain object`);
+      }
+      const keys = Object.keys(value);
+      if (sortKeys)
+        keys.sort();
+      const copy = {};
+      for (const key of keys) {
+        const item = value[key];
+        if (item === void 0)
+          continue;
+        Object.defineProperty(copy, key, {
+          value: copyJson(item, sortKeys, seen, `${path}/${key}`),
+          enumerable: true,
+          writable: true,
+          configurable: true
+        });
+      }
+      return copy;
+    } finally {
+      seen.delete(value);
+    }
+  }
+  function describe(path) {
+    return path ? `the value at '${path}'` : "the value";
+  }
 
   // node_modules/@a2ui/web_core/src/common/semver.js
   var SEMVER_REGEX = /^[vV]?(0|[1-9]\d*)\.(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
@@ -5125,6 +6262,37 @@ var bwA2UI = (() => {
   }
 
   // node_modules/@a2ui/web_core/src/common/settle_deep.js
+  var FailedArgument = class {
+    constructor(error) {
+      this.error = error;
+    }
+  };
+  function findFailedArgument(value) {
+    if (value instanceof FailedArgument) {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const found = findFailedArgument(item);
+        if (found)
+          return found;
+      }
+      return void 0;
+    }
+    if (isPlainObject(value)) {
+      for (const item of Object.values(value)) {
+        const found = findFailedArgument(item);
+        if (found)
+          return found;
+      }
+      return void 0;
+    }
+    return void 0;
+  }
+  var settledPromises = /* @__PURE__ */ new WeakMap();
+  function recordSettledValue(promise, value) {
+    settledPromises.set(promise, { value });
+  }
   function isThenable(value) {
     return typeof value === "object" && value !== null && typeof value.then === "function";
   }
@@ -5137,16 +6305,23 @@ var bwA2UI = (() => {
   }
   function settleDeep(value) {
     if (isThenable(value)) {
+      const recorded = settledPromises.get(value);
+      if (recorded !== void 0) {
+        return settleDeep(recorded.value);
+      }
       return Promise.resolve(value).then(settleDeep);
     }
     if (Array.isArray(value)) {
       const items = value.map(settleDeep);
-      return items.some(isThenable) ? Promise.all(items) : value;
+      if (!items.some(isThenable)) {
+        return items.every((item, i2) => item === value[i2]) ? value : items;
+      }
+      return Promise.all(items);
     }
     if (isPlainObject(value)) {
       const entries = Object.entries(value).map(([key, item]) => [key, settleDeep(item)]);
       if (!entries.some(([, item]) => isThenable(item))) {
-        return value;
+        return entries.every(([key, item]) => item === value[key]) ? value : Object.fromEntries(entries);
       }
       return Promise.all(entries.map(([, item]) => item)).then((settled) => Object.fromEntries(entries.map(([key], i2) => [key, settled[i2]])));
     }
@@ -5161,6 +6336,1265 @@ var bwA2UI = (() => {
     SpecVersion2["V0_9_1"] = "v0.9.1";
     SpecVersion2["V1_0"] = "1.0";
   })(SpecVersion || (SpecVersion = {}));
+
+  // node_modules/@a2ui/web_core/src/state/resolve-surface-catalog.js
+  function resolveSurfaceCatalog(surface, catalogId, subject) {
+    const defaultCatalog = surface.defaultCatalog ?? surface.catalog;
+    if (catalogId !== void 0) {
+      const found = surface.availableCatalogs?.get(catalogId);
+      if (found) {
+        return found;
+      }
+      if (defaultCatalog && defaultCatalog.id === catalogId) {
+        return defaultCatalog;
+      }
+      throw new A2uiCatalogError(`Catalog not found: ${catalogId}`);
+    }
+    if (!defaultCatalog) {
+      throw new A2uiCatalogError(`${subject} names no catalogId and surface '${surface.id}' has no default catalogId.`);
+    }
+    return defaultCatalog;
+  }
+
+  // node_modules/@a2ui/web_core/src/resolution/data-context-internal.js
+  var internals;
+  function getInternals() {
+    if (!internals) {
+      throw new Error("DataContext internals have not been registered.");
+    }
+    return internals;
+  }
+  function registerDataContextInternals(impl) {
+    internals = impl;
+  }
+  function resolveArgumentValue(ctx, value, depth, userActivated, options) {
+    const impl = getInternals();
+    const scope = options?.allowAgentRouting === false ? impl.withFlags(ctx, { noAgentRouting: true }) : ctx;
+    return impl.resolveValue(scope, value, depth, userActivated, true);
+  }
+  function allowsAgentRouting(ctx) {
+    return getInternals().allowsAgentRouting(ctx);
+  }
+  function resolveSignalKeepingPending(ctx, value) {
+    return getInternals().resolveSignalValue(ctx, value, 0, true);
+  }
+  function withoutAgentRouting(ctx) {
+    return getInternals().withFlags(ctx, { noAgentRouting: true });
+  }
+  function activeCallCatalogId(ctx) {
+    return getInternals().activeCatalogId(ctx);
+  }
+  function withActiveCallCatalogId(ctx, catalogId, catalog) {
+    const impl = getInternals();
+    if (impl.activeCatalogId(ctx) === catalogId && (catalog === void 0 || impl.activeCatalog(ctx) === catalog)) {
+      return ctx;
+    }
+    return impl.withFlags(ctx, { activeCatalogId: catalogId, activeCatalog: catalog });
+  }
+
+  // node_modules/@a2ui/web_core/src/resolution/data-context.js
+  var schemaKeysCache = /* @__PURE__ */ new WeakMap();
+  var SYSTEM_FUNCTION_CATALOG_ID = "a2ui:system-functions";
+  var systemFunctionCatalog;
+  function getSystemFunctionCatalog() {
+    systemFunctionCatalog ?? (systemFunctionCatalog = new Catalog(SYSTEM_FUNCTION_CATALOG_ID, SpecVersion.V1_0, [], SYSTEM_FUNCTIONS));
+    return systemFunctionCatalog;
+  }
+  function getKnownSchemaKeys(schema) {
+    if (schemaKeysCache.has(schema)) {
+      return schemaKeysCache.get(schema);
+    }
+    const result = (() => {
+      let current = schema;
+      while (current) {
+        if (current instanceof external_exports.ZodObject || current._def?.typeName === "ZodObject") {
+          if (current._def?.unknownKeys === "passthrough") {
+            return null;
+          }
+          const shape = typeof current.shape === "function" ? current.shape() : current.shape;
+          if (shape && typeof shape === "object") {
+            return new Set(Object.keys(shape));
+          }
+          return null;
+        }
+        if (current instanceof external_exports.ZodEffects || current._def?.typeName === "ZodEffects") {
+          current = current._def.schema;
+          continue;
+        }
+        if (current instanceof external_exports.ZodOptional || current instanceof external_exports.ZodNullable || current._def?.typeName === "ZodOptional" || current._def?.typeName === "ZodNullable") {
+          current = current._def.innerType;
+          continue;
+        }
+        if (current instanceof external_exports.ZodDefault || current._def?.typeName === "ZodDefault") {
+          current = current._def.innerType;
+          continue;
+        }
+        if (current instanceof external_exports.ZodCatch || current._def?.typeName === "ZodCatch") {
+          current = current._def.innerType;
+          continue;
+        }
+        if (current instanceof external_exports.ZodIntersection || current._def?.typeName === "ZodIntersection") {
+          const leftKeys = getKnownSchemaKeys(current._def.left);
+          const rightKeys = getKnownSchemaKeys(current._def.right);
+          if (!leftKeys || !rightKeys) {
+            return null;
+          }
+          return /* @__PURE__ */ new Set([...leftKeys, ...rightKeys]);
+        }
+        if (current instanceof external_exports.ZodUnion || current instanceof external_exports.ZodDiscriminatedUnion || current._def?.typeName === "ZodUnion" || current._def?.typeName === "ZodDiscriminatedUnion") {
+          const options = current._def.options;
+          const allKeys = /* @__PURE__ */ new Set();
+          for (const opt of options) {
+            const k = getKnownSchemaKeys(opt);
+            if (!k)
+              return null;
+            for (const key of k) {
+              allKeys.add(key);
+            }
+          }
+          return allKeys;
+        }
+        return null;
+      }
+      return null;
+    })();
+    schemaKeysCache.set(schema, result);
+    return result;
+  }
+  function validateFunctionArgs(functionName, rawArgs, catalog) {
+    if (!rawArgs || typeof rawArgs !== "object" || Array.isArray(rawArgs)) {
+      return;
+    }
+    const suppliedKeys = Object.keys(rawArgs);
+    if (suppliedKeys.length > MAX_FUNCTION_CALL_ARGS) {
+      throw new A2uiExpressionError(`Function call '${functionName}' exceeds maximum allowed arguments count (${MAX_FUNCTION_CALL_ARGS})`, functionName);
+    }
+    const fn = catalog?.functions?.get?.(functionName) ?? (functionName === "@index" && catalog?.protocolVersion && isAtLeastVersion(catalog.protocolVersion, SpecVersion.V1_0) ? IndexApi : void 0);
+    if (!fn?.schema) {
+      return;
+    }
+    const knownKeys = getKnownSchemaKeys(fn.schema);
+    if (!knownKeys) {
+      return;
+    }
+    for (const key of suppliedKeys) {
+      if (!knownKeys.has(key)) {
+        throw new A2uiExpressionError(`Unknown argument '${key}' passed to function '${functionName}'`, functionName);
+      }
+    }
+    if (suppliedKeys.length > knownKeys.size) {
+      throw new A2uiExpressionError(`Too many arguments for function '${functionName}': expected at most ${knownKeys.size}, received ${suppliedKeys.length}`, functionName);
+    }
+  }
+  function isSingleAtKey(key) {
+    return key.startsWith("@") && !key.startsWith("@@");
+  }
+  function unescapeObjectKey(key) {
+    return key.startsWith("@@") ? key.slice(1) : key;
+  }
+  var RESERVED_DIRECTIVES = /* @__PURE__ */ new Set(["@path", "@call"]);
+  function validateReservedDirectives(keys, protocolVersion) {
+    if (!isAtLeastVersion(protocolVersion, "1.0")) {
+      return;
+    }
+    for (const key of keys) {
+      if (isSingleAtKey(key) && !RESERVED_DIRECTIVES.has(key)) {
+        throw new A2uiValidationError(`Unrecognized reserved protocol directive '${key}' in v1.0 dynamic object. Reserved keys must be in ${Array.from(RESERVED_DIRECTIVES).join(", ")}, or escaped with prefix doubling (e.g. '@${key}').`, void 0, "INVALID_RESERVED_KEY");
+      }
+    }
+  }
+  function resolveContextIndex(startCtx) {
+    let ctx = startCtx;
+    while (ctx) {
+      if (ctx.explicitIndex !== void 0 && Number.isFinite(ctx.explicitIndex)) {
+        return ctx.explicitIndex;
+      }
+      if (!(ctx instanceof DataContext) && typeof ctx.getIndex === "function") {
+        const idx = ctx.getIndex();
+        if (idx !== void 0 && Number.isFinite(idx)) {
+          return idx;
+        }
+      }
+      if (!(ctx instanceof DataContext) && typeof ctx.index === "number" && Number.isFinite(ctx.index)) {
+        return ctx.index;
+      }
+      if (typeof ctx.path === "string") {
+        const parts = ctx.path.split("/").filter(Boolean);
+        if (parts.length > 0 && /^\d+$/.test(parts[parts.length - 1])) {
+          return parseInt(parts[parts.length - 1], 10);
+        }
+      }
+      ctx = ctx.parent;
+    }
+    return void 0;
+  }
+  function linkedAbortController(parent) {
+    const controller = new AbortController();
+    if (parent?.aborted) {
+      controller.abort();
+    } else {
+      parent?.addEventListener("abort", () => controller.abort(), { once: true });
+    }
+    return controller;
+  }
+  function abortOnFailedArgument(args, controller) {
+    if (isThenable(args)) {
+      Promise.resolve(args).then((settled) => {
+        if (findFailedArgument(settled))
+          controller.abort();
+      }, () => controller.abort());
+    } else if (Array.isArray(args)) {
+      for (const item of args)
+        abortOnFailedArgument(item, controller);
+    } else if (isPlainObject(args)) {
+      for (const item of Object.values(args))
+        abortOnFailedArgument(item, controller);
+    }
+  }
+  function isCancellation(e2) {
+    return e2 instanceof A2uiRpcError && e2.code === RpcErrorCode.CANCELLED;
+  }
+  function defineOwn(target, key, value) {
+    Object.defineProperty(target, key, { value, enumerable: true, writable: true, configurable: true });
+  }
+  var MAX_DYNAMIC_VALUE_DEPTH = 1e3;
+  var DataContext = class _DataContext {
+    /**
+     * Initializes a new DataContext instance.
+     *
+     * @param surface The surface model or data model this context belongs to.
+     * @param path The absolute path in the DataModel that this context is scoped to.
+     * @param index Optional explicit collection iteration index.
+     * @param parent Optional parent DataContext in the scope chain.
+     */
+    constructor(surface, path, index, parent) {
+      this.path = path;
+      this._isUserActivated = false;
+      this._isPassiveEvaluation = false;
+      this._isActionExecution = false;
+      this._noAgentRouting = false;
+      if (surface instanceof DataModel) {
+        this.surface = void 0;
+        this.dataModel = surface;
+        this.functionInvoker = () => void 0;
+      } else {
+        this.surface = surface;
+        this.dataModel = surface.dataModel;
+        const defaultCatalog = surface.defaultCatalog ?? surface.catalog;
+        this.functionInvoker = defaultCatalog?.invoker ?? ((name, ...rest) => resolveSurfaceCatalog(surface, void 0, `Function call '${name}'`).invoker(name, ...rest));
+      }
+      this.explicitIndex = index;
+      this.parent = parent;
+      this.warnedPaths = parent ? parent.warnedPaths : /* @__PURE__ */ new Set();
+    }
+    /** Whether the current function evaluation was initiated by an active user action. */
+    get isUserActivated() {
+      return this._isUserActivated || Boolean(this.parent?.isUserActivated);
+    }
+    /** Whether the current function evaluation is running inside a passive reactive binding. */
+    get isPassiveEvaluation() {
+      return this._isPassiveEvaluation || Boolean(this.parent?.isPassiveEvaluation);
+    }
+    /** Whether the current function evaluation was initiated by an imperative action. */
+    get isActionExecution() {
+      return this._isActionExecution || Boolean(this.parent?.isActionExecution);
+    }
+    /**
+     * Returns the 0-based iteration index if this context (or an ancestor context)
+     * is scoped to a collection template item, or `undefined` when outside any
+     * collection template scope.
+     *
+     * Mirrors `DataContext.index` in Python: checks an explicit `explicitIndex` first,
+     * then checks strictly the trailing segment of `ctx.path`, walking `ctx.parent`.
+     *
+     * @returns The 0-based iteration index, or `undefined` if outside an iteration scope.
+     */
+    getIndex() {
+      return resolveContextIndex(this);
+    }
+    /** Active iteration index if inside a collection template scope, or `undefined`. */
+    get index() {
+      return this.getIndex();
+    }
+    /**
+     * Mutates the underlying DataModel at the specified path.
+     *
+     * @param path JSON pointer path, resolved relative to this context's `path` if not absolute.
+     * @param value New value to store in the DataModel.
+     */
+    set(path, value) {
+      const absolutePath = this.resolvePath(path);
+      const preserveNull = Boolean(this.surfaceProtocolVersion && !this.atLeastV10);
+      this.dataModel.set(absolutePath, value, preserveNull);
+    }
+    /**
+     * Protocol version of the bound surface.
+     *
+     * Reads the surface's own version, which is set even when the surface has
+     * no default catalog, and falls back to the default or active catalog's
+     * version for surface-like or surface-less contexts.
+     */
+    get surfaceProtocolVersion() {
+      return this.surface?.protocolVersion ?? this.surface?.defaultCatalog?.protocolVersion ?? this.activeCatalog?.protocolVersion ?? this.surface?.catalog?.protocolVersion;
+    }
+    /** Whether this context targets A2UI protocol v1.0 or newer. */
+    get atLeastV10() {
+      if (this._cachedAtLeastV10 === void 0) {
+        this._cachedAtLeastV10 = isAtLeastVersion(this.surfaceProtocolVersion, "1.0");
+      }
+      return this._cachedAtLeastV10;
+    }
+    /**
+     * Checks whether an object represents a data binding.
+     *
+     * In v1.0, data bindings must use `@path`. In v0.9, data bindings use `path`.
+     *
+     * @param val Candidate object to inspect.
+     * @returns Whether the object represents a valid data binding for this context's protocol version.
+     */
+    isDataBindingObject(val2) {
+      const hasPath = this.atLeastV10 ? "@path" in val2 && typeof val2["@path"] === "string" : "path" in val2 && typeof val2.path === "string";
+      return hasPath && !("componentId" in val2);
+    }
+    /**
+     * Checks whether an object represents a function call.
+     *
+     * In v1.0, function calls must use `@call`. In v0.9, function calls use `call`.
+     *
+     * @param val Candidate object to inspect.
+     * @returns Whether the object represents a valid function call for this context's protocol version.
+     */
+    isFunctionCallObject(val2) {
+      return this.atLeastV10 ? "@call" in val2 && typeof val2["@call"] === "string" : "call" in val2 && typeof val2.call === "string";
+    }
+    /**
+     * Checks whether a value contains any dynamic parts (path bindings,
+     * function calls, or escaped/reserved directive keys) at any nesting depth.
+     *
+     * @param value The value or data structure to inspect.
+     * @returns Whether the value contains dynamic elements requiring resolution.
+     */
+    containsDynamicValue(value) {
+      if (value === null || typeof value !== "object" || isThenable(value)) {
+        return false;
+      }
+      if (Array.isArray(value)) {
+        return value.some((item) => this.containsDynamicValue(item));
+      }
+      const rec = value;
+      if (this.isDataBindingObject(rec) || this.isFunctionCallObject(rec)) {
+        return true;
+      }
+      if (this.atLeastV10) {
+        for (const k of Object.keys(rec)) {
+          if (k.startsWith("@")) {
+            return true;
+          }
+        }
+      }
+      return Object.values(rec).some((v2) => this.containsDynamicValue(v2));
+    }
+    /**
+     * Emits a warning if a data binding path does not exist in the data model.
+     *
+     * @param absolutePath Absolute JSON pointer path to check.
+     */
+    emitMissingDataBindingWarning(absolutePath) {
+      if (typeof this.dataModel?.hasPath === "function" && !this.dataModel.hasPath(absolutePath) && !this.warnedPaths.has(absolutePath)) {
+        this.warnedPaths.add(absolutePath);
+        void this.surface?.dispatchWarning?.({
+          code: "MISSING_DATA_BINDING",
+          path: absolutePath,
+          message: `Preflight DataBinding Warning: The bound JSON Pointer '${absolutePath}' does not physically exist in the active DataModel. Evaluating to None.`
+        });
+      }
+    }
+    /**
+     * Synchronously evaluates a DynamicValue into its concrete runtime value.
+     *
+     * Evaluates the value once at the current moment without creating reactive subscriptions.
+     * Use `subscribeDynamicValue` for reactive updates.
+     *
+     * The result of an asynchronous function, such as a call routed to the
+     * agent, is a Promise that resolves to the value, or to `undefined` once
+     * the failure has been reported on the surface.
+     * @param value The DynamicValue object or raw value from the A2UI JSON payload.
+     * @param depth The current recursion depth when evaluating nested arguments or expressions.
+     * @param userActivated Whether the evaluation was initiated by an active user action.
+     * @returns The synchronously resolved value.
+     */
+    resolveDynamicValue(value, depth = 0, userActivated = false) {
+      return this.resolveValue(value, depth, userActivated, false);
+    }
+    /**
+     * Evaluates a DynamicValue once, as {@link resolveDynamicValue} does.
+     *
+     * Inside the arguments of a function call (`keepPending`), a pending result
+     * stays a Promise, which the invoker of the enclosing call awaits before
+     * validating its arguments, and, from v1.0, a call that fails resolves to a
+     * `FailedArgument` that stops the enclosing call.
+     *
+     * @param value The DynamicValue object or raw value.
+     * @param depth The current recursion depth.
+     * @param userActivated Whether the evaluation was initiated by an active user action.
+     * @param keepPending Whether the value is (part of) a function argument.
+     * @param parentSignal Abort signal of the enclosing call. Calls nested in
+     *   `value` are aborted with it.
+     * @returns The resolved value.
+     */
+    resolveValue(value, depth, userActivated, keepPending, parentSignal) {
+      if (depth > MAX_DYNAMIC_VALUE_DEPTH) {
+        const err = new A2uiExpressionError(`Maximum dynamic value nesting depth exceeded (${MAX_DYNAMIC_VALUE_DEPTH})`);
+        this.dispatchExpressionError(err, "DynamicValue");
+        return keepPending ? this.failedArgument(err) : void 0;
+      }
+      if (value === null || typeof value !== "object" || isThenable(value)) {
+        return value;
+      }
+      if (Array.isArray(value)) {
+        if (!this.containsDynamicValue(value)) {
+          return value;
+        }
+        return value.map((item) => this.resolveValue(item, depth + 1, userActivated, keepPending, parentSignal));
+      }
+      const rec = value;
+      if (this.isDataBindingObject(rec)) {
+        const bindingPath = rec["@path"] ?? rec.path;
+        const absolutePath = this.resolvePath(bindingPath);
+        const val2 = this.dataModel.get(absolutePath);
+        if (val2 === void 0) {
+          this.emitMissingDataBindingWarning(absolutePath);
+        }
+        return val2;
+      }
+      if (this.isFunctionCallObject(rec)) {
+        return this.resolveFunctionCallValue(rec, depth, userActivated, keepPending, parentSignal);
+      }
+      return this.resolvePlainObjectValue(rec, depth, userActivated, keepPending, parentSignal);
+    }
+    /**
+     * Resolves a function call by validating arguments and invoking the function.
+     *
+     * An asynchronous function returns a pending Promise. Outside function
+     * arguments (`!keepPending`), the Promise is returned with its rejection
+     * turned into an `EXPRESSION_ERROR` on the surface, since nothing else would
+     * report it; inside the arguments of another call (`keepPending`) it is
+     * wrapped so the inner call reports its own rejection once and resolves to a
+     * `FailedArgument` that stops the enclosing call from executing.
+     *
+     * When an argument fails, the call is aborted, and with it the calls in its
+     * other arguments: one that has not sent its agent call yet does not send
+     * it, and one that fails later reports nothing.
+     *
+     * @param call Function call definition to execute.
+     * @param depth Current recursion depth for nested expression tracking.
+     * @param userActivated Whether the evaluation was initiated by an active user action.
+     * @param keepPending Whether the call is nested inside a function argument.
+     * @param parentSignal Abort signal of the enclosing call, if any.
+     * @returns The resolved function return value.
+     */
+    resolveFunctionCallValue(call, depth, userActivated, keepPending, parentSignal) {
+      const callName = call["@call"] ?? call.call;
+      const targetCatalog = this.resolveCallCatalog(callName, call);
+      if (!targetCatalog) {
+        return keepPending ? this.failedArgument(void 0) : void 0;
+      }
+      try {
+        validateFunctionArgs(callName, call.args, targetCatalog);
+      } catch (e2) {
+        this.dispatchExpressionError(e2, callName);
+        return keepPending ? this.failedArgument(e2) : void 0;
+      }
+      const abortController = linkedAbortController(parentSignal);
+      const args = {};
+      for (const [key, argVal] of Object.entries(call.args ?? {})) {
+        const arg = this.resolveValue(argVal, depth + 1, userActivated, true, abortController.signal);
+        const failed = findFailedArgument(arg);
+        if (failed) {
+          abortController.abort();
+          return keepPending ? failed : void 0;
+        }
+        defineOwn(args, key, arg);
+      }
+      abortOnFailedArgument(args, abortController);
+      const activeCatalogId = !callName.startsWith("@") ? targetCatalog.id : void 0;
+      const scope = userActivated && !this.isUserActivated || activeCatalogId !== void 0 ? this.withFlags({
+        userActivated: userActivated && !this.isUserActivated,
+        activeCatalogId,
+        activeCatalog: activeCatalogId !== void 0 ? targetCatalog : void 0
+      }) : this;
+      const result = scope.evaluateFunctionReactive(callName, args, targetCatalog.invoker, abortController.signal, keepPending);
+      if (result === void 0) {
+        return void 0;
+      }
+      if (result instanceof FailedArgument) {
+        abortController.abort();
+        return keepPending ? result : void 0;
+      }
+      if (isThenable(result)) {
+        if (keepPending) {
+          return scope.keepPendingResult(result, callName, abortController.signal);
+        }
+        return Promise.resolve(result).then((value) => {
+          if (value instanceof FailedArgument) {
+            return void 0;
+          }
+          return isSignal(value) ? peekValue(value) : value;
+        }, (e2) => {
+          scope.dispatchExpressionError(e2, callName);
+          return void 0;
+        });
+      }
+      return isSignal(result) ? peekValue(result) : result;
+    }
+    /**
+     * Recursively resolves dynamic values nested inside a plain object.
+     *
+     * @param rec Plain object dictionary to resolve.
+     * @param depth Current recursion depth for nested expression tracking.
+     * @param userActivated Whether the evaluation was initiated by an active user action.
+     * @param keepPending Whether the object is nested inside a function argument.
+     * @param parentSignal Abort signal of the enclosing call, if any.
+     * @returns A copy of the object with all nested dynamic values resolved.
+     */
+    resolvePlainObjectValue(rec, depth, userActivated, keepPending, parentSignal) {
+      if (this.atLeastV10) {
+        validateReservedDirectives(Object.keys(rec), this.surfaceProtocolVersion);
+      }
+      if (!this.containsDynamicValue(rec)) {
+        return rec;
+      }
+      const resolved = {};
+      for (const [k, v2] of Object.entries(rec)) {
+        const key = this.atLeastV10 ? unescapeObjectKey(k) : k;
+        defineOwn(resolved, key, this.resolveValue(v2, depth + 1, userActivated, keepPending, parentSignal));
+      }
+      return resolved;
+    }
+    /**
+     * Reactively listens to changes in a DynamicValue.
+     *
+     * Whenever the underlying data or function dependencies change, the `onChange`
+     * callback fires with the freshly evaluated result.
+     *
+     * @template V Expected type of the resolved value.
+     * @param value The DynamicValue or raw value to evaluate and observe.
+     * @param onChange Callback fired whenever the evaluated result changes.
+     * @returns A subscription containing the current value and an `unsubscribe` method.
+     */
+    subscribeDynamicValue(value, onChange) {
+      const sig = this.resolveSignal(value);
+      let isSync = true;
+      let currentValue = peekValue(sig);
+      const dispose = effect(() => {
+        const val2 = getValue(sig);
+        currentValue = val2;
+        if (!isSync) {
+          onChange(val2);
+        }
+      });
+      isSync = false;
+      return {
+        get value() {
+          return currentValue;
+        },
+        unsubscribe: () => {
+          dispose();
+          sig.unsubscribe?.();
+        }
+      };
+    }
+    /**
+     * Resolves a DynamicValue into a reactive Signal.
+     *
+     * Recursively resolves any nested path bindings or function calls into a
+     * single reactive `Signal`. Changes to underlying data or function dependencies
+     * cause the signal's value to update.
+     *
+     * @template V Expected type of the signal value.
+     * @param value The DynamicValue or raw value to evaluate and observe.
+     * @param depth The current recursion depth when evaluating nested arguments or expressions.
+     * @returns A reactive Signal containing the result of the evaluation.
+     */
+    resolveSignal(value, depth = 0) {
+      return this.resolveSignalValue(value, depth, false);
+    }
+    /**
+     * Resolves a DynamicValue into a reactive Signal, as {@link resolveSignal}.
+     *
+     * Inside the arguments of a function call (`keepPending`), the pending
+     * result of an asynchronous function stays in its signal as a Promise, so
+     * the invoker of the enclosing call waits for it before validating and
+     * running, as it does when the value is resolved once. Elsewhere the
+     * signal holds `undefined` until the result settles.
+     *
+     * @param value The DynamicValue or raw value to evaluate and observe.
+     * @param depth The current recursion depth.
+     * @param keepPending Whether the value is (part of) a function argument.
+     * @returns A reactive Signal containing the result of the evaluation.
+     */
+    resolveSignalValue(value, depth, keepPending) {
+      if (depth > MAX_DYNAMIC_VALUE_DEPTH) {
+        const err = new A2uiExpressionError(`Maximum dynamic value nesting depth exceeded (${MAX_DYNAMIC_VALUE_DEPTH})`);
+        this.dispatchExpressionError(err, typeof value === "object" && value && ("@call" in value || "call" in value) ? value["@call"] ?? value.call : "DynamicValue");
+        return signal(keepPending ? this.failedArgument(err) : void 0);
+      }
+      if (typeof value !== "object" || value === null) {
+        return signal(value);
+      }
+      if (isThenable(value)) {
+        if (keepPending) {
+          return signal(this.keepPendingResult(value, "DynamicValue"));
+        }
+        const pendingSig = signal(void 0);
+        this.settleIntoSignal(pendingSig, value, "DynamicValue");
+        return pendingSig;
+      }
+      if (Array.isArray(value)) {
+        if (!this.containsDynamicValue(value)) {
+          return signal(value);
+        }
+        const itemSignals = value.map((item) => this.resolveSignalValue(item, depth + 1, keepPending));
+        const resultSig = computed(() => itemSignals.map((s2) => getValue(s2)));
+        resultSig.unsubscribe = () => {
+          for (const s2 of itemSignals) {
+            s2.unsubscribe?.();
+          }
+        };
+        return resultSig;
+      }
+      const rec = value;
+      if (this.isDataBindingObject(rec)) {
+        const bindingPath = rec["@path"] ?? rec.path;
+        const absolutePath = this.resolvePath(bindingPath);
+        this.emitMissingDataBindingWarning(absolutePath);
+        return this.dataModel.getSignal(absolutePath);
+      }
+      if (this.isFunctionCallObject(rec)) {
+        const call = rec;
+        const callName = call["@call"] ?? call.call;
+        const targetCatalog = this.resolveCallCatalog(callName, call);
+        if (!targetCatalog) {
+          return signal(keepPending ? this.failedArgument(void 0) : void 0);
+        }
+        try {
+          validateFunctionArgs(callName, call.args, targetCatalog);
+        } catch (e2) {
+          this.dispatchExpressionError(e2, callName);
+          return signal(keepPending ? this.failedArgument(e2) : void 0);
+        }
+        const activeCatalogId = !callName.startsWith("@") ? targetCatalog.id : void 0;
+        const scope = this.withFlags({
+          passive: true,
+          activeCatalogId,
+          activeCatalog: activeCatalogId !== void 0 ? targetCatalog : void 0
+        });
+        const argSignals = {};
+        for (const [key, argVal] of Object.entries(call.args ?? {})) {
+          argSignals[key] = this.resolveSignalValue(argVal, depth + 1, true);
+        }
+        if (Object.keys(argSignals).length === 0) {
+          const abortController2 = new AbortController();
+          const result = scope.evaluateFunctionReactive(callName, {}, targetCatalog.invoker, abortController2.signal, keepPending);
+          let sig;
+          if (isSignal(result)) {
+            sig = result;
+          } else if (isThenable(result)) {
+            const pendingSig = signal(void 0);
+            if (keepPending) {
+              setValue(pendingSig, scope.keepPendingResult(result, callName, abortController2.signal, {
+                onSignal: (inner) => scope.forwardSignal(pendingSig, inner, abortController2.signal)
+              }));
+            } else {
+              scope.settleIntoSignal(pendingSig, result, callName, abortController2.signal);
+            }
+            sig = pendingSig;
+          } else if (result instanceof FailedArgument) {
+            sig = signal(keepPending ? result : this.atLeastV10 ? null : void 0);
+          } else {
+            sig = signal(result);
+          }
+          sig.unsubscribe = () => abortController2.abort();
+          return sig;
+        }
+        const keys = Object.keys(argSignals);
+        const resultSig = signal(void 0);
+        let abortController;
+        let innerUnsubscribe;
+        let failedArgsKey;
+        const argsSig = computed(() => {
+          const argsRecord = {};
+          for (let i2 = 0; i2 < keys.length; i2++) {
+            defineOwn(argsRecord, keys[i2], getValue(argSignals[keys[i2]]));
+          }
+          return argsRecord;
+        });
+        const stopper = effect(() => {
+          let argsKey;
+          try {
+            const args = getValue(argsSig);
+            argsKey = canonicalJsonKey(args);
+            if (argsKey !== void 0 && argsKey === failedArgsKey) {
+              return;
+            }
+            failedArgsKey = void 0;
+            if (abortController)
+              abortController.abort();
+            if (innerUnsubscribe) {
+              innerUnsubscribe();
+              innerUnsubscribe = void 0;
+            }
+            const evaluation = new AbortController();
+            abortController = evaluation;
+            const evaluatedKey = argsKey;
+            const markFailed = () => {
+              if (!evaluation.signal.aborted) {
+                failedArgsKey = evaluatedKey;
+              }
+            };
+            const res = scope.evaluateFunctionReactive(callName, args, targetCatalog.invoker, evaluation.signal, keepPending);
+            if (isSignal(res)) {
+              setValue(resultSig, peekValue(res));
+              innerUnsubscribe = effect(() => {
+                setValue(resultSig, getValue(res));
+              });
+            } else if (isThenable(res)) {
+              if (keepPending) {
+                setValue(resultSig, scope.keepPendingResult(res, callName, evaluation.signal, {
+                  onSignal: (inner) => scope.forwardSignal(resultSig, inner, evaluation.signal),
+                  onFailure: markFailed
+                }));
+              } else {
+                scope.settleIntoSignal(resultSig, res, callName, evaluation.signal, markFailed);
+              }
+            } else if (res instanceof FailedArgument) {
+              markFailed();
+              setValue(resultSig, keepPending ? res : this.atLeastV10 ? null : void 0);
+            } else {
+              setValue(resultSig, res);
+            }
+          } catch (e2) {
+            failedArgsKey = argsKey;
+            scope.dispatchExpressionError(e2, callName);
+            setValue(resultSig, keepPending ? scope.failedArgument(e2) : void 0);
+          }
+        });
+        resultSig.unsubscribe = () => {
+          stopper();
+          if (innerUnsubscribe)
+            innerUnsubscribe();
+          if (abortController)
+            abortController.abort();
+          for (let i2 = 0; i2 < keys.length; i2++) {
+            argSignals[keys[i2]].unsubscribe?.();
+          }
+        };
+        return resultSig;
+      }
+      if (this.atLeastV10) {
+        validateReservedDirectives(Object.keys(rec), this.surfaceProtocolVersion);
+      }
+      if (!this.containsDynamicValue(rec)) {
+        return signal(value);
+      }
+      const entrySignals = Object.entries(rec).map(([k, v2]) => {
+        const key = this.atLeastV10 ? unescapeObjectKey(k) : k;
+        return [key, this.resolveSignalValue(v2, depth + 1, keepPending)];
+      });
+      const objSig = computed(() => {
+        const resolved = {};
+        for (const [k, s2] of entrySignals) {
+          defineOwn(resolved, k, getValue(s2));
+        }
+        return resolved;
+      });
+      const prevUnsubscribe = objSig.unsubscribe?.bind(objSig);
+      objSig.unsubscribe = () => {
+        prevUnsubscribe?.();
+        for (const [, s2] of entrySignals) {
+          s2.unsubscribe?.();
+        }
+      };
+      return objSig;
+    }
+    handleInvalidAction(message) {
+      this.surface?.dispatchError({
+        code: "INVALID_ACTION",
+        surfaceId: this.surface?.id,
+        message
+      });
+      return void 0;
+    }
+    /**
+     * Resolves the `context` entries and `userMessage` of an event action.
+     *
+     * The entries are resolved in declared order, then `userMessage`, one at a
+     * time: an entry that waits on an asynchronous call, such as an agent
+     * function call, settles before the next entry is evaluated. The first entry
+     * that fails stops the resolution, so no later entry is evaluated and no
+     * later agent call is sent.
+     *
+     * @param ev The event to resolve.
+     * @param options `userActivation` as passed to {@link resolveAction}.
+     * @returns The resolved event, a Promise of it when an entry waits on an
+     *   asynchronous call, or `undefined` (or a Promise of it) when the event is
+     *   invalid or an entry failed. Every failure has been reported by then.
+     */
+    resolveActionEventObject(ev, options) {
+      if (typeof ev.name !== "string" || ev.name.length === 0) {
+        return this.handleInvalidAction("Action event is missing required 'name' string.");
+      }
+      const userActivated = options?.userActivation ?? true;
+      const scope = this.withFlags({ action: true, passive: options?.userActivation === false });
+      const contextEntries = ev.context && typeof ev.context === "object" && !Array.isArray(ev.context) ? Object.entries(ev.context) : void 0;
+      const hasUserMessage = ev.userMessage !== void 0;
+      const entryCount = (contextEntries?.length ?? 0) + (hasUserMessage ? 1 : 0);
+      const resolvedContext = {};
+      let resolvedUserMessage = void 0;
+      const finish = () => {
+        const resolvedEvent = { ...ev };
+        if (contextEntries) {
+          resolvedEvent.context = resolvedContext;
+        }
+        if (ev.context === void 0) {
+          delete resolvedEvent.context;
+        }
+        if (hasUserMessage) {
+          if (resolvedUserMessage === void 0 || resolvedUserMessage === null) {
+            delete resolvedEvent.userMessage;
+          } else if (typeof resolvedUserMessage !== "string") {
+            return this.handleInvalidAction("Action event 'userMessage' must resolve to a string.");
+          } else {
+            resolvedEvent.userMessage = resolvedUserMessage;
+          }
+        }
+        return resolvedEvent;
+      };
+      const resolveFrom = (start) => {
+        for (let index = start; index < entryCount; index++) {
+          const contextEntry = contextEntries?.[index];
+          const entryController = new AbortController();
+          let value;
+          try {
+            value = scope.resolveValue(contextEntry ? contextEntry[1] : ev.userMessage, 0, userActivated, true, entryController.signal);
+          } catch (e2) {
+            entryController.abort();
+            this.surface?.dispatchError({
+              code: "EXPRESSION_ERROR",
+              surfaceId: this.surface?.id,
+              message: `Action event ${contextEntry ? `context entry '${contextEntry[0]}'` : "userMessage"} is invalid: ${e2?.message ?? String(e2)}`
+            });
+            return void 0;
+          }
+          const store = (settled2) => {
+            if (findFailedArgument(settled2)) {
+              entryController.abort();
+              return false;
+            }
+            if (contextEntry) {
+              defineOwn(resolvedContext, contextEntry[0], settled2);
+            } else {
+              resolvedUserMessage = settled2;
+            }
+            return true;
+          };
+          const settled = settleDeep(value);
+          if (isThenable(settled)) {
+            return Promise.resolve(settled).then((settledValue) => store(settledValue) ? resolveFrom(index + 1) : void 0, (e2) => {
+              entryController.abort();
+              scope.dispatchExpressionError(e2, "DynamicValue");
+              return void 0;
+            });
+          }
+          if (!store(settled)) {
+            return void 0;
+          }
+        }
+        return finish();
+      };
+      return resolveFrom(0);
+    }
+    executeActionFunctionCall(action, options) {
+      let callTarget = "functionCall" in action ? action.functionCall : action;
+      if (callTarget && typeof callTarget === "object") {
+        const callName = callTarget["@call"] ?? callTarget.call;
+        if (typeof callName === "string") {
+          callTarget = this.atLeastV10 && !("@call" in callTarget) ? { "@call": callName, ...callTarget } : !this.atLeastV10 && !("call" in callTarget) ? { call: callName, ...callTarget } : callTarget;
+        }
+      }
+      const userActivated = options?.userActivation ?? true;
+      const scope = this.withFlags({ action: true, passive: options?.userActivation === false });
+      return scope.resolveValue(callTarget, 0, userActivated, false);
+    }
+    /**
+     * Resolves an action by evaluating its top-level dynamic values.
+     *
+     * For event actions, resolves each value in the context map, then
+     * `userMessage`, in order and one at a time (see the protocol's event
+     * actions). For function call actions, evaluates the function call.
+     *
+     * A `userMessage` that resolves to `null` or `undefined` is left out of the
+     * resolved event; one that resolves to any other non-string is reported as
+     * an `INVALID_ACTION`, and the action resolves to `undefined`.
+     *
+     * `options.userActivation` applies to both kinds: a function that requires
+     * user activation runs, or is sent to the agent, only when the action is
+     * user-activated (the default), and is refused when it is `false`.
+     *
+     * @param action The Action object to resolve.
+     * @param options Whether the action was initiated by an active user gesture.
+     * @returns For an event action, the action with its context and
+     *   `userMessage` resolved, or a Promise of it when an entry waits on an
+     *   asynchronous call such as an agent function call. `undefined`, or a
+     *   Promise of `undefined`, when the action is invalid or an entry failed;
+     *   the failure has then been reported and the action must not be
+     *   dispatched. For a function call action, the function's result.
+     */
+    resolveAction(action, options) {
+      if ("event" in action && typeof action.event === "object" && action.event !== null) {
+        const resolvedEvent = this.resolveActionEventObject(action.event, options);
+        const withEvent = (event) => event === void 0 ? void 0 : { ...action, event };
+        return isThenable(resolvedEvent) ? Promise.resolve(resolvedEvent).then(withEvent) : withEvent(resolvedEvent);
+      }
+      if ("name" in action) {
+        return this.resolveActionEventObject(action, options);
+      }
+      if ("functionCall" in action || "call" in action || "@call" in action) {
+        return this.executeActionFunctionCall(action, options);
+      }
+      return action;
+    }
+    /**
+     * Resolves the catalog against which a function call executes.
+     *
+     * From v1.0, reserved `@`-prefixed system functions such as `@index` belong
+     * to no catalog, so they resolve to the built-in system function set
+     * whatever the surface's catalogs are. Before v1.0 a call cannot select a
+     * catalog, so a `catalogId` on it is ignored and the call runs in the
+     * surface catalog.
+     *
+     * @param name Name of the function being called.
+     * @param catalogId Identifier of the catalog named by the call, if specified.
+     * @param namesCatalog Whether the call carries a `catalogId` key, whatever
+     *   its value.
+     * @returns The resolved Catalog instance, or the surface default catalog if omitted.
+     * @throws {A2uiExpressionError} If, from v1.0, a call to a reserved `@`
+     *   system function names a catalog: such a function belongs to no catalog,
+     *   so the call is a malformed expression.
+     * @throws {A2uiCatalogError} If the call names a catalog ID that cannot be
+     *   resolved on this surface, or names none on a surface without a default
+     *   catalog. This is reported as a catalog fault rather than a missing
+     *   function, since the function may exist in a catalog that is not
+     *   available here.
+     */
+    resolveFunctionCatalog(name, catalogId, namesCatalog) {
+      if (this.atLeastV10 && name.startsWith("@")) {
+        if (namesCatalog) {
+          throw new A2uiExpressionError(`System function '${name}' belongs to no catalog and must not name a catalogId.`, name);
+        }
+        return getSystemFunctionCatalog();
+      }
+      const effectiveCatalogId = this.atLeastV10 ? catalogId : void 0;
+      if (typeof effectiveCatalogId === "string") {
+        const activeCatalog = this.lookupActiveCatalog(effectiveCatalogId);
+        if (activeCatalog) {
+          return activeCatalog;
+        }
+      }
+      if (!this.surface) {
+        throw new A2uiCatalogError(`No surface available to resolve catalog: ${catalogId ?? "default"}`);
+      }
+      return resolveSurfaceCatalog(this.surface, effectiveCatalogId, `Function call '${name}'`);
+    }
+    /**
+     * Resolves the catalog a function call runs in, dispatching a
+     * `CATALOG_ERROR` to the surface when it cannot be resolved, and an
+     * `EXPRESSION_ERROR` for any other failure, such as a system function call
+     * that names a catalog.
+     *
+     * @param name Name of the function being called.
+     * @param call The function call, whose `catalogId` selects the catalog.
+     * @returns The resolved Catalog instance, or `undefined` if resolution failed.
+     */
+    resolveCallCatalog(name, call) {
+      try {
+        return this.resolveFunctionCatalog(name, call.catalogId, "catalogId" in call);
+      } catch (e2) {
+        if (e2 instanceof A2uiCatalogError && this.surface) {
+          this.surface.dispatchError({
+            code: "CATALOG_ERROR",
+            message: e2.message,
+            expression: name
+          });
+        } else {
+          this.dispatchExpressionError(e2, name);
+        }
+        return void 0;
+      }
+    }
+    /**
+     * Returns a view of this context with evaluation flags added.
+     *
+     * The view shares everything else with this context. A call evaluated
+     * through it keeps the flags for as long as it runs, including the parts
+     * that run after its pending arguments settle, instead of reading flags
+     * that were reset when the synchronous part returned.
+     *
+     * @param flags The flags to add to those of this context.
+     * @returns The view.
+     */
+    withFlags(flags) {
+      const view = Object.create(this);
+      view._isUserActivated = this._isUserActivated || Boolean(flags.userActivated);
+      view._isPassiveEvaluation = this._isPassiveEvaluation || Boolean(flags.passive);
+      view._isActionExecution = this._isActionExecution || Boolean(flags.action);
+      view._noAgentRouting = this._noAgentRouting || Boolean(flags.noAgentRouting);
+      view._activeCatalogId = flags.activeCatalogId ?? this._activeCatalogId;
+      view._activeCatalog = flags.activeCatalog !== void 0 ? flags.activeCatalog : flags.activeCatalogId !== void 0 && flags.activeCatalogId !== this._activeCatalogId ? void 0 : this._activeCatalog;
+      if (flags.activeCatalogId !== void 0 || flags.activeCatalog !== void 0) {
+        view._cachedAtLeastV10 = void 0;
+      }
+      return view;
+    }
+    /**
+     * The catalog ID of the catalog function currently executing in this context
+     * or an ancestor context, if any.
+     */
+    get activeCatalogId() {
+      return this._activeCatalogId ?? this.parent?.activeCatalogId;
+    }
+    /**
+     * The active `Catalog` instance attached to the nearest active catalog scope,
+     * stopping at the closest context that defines `_activeCatalogId`.
+     */
+    get activeCatalog() {
+      if (this._activeCatalogId !== void 0) {
+        return this._activeCatalog;
+      }
+      return this.parent?.activeCatalog;
+    }
+    /**
+     * Looks up a scoped active `Catalog` instance matching `catalogId` on the
+     * nearest active catalog scope.
+     */
+    lookupActiveCatalog(catalogId) {
+      const active = this.activeCatalog;
+      return active?.id === catalogId ? active : void 0;
+    }
+    /**
+     * Whether a call the renderer does not implement may be sent to the agent.
+     * It may not in an evaluation that cannot wait for the answer, such as the
+     * arguments of an agent's `callRendererFunction`.
+     */
+    get allowsAgentRouting() {
+      return !this._noAgentRouting && (this.parent?.allowsAgentRouting ?? true);
+    }
+    /**
+     * The value of a failed call inside the arguments of another call.
+     *
+     * From v1.0 it is a `FailedArgument`, which stops the enclosing call. Before
+     * v1.0 it is `undefined`, as it always was.
+     *
+     * @param error The failure.
+     * @returns The value standing for the failed call.
+     */
+    failedArgument(error) {
+      return this.atLeastV10 ? new FailedArgument(error) : void 0;
+    }
+    /**
+     * Evaluates a catalog function and returns its reactive Signal or static value.
+     *
+     * Invokes the function with this context through the invoker of the
+     * catalog the call resolved to, and dispatches an `EXPRESSION_ERROR` if
+     * execution throws.
+     *
+     * @template V Expected return type of the function evaluation.
+     * @param name Name of the function to evaluate.
+     * @param args Resolved arguments to pass to the function.
+     * @param invoker Invoker of the catalog the call resolved to.
+     * @param abortSignal Optional abort signal to cancel asynchronous execution.
+     * @param keepPending Whether the call is nested inside a function argument.
+     * @returns The evaluated result as a reactive `Signal` or static value, or `undefined` on failure.
+     */
+    evaluateFunctionReactive(name, args, invoker, abortSignal, keepPending = false) {
+      try {
+        return invoker(name, args, this, abortSignal);
+      } catch (e2) {
+        this.dispatchExpressionError(e2, name);
+        return keepPending ? this.failedArgument(e2) : void 0;
+      }
+    }
+    /**
+     * Wraps a pending function result nested inside a function argument.
+     *
+     * The inner call reports its own rejection once (attributed to `name`) and
+     * resolves to a `FailedArgument` (`undefined` before v1.0), which stops the
+     * enclosing call from executing or reporting a duplicate error. Settled
+     * values are recorded so `settleDeep` can read them synchronously if a
+     * sibling reactive dependency changes later.
+     *
+     * @param pending The pending result.
+     * @param name Name of the function that produced `pending`.
+     * @param abortSignal Signal that marks the evaluation as stale.
+     * @param handlers `onSignal` receives a `Signal` the result settles to, so
+     *   a binding can follow its later values; `onFailure` runs when the result
+     *   rejects. Neither runs once `abortSignal` has fired.
+     * @returns A Promise resolving to the settled value or a `FailedArgument`.
+     */
+    keepPendingResult(pending, name, abortSignal, handlers) {
+      const tracked = Promise.resolve(pending).then((value) => {
+        const unwrapped = isSignal(value) ? peekValue(value) : value;
+        recordSettledValue(tracked, unwrapped);
+        if (isSignal(value) && !abortSignal?.aborted) {
+          handlers?.onSignal?.(value);
+        }
+        return unwrapped;
+      }, (e2) => {
+        if (!abortSignal?.aborted) {
+          if (!isCancellation(e2))
+            handlers?.onFailure?.();
+          this.dispatchExpressionError(e2, name);
+        }
+        const failed = this.failedArgument(e2);
+        recordSettledValue(tracked, failed);
+        return failed;
+      });
+      return tracked;
+    }
+    /**
+     * Writes the settled value of a pending function result into a signal.
+     *
+     * The signal keeps its current value while the result is pending. A
+     * completion that arrives after `abortSignal` fired is ignored, since the
+     * arguments changed or the subscription ended in the meantime. A result
+     * that settles to a `Signal` is followed until `abortSignal` fires. A
+     * rejection is dispatched as an `EXPRESSION_ERROR` and resets the signal,
+     * as a synchronous failure of the same call would.
+     *
+     * @param sig The signal that exposes the result.
+     * @param pending The pending result.
+     * @param name Name of the function being evaluated.
+     * @param abortSignal Signal that marks the evaluation as stale.
+     * @param onFailure Runs when the result rejects, before subscribers see it.
+     */
+    settleIntoSignal(sig, pending, name, abortSignal, onFailure) {
+      Promise.resolve(pending).then((value) => {
+        if (abortSignal?.aborted || this.surface?.disposed)
+          return;
+        if (value instanceof FailedArgument) {
+          setValue(sig, this.atLeastV10 ? null : void 0);
+        } else if (isSignal(value) && abortSignal) {
+          this.forwardSignal(sig, value, abortSignal);
+        } else {
+          setValue(sig, isSignal(value) ? peekValue(value) : value);
+        }
+      }, (e2) => {
+        if (abortSignal?.aborted || this.surface?.disposed)
+          return;
+        const cancelled = isCancellation(e2);
+        if (!cancelled)
+          onFailure?.();
+        this.dispatchExpressionError(e2, name);
+        setValue(sig, !cancelled && this.atLeastV10 ? null : void 0);
+      });
+    }
+    /**
+     * Copies the values of `source` into `target` until `abortSignal` fires.
+     *
+     * @param target The signal that exposes the result.
+     * @param source The signal a function returned.
+     * @param abortSignal Signal that ends the forwarding.
+     */
+    forwardSignal(target, source, abortSignal) {
+      if (abortSignal.aborted)
+        return;
+      const stop = effect(() => {
+        setValue(target, getValue(source));
+      });
+      abortSignal.addEventListener("abort", () => stop(), { once: true });
+    }
+    /**
+     * Dispatches an evaluation failure to the surface as an `EXPRESSION_ERROR`.
+     *
+     * Every failure other than an unresolvable catalog uses this code, including
+     * a function missing from the catalog the call resolved to and an unknown
+     * system function. Unresolvable catalogs are reported by
+     * {@link resolveCallCatalog} as `CATALOG_ERROR`. A cancelled agent call
+     * (an `A2uiRpcError` with code `CANCELLED`, as when its surface is deleted)
+     * is not reported.
+     *
+     * @param e The error thrown while evaluating the call.
+     * @param name Name of the function being evaluated.
+     */
+    dispatchExpressionError(e2, name) {
+      if (!this.surface || this.surface.disposed)
+        return;
+      if (isCancellation(e2))
+        return;
+      if (e2 instanceof external_exports.ZodError || typeof e2 === "object" && e2 !== null && e2.name === "ZodError") {
+        const zodErr = e2;
+        const err = new A2uiExpressionError(`Validation failed for function '${name}': ${zodErr.message}`, name, zodErr.errors ?? zodErr.issues);
+        this.surface.dispatchError({
+          code: "EXPRESSION_ERROR",
+          message: err.message,
+          expression: name,
+          details: err.details
+        });
+      } else if (e2 instanceof A2uiExpressionError) {
+        this.surface.dispatchError({
+          code: "EXPRESSION_ERROR",
+          message: e2.message,
+          expression: e2.expression,
+          details: e2.details
+        });
+      } else {
+        const errObj = typeof e2 === "object" && e2 !== null ? e2 : {};
+        const isAgentFailure = e2 instanceof A2uiRpcError;
+        this.surface.dispatchError({
+          code: this.isActionExecution && !isAgentFailure ? "EXECUTION_ERROR" : "EXPRESSION_ERROR",
+          message: errObj.message ?? `An unexpected error occurred in function ${name}.`,
+          expression: name,
+          ...isAgentFailure && e2.functionCallId ? { functionCallId: e2.functionCallId } : {}
+        });
+      }
+    }
+    /**
+     * Creates a child DataContext scoped to a deeper relative path.
+     *
+     * @param relativePath The path relative to the current context's path.
+     * @param index Optional explicit iteration index for this nested scope.
+     * @returns A new DataContext instance pointing to the resolved absolute path.
+     */
+    nested(relativePath, index) {
+      const newPath = this.resolvePath(relativePath);
+      return new _DataContext(this.surface ?? this.dataModel, newPath, index, this);
+    }
+    resolvePath(path) {
+      if (path.startsWith("/")) {
+        return path;
+      }
+      let base = this.path;
+      if (base.endsWith("/") && base.length > 1) {
+        base = base.slice(0, -1);
+      }
+      if (path === "" || path === ".") {
+        return base || "/";
+      }
+      if (base === "/")
+        base = "";
+      return `${base}/${path}`;
+    }
+  };
+  (() => {
+    registerDataContextInternals({
+      withFlags: (ctx, flags) => ctx.withFlags(flags),
+      resolveValue: (ctx, value, depth, userActivated, keepPending) => ctx.resolveValue(value, depth, userActivated, keepPending),
+      allowsAgentRouting: (ctx) => ctx.allowsAgentRouting,
+      resolveSignalValue: (ctx, value, depth, keepPending) => ctx.resolveSignalValue(value, depth, keepPending),
+      activeCatalogId: (ctx) => ctx.activeCatalogId,
+      activeCatalog: (ctx) => ctx.activeCatalog
+    });
+  })();
 
   // node_modules/@a2ui/web_core/src/common/metadata.js
   function isPlainObject2(value) {
@@ -5294,149 +7728,400 @@ var bwA2UI = (() => {
     return jsonValueEquals(a2, b2);
   }
 
-  // node_modules/@a2ui/web_core/src/types/common-types.js
-  var ComponentIdSchema2 = markChildRef(external_exports.string().describe("REF:common_types.json#/$defs/ComponentId|The unique identifier for a component, used for both definitions and references within the same surface."), "component-id");
-  var DataBindingSchema2 = external_exports.object({
-    "path": external_exports.string().describe("A JSON Pointer path to a value in the data model.").optional(),
-    "@path": external_exports.string().describe("A JSON Pointer path to a value in the data model.").optional()
-  }).refine((data) => data["@path"] !== void 0 || data.path !== void 0, {
-    message: "Either '@path' or 'path' must be provided."
-  }).describe("REF:common_types.json#/$defs/DataBinding");
-  var FunctionCallSchema2 = external_exports.object({
-    "call": external_exports.string().describe("The name of the function to call.").optional(),
-    "@call": external_exports.string().describe("The name of the function to call.").optional(),
-    "args": external_exports.record(external_exports.string(), external_exports.unknown()).describe("Arguments passed to the function.").optional(),
-    "returnType": external_exports.enum(["string", "number", "boolean", "array", "object", "any", "void"]).describe("The expected return type of the function call.").optional(),
-    "catalogId": external_exports.string().describe("The catalog ID for this function, overriding any surface-level default catalogId.").optional()
-  }).strict().refine((data) => data["@call"] !== void 0 || data.call !== void 0, {
-    message: "Either '@call' or 'call' must be provided."
-  }).describe("REF:common_types.json#/$defs/FunctionCall|Invokes a named function, combining common function properties with the catalog function definition.");
-  var DynamicStringSchema2 = external_exports.union([external_exports.string(), DataBindingSchema2, FunctionCallSchema2]).describe("REF:common_types.json#/$defs/DynamicString|Represents a string");
-  var DynamicBooleanSchema2 = external_exports.union([external_exports.boolean(), DataBindingSchema2, FunctionCallSchema2]).describe("REF:common_types.json#/$defs/DynamicBoolean|A boolean value that can be a literal, a path, or a function call returning a boolean or a validation result object (coerced to its \\'valid\\' boolean).");
-  var AccessibilityAttributesSchema2 = external_exports.object({
-    "label": DynamicStringSchema2.optional(),
-    "description": DynamicStringSchema2.optional(),
-    "live": external_exports.enum(["off", "polite", "assertive"]).default("off").describe("Controls screen reader announcements for dynamic updates (WAI-ARIA aria-live). 'polite' waits for user pause; 'assertive' interrupts immediately for alerts.").optional(),
-    "hidden": DynamicBooleanSchema2.optional()
-  }).describe("REF:common_types.json#/$defs/AccessibilityAttributes|Attributes to enhance accessibility when using assistive technologies like screen readers or model understanding.");
-  var ExtensionsSchema2 = external_exports.record(external_exports.string(), external_exports.unknown()).superRefine((value, ctx) => {
-    for (const key in value) {
-      if (!isValidUax31Identifier(key)) {
-        ctx.addIssue({
-          path: [key],
-          code: external_exports.ZodIssueCode.custom,
-          message: `Invalid extension key "${key}": Keys MUST be Unicode identifiers (UAX #31).`
-        });
-      }
+  // node_modules/@a2ui/web_core/src/catalog/agent_function_brand.js
+  var AGENT_FUNCTION_BRAND = /* @__PURE__ */ Symbol.for("@a2ui/web_core/AgentFunction");
+  function isAgentFunction(value) {
+    return typeof value === "object" && value !== null && value[AGENT_FUNCTION_BRAND] === true && typeof value.handler === "function";
+  }
+
+  // node_modules/@a2ui/web_core/src/catalog/json_entries.js
+  var definitions = /* @__PURE__ */ new WeakMap();
+  function loadedDefinition(entry) {
+    return definitions.get(entry);
+  }
+  function copyLoadedDefinition(source, target) {
+    const definition = definitions.get(source);
+    if (definition !== void 0) {
+      definitions.set(target, definition);
     }
-  }).describe("REF:#/$defs/Extensions|Optional extension metadata. Keys MUST be Unicode identifiers (UAX #31). Keys starting with 'a2ui_' are reserved for official extensions.");
-  var ComponentCommonSchema2 = external_exports.object({
-    "id": ComponentIdSchema2,
-    "accessibility": AccessibilityAttributesSchema2.optional(),
-    "catalogId": external_exports.string().describe("The catalog ID for this component, overriding any surface-level default catalogId.").optional(),
-    "metadata": external_exports.object({
-      "extensions": ExtensionsSchema2.optional()
-    }).strict().describe("Optional component-level metadata for vendor extensions.").optional()
-  }).describe("REF:common_types.json#/$defs/ComponentCommon");
-  var ChildListSchema2 = markChildRef(external_exports.union([
-    external_exports.array(ComponentIdSchema2).describe("A static list of child component IDs."),
-    external_exports.object({
-      "componentId": ComponentIdSchema2,
-      "path": external_exports.string().describe("The path to the list of component property objects in the data model.")
-    }).describe("A template for generating a dynamic list of children.")
-  ]).describe("REF:common_types.json#/$defs/ChildList"), "child-list");
-  var DynamicValueSchema2 = external_exports.union([
+  }
+  function defineViews(target, views) {
+    for (const [key, compute] of Object.entries(views)) {
+      let computed2 = false;
+      let value;
+      Object.defineProperty(target, key, {
+        enumerable: true,
+        get() {
+          if (!computed2) {
+            value = compute();
+            computed2 = true;
+          }
+          return value;
+        }
+      });
+    }
+  }
+  function isObject(value) {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+  function stringList(value) {
+    return Array.isArray(value) ? value.filter((item) => typeof item === "string") : void 0;
+  }
+  var JsonComponentApi = class {
+    /**
+     * @param name The component's name.
+     * @param jsonSchema The component's definition, deeply frozen.
+     * @param deriveSchema Derives the component's Zod schema from its definition.
+     */
+    constructor(name, jsonSchema, deriveSchema) {
+      this.name = name;
+      definitions.set(this, jsonSchema);
+      defineViews(this, {
+        schema: () => deriveSchema(jsonSchema),
+        allowedParents: () => stringList(jsonSchema["allowedParents"]),
+        allowedChildren: () => stringList(jsonSchema["allowedChildren"]),
+        metadata: () => isObject(jsonSchema["metadata"]) ? jsonSchema["metadata"] : void 0
+      });
+      Object.freeze(this);
+    }
+    /** The component's JSON Schema definition, as its catalog document writes it. */
+    get jsonSchema() {
+      return definitions.get(this);
+    }
+  };
+  var JsonFunctionApi = class {
+    /**
+     * @param name The function's name.
+     * @param jsonSchema The function's definition, deeply frozen.
+     * @param deriveSchema Derives the Zod schema of the function's arguments
+     *     from its definition.
+     */
+    constructor(name, jsonSchema, deriveSchema) {
+      this.name = name;
+      definitions.set(this, jsonSchema);
+      const props = isObject(jsonSchema["properties"]) ? jsonSchema["properties"] : void 0;
+      const constant = (key) => {
+        const property = props?.[key];
+        return isObject(property) ? property["const"] : void 0;
+      };
+      defineViews(this, {
+        schema: () => deriveSchema(jsonSchema),
+        returnType: () => {
+          const declared = jsonSchema["returnType"] ?? constant("returnType");
+          return typeof declared === "string" ? declared : "any";
+        },
+        description: () => typeof jsonSchema["description"] === "string" ? jsonSchema["description"] : void 0,
+        allowedCallers: () => jsonSchema["allowedCallers"] ?? constant("allowedCallers"),
+        requiresUserActivation: () => jsonSchema["requiresUserActivation"] ?? constant("requiresUserActivation")
+      });
+      Object.freeze(this);
+    }
+    /** The function's JSON Schema definition, as its catalog document writes it. */
+    get jsonSchema() {
+      return definitions.get(this);
+    }
+  };
+
+  // node_modules/@a2ui/web_core/src/catalog/spec_annotations.js
+  var annotations = /* @__PURE__ */ new WeakMap();
+  var rawDescribeMethods = /* @__PURE__ */ new WeakMap();
+  function cloneSchema(schema, description = schema.description) {
+    const describeFn = rawDescribeMethods.get(schema) ?? external_exports.ZodType?.prototype?.describe ?? schema.describe;
+    return describeFn.call(schema, description);
+  }
+  function spec(schema, annotation) {
+    const copy = cloneSchema(schema, schema.description);
+    annotations.set(copy, { ...annotations.get(schema), ...annotation });
+    return copy;
+  }
+  function getSpecAnnotation(schema) {
+    return typeof schema === "object" && schema !== null ? annotations.get(schema) : void 0;
+  }
+
+  // node_modules/@a2ui/web_core/src/v0_9/schema/common-types.js
+  var common_types_exports3 = {};
+  __export(common_types_exports3, {
+    AccessibilityAttributesSchema: () => AccessibilityAttributesSchema3,
+    ActionSchema: () => ActionSchema3,
+    CheckRuleSchema: () => CheckRuleSchema3,
+    CheckableSchema: () => CheckableSchema3,
+    ChildListSchema: () => ChildListSchema3,
+    CommonSchemas: () => CommonSchemas3,
+    ComponentCommonSchema: () => ComponentCommonSchema3,
+    ComponentIdSchema: () => ComponentIdSchema3,
+    DataBindingSchema: () => DataBindingSchema3,
+    DynamicBooleanSchema: () => DynamicBooleanSchema3,
+    DynamicNumberSchema: () => DynamicNumberSchema3,
+    DynamicStringListSchema: () => DynamicStringListSchema3,
+    DynamicStringSchema: () => DynamicStringSchema3,
+    DynamicValueSchema: () => DynamicValueSchema3,
+    FunctionCallSchema: () => FunctionCallSchema3
+  });
+  var ComponentIdSchema3 = markChildRef(external_exports.string().describe("REF:#/$defs/ComponentId|The unique identifier for a component, used for both definitions and references within the same surface."), "component-id");
+  var DataBindingSchema3 = external_exports.object({ "path": external_exports.string().describe("A JSON Pointer path to a value in the data model.") }).strict().describe("REF:#/$defs/DataBinding");
+  var DynamicValueSchema3 = external_exports.union([
     external_exports.string(),
     external_exports.number(),
     external_exports.boolean(),
-    external_exports.array(external_exports.unknown()),
-    DataBindingSchema2,
-    FunctionCallSchema2,
-    external_exports.record(external_exports.string(), external_exports.unknown()).refine((obj) => !obj || !("@path" in obj) && !("path" in obj) && !("@call" in obj) && !("call" in obj))
-  ]).describe("REF:common_types.json#/$defs/DynamicValue|A value that can be a literal, a path, or a function call returning any type.");
-  var DynamicNumberSchema2 = external_exports.union([external_exports.number(), DataBindingSchema2, FunctionCallSchema2]).describe("REF:common_types.json#/$defs/DynamicNumber|Represents a value that can be either a literal number, a path to a number in the data model, or a function call returning a number.");
-  var DynamicStringListSchema2 = external_exports.union([external_exports.array(external_exports.string()), DataBindingSchema2, FunctionCallSchema2]).describe("REF:common_types.json#/$defs/DynamicStringList|Represents a value that can be either a literal array of strings, a path to a string array in the data model, or a function call returning a string array.");
-  var CheckRuleSchema2 = external_exports.object({
-    "condition": external_exports.union([DynamicBooleanSchema2, DataBindingSchema2, FunctionCallSchema2]).describe("Path or function call evaluating to a structured validation result object or a boolean."),
-    "message": external_exports.string().describe("Optional fallback error message.").optional()
-  }).describe("REF:common_types.json#/$defs/CheckRule|A single validation check rule applied to an input component. The condition function or path evaluates to a structured validation result object or a boolean (which is coerced to a validation result object).");
-  var CheckableSchema2 = external_exports.object({
-    "checks": external_exports.array(CheckRuleSchema2).describe("A list of validation check rules to perform on the component.").optional()
-  }).describe("REF:common_types.json#/$defs/Checkable|Properties for components that support renderer-side checks.");
-  var ActionSchema2 = external_exports.union([
+    external_exports.array(external_exports.any()),
+    DataBindingSchema3,
+    external_exports.lazy(() => FunctionCallSchema3)
+  ]).describe("REF:#/$defs/DynamicValue|A value that can be a literal, a path, or a function call returning any type.");
+  var FunctionCallSchema3 = external_exports.object({
+    "call": external_exports.string().describe("The name of the function to call."),
+    "args": external_exports.record(external_exports.string(), external_exports.union([
+      DynamicValueSchema3,
+      external_exports.record(external_exports.string(), external_exports.any()).describe("A literal object argument (e.g. configuration).")
+    ])).describe("Arguments passed to the function.").optional(),
+    "returnType": external_exports.enum(["string", "number", "boolean", "array", "object", "any", "void"]).describe("The expected return type of the function call.").default("boolean")
+  }).describe("REF:#/$defs/FunctionCall|Invokes a named function on the client.");
+  var DynamicStringSchema3 = external_exports.union([external_exports.string(), DataBindingSchema3, FunctionCallSchema3]).describe("REF:#/$defs/DynamicString|Represents a string");
+  var AccessibilityAttributesSchema3 = external_exports.object({ "label": DynamicStringSchema3.optional(), "description": DynamicStringSchema3.optional() }).describe("REF:#/$defs/AccessibilityAttributes|Attributes to enhance accessibility when using assistive technologies like screen readers.");
+  var ComponentCommonSchema3 = external_exports.object({ "id": ComponentIdSchema3, "accessibility": AccessibilityAttributesSchema3.optional() }).describe("REF:#/$defs/ComponentCommon");
+  var ChildListSchema3 = markChildRef(external_exports.union([
+    external_exports.array(ComponentIdSchema3).describe("A static list of child component IDs."),
+    external_exports.object({
+      "componentId": ComponentIdSchema3,
+      "path": external_exports.string().describe("The path to the list of component property objects in the data model.")
+    }).strict().describe("A template for generating a dynamic list of children from a data model list. The `componentId` is the component to use as a template.")
+  ]).describe("REF:#/$defs/ChildList"), "child-list");
+  var DynamicNumberSchema3 = external_exports.union([external_exports.number(), DataBindingSchema3, FunctionCallSchema3]).describe("REF:#/$defs/DynamicNumber|Represents a value that can be either a literal number, a path to a number in the data model, or a function call returning a number.");
+  var DynamicBooleanSchema3 = external_exports.union([external_exports.boolean(), DataBindingSchema3, FunctionCallSchema3]).describe("REF:#/$defs/DynamicBoolean|A boolean value that can be a literal, a path, or a function call returning a boolean.");
+  var DynamicStringListSchema3 = external_exports.union([external_exports.array(external_exports.string()), DataBindingSchema3, FunctionCallSchema3]).describe("REF:#/$defs/DynamicStringList|Represents a value that can be either a literal array of strings, a path to a string array in the data model, or a function call returning a string array.");
+  var CheckRuleSchema3 = external_exports.object({
+    "condition": DynamicBooleanSchema3,
+    "message": external_exports.string().describe("The error message to display if the check fails.")
+  }).strict().describe("REF:#/$defs/CheckRule|A single validation rule applied to an input component.");
+  var CheckableSchema3 = external_exports.object({
+    "checks": external_exports.array(CheckRuleSchema3).describe("A list of checks to perform. These are function calls that must return a boolean indicating validity.").optional()
+  }).describe("REF:#/$defs/Checkable|Properties for components that support client-side checks.");
+  var ActionSchema3 = external_exports.union([
     external_exports.object({
       "event": external_exports.object({
         "name": external_exports.string().describe("The name of the action to be dispatched to the server."),
-        "context": external_exports.record(external_exports.string(), external_exports.unknown()).describe("A JSON object containing the key-value pairs for the action context. Values can be literals or paths. Use literal values unless the value must be dynamically bound to the data model. Do NOT use paths for static IDs.").optional()
+        "context": external_exports.record(external_exports.string(), DynamicValueSchema3).describe("A JSON object containing the key-value pairs for the action context. Values can be literals or paths. Use literal values unless the value must be dynamically bound to the data model. Do NOT use paths for static IDs.").optional()
       }).strict().describe("The event to dispatch to the server.")
     }).strict().describe("Triggers a server-side event."),
-    external_exports.object({
-      "functionCall": FunctionCallSchema2
-    }).strict().describe("Executes a local client-side function."),
-    external_exports.object({
-      "event": external_exports.object({
-        "name": external_exports.string().describe("The name of the action to be dispatched to the agent."),
-        "userMessage": DynamicStringSchema2.optional(),
-        "context": external_exports.record(external_exports.string(), external_exports.unknown()).describe("A JSON object containing the key-value pairs for the action context. Values can be literals or paths. Use literal values unless the value must be dynamically bound to the data model. Do NOT use paths for static IDs.").optional()
-      }).strict().describe("The event to dispatch to the agent.")
-    }).strict().describe("Triggers an agent-side event."),
-    external_exports.object({
-      "functionCall": FunctionCallSchema2
-    }).strict().describe("Executes a renderer or agent-side function.")
-  ]).describe("REF:common_types.json#/$defs/Action|Defines an interaction handler that can either trigger an agent-side event or execute a local renderer-side function.");
-  var CallIdSchema2 = external_exports.string().describe("REF:common_types.json#/$defs/CallId|The unique identifier for a function call.");
-  var ChildSchema = ComponentIdSchema2;
-  var FunctionCommonSchema2 = external_exports.object({
-    "call": external_exports.string().describe("The name of the function to call.").optional(),
-    "@call": external_exports.string().describe("The name of the function to call.").optional(),
-    "catalogId": external_exports.string().describe("The catalog ID for this function, overriding any surface-level default catalogId.").optional()
-  }).refine((data) => data["@call"] !== void 0 || data.call !== void 0, {
-    message: "Either '@call' or 'call' must be provided."
-  }).describe("REF:common_types.json#/$defs/FunctionCommon|Baseline envelope properties common to all function calls. Function-specific argument schemas ('args') are defined individually by each function in the active catalog.");
-  var IndexSystemFunctionSchema2 = external_exports.object({
-    "call": external_exports.literal("@index").optional(),
-    "@call": external_exports.literal("@index").optional(),
-    "args": external_exports.object({
-      "offset": DynamicNumberSchema2.optional()
-    }).optional()
-  }).refine((data) => data["@call"] !== void 0 || data.call !== void 0, {
-    message: "Either '@call' or 'call' must be '@index'."
-  }).describe("REF:common_types.json#/$defs/IndexSystemFunction|Returns the 0-based index of the current item when rendering a dynamic list from a template. This function MUST ONLY be available when evaluating template items within a list context.");
-  var SurfaceSchema2 = external_exports.object({
-    "component": external_exports.literal("Surface").optional(),
-    "child": external_exports.literal("root").optional()
-  }).strict().describe("REF:common_types.json#/$defs/Surface|The reserved canonical container component representing an A2UI surface. The Surface component is immutable and always has \\'child\\': \\'root\\'.");
-  var FunctionResponseSchema2 = external_exports.object({
-    "functionCallId": CallIdSchema2,
-    "value": external_exports.unknown().describe("The return value of the function.").optional(),
-    "error": external_exports.object({
-      "code": external_exports.string(),
-      "message": external_exports.string()
-    }).strict().describe("An error object indicating failure of the function execution.").optional()
-  }).strict().describe("REF:common_types.json#/$defs/FunctionResponse|The return response matching a callAgentFunction or callRendererFunction invocation.");
-  var CommonSchemas = {
-    ComponentId: ComponentIdSchema2,
-    DataBinding: DataBindingSchema2,
-    FunctionCall: FunctionCallSchema2,
-    DynamicString: DynamicStringSchema2,
-    DynamicBoolean: DynamicBooleanSchema2,
-    AccessibilityAttributes: AccessibilityAttributesSchema2,
-    Extensions: ExtensionsSchema2,
-    ComponentCommon: ComponentCommonSchema2,
-    ChildList: ChildListSchema2,
-    DynamicValue: DynamicValueSchema2,
-    DynamicNumber: DynamicNumberSchema2,
-    DynamicStringList: DynamicStringListSchema2,
-    CheckRule: CheckRuleSchema2,
-    Checkable: CheckableSchema2,
-    Action: ActionSchema2,
-    CallId: CallIdSchema2,
-    Child: ChildSchema,
-    FunctionCommon: FunctionCommonSchema2,
-    IndexSystemFunction: IndexSystemFunctionSchema2,
-    Surface: SurfaceSchema2,
-    FunctionResponse: FunctionResponseSchema2
+    external_exports.object({ "functionCall": FunctionCallSchema3 }).strict().describe("Executes a local client-side function.")
+  ]).describe("REF:#/$defs/Action|Defines an interaction handler that can either trigger a server-side event or execute a local client-side function.");
+  var CommonSchemas3 = {
+    ComponentId: ComponentIdSchema3,
+    DataBinding: DataBindingSchema3,
+    DynamicValue: DynamicValueSchema3,
+    FunctionCall: FunctionCallSchema3,
+    DynamicString: DynamicStringSchema3,
+    AccessibilityAttributes: AccessibilityAttributesSchema3,
+    ComponentCommon: ComponentCommonSchema3,
+    ChildList: ChildListSchema3,
+    DynamicNumber: DynamicNumberSchema3,
+    DynamicBoolean: DynamicBooleanSchema3,
+    DynamicStringList: DynamicStringListSchema3,
+    CheckRule: CheckRuleSchema3,
+    Checkable: CheckableSchema3,
+    Action: ActionSchema3
   };
+
+  // node_modules/@a2ui/web_core/src/catalog/component_envelope.js
+  var COMPONENT_MIXIN_KEYS = ["metadata", "catalogId", "accessibility", "checks"];
+  var AT_COMPONENT_MIXIN_KEYS = new Set(COMPONENT_MIXIN_KEYS.map(atMixinKey));
+  function atMixinKey(key) {
+    return `@${key}`;
+  }
+  var standardMixinSchemas = /* @__PURE__ */ new WeakSet();
+  function markStandardMixinSchema(schema) {
+    standardMixinSchemas.add(schema);
+    return schema;
+  }
+  for (const types of [common_types_exports2, common_types_exports3, common_types_exports]) {
+    for (const [key, prop] of Object.entries(types.ComponentCommonSchema.shape)) {
+      if (key !== "id")
+        markStandardMixinSchema(prop);
+    }
+    for (const prop of Object.values(types.CheckableSchema.shape)) {
+      markStandardMixinSchema(prop);
+    }
+    markStandardMixinSchema(types.CheckRuleSchema);
+    markStandardMixinSchema(types.AccessibilityAttributesSchema);
+  }
+  var EMPTY_LAYOUT = { customKeys: /* @__PURE__ */ new Set(), schemaKeys: /* @__PURE__ */ new Map() };
+  var layoutCache = /* @__PURE__ */ new WeakMap();
+  var INNER_TYPE_WRAPPERS = /* @__PURE__ */ new Set([
+    "ZodOptional",
+    "ZodNullable",
+    "ZodDefault",
+    "ZodCatch",
+    "ZodReadonly"
+  ]);
+  function unwrapSchemaLayer(def) {
+    const typeName = def?.typeName;
+    if (typeName === "ZodEffects")
+      return def.schema;
+    if (INNER_TYPE_WRAPPERS.has(typeName))
+      return def.innerType;
+    if (typeName === "ZodBranded")
+      return def.type;
+    if (typeName === "ZodLazy")
+      return def.getter();
+    return void 0;
+  }
+  function collectDeclaredProperties(schema, declared = /* @__PURE__ */ new Map(), visited = /* @__PURE__ */ new Set()) {
+    let current = schema;
+    while (current && !visited.has(current)) {
+      visited.add(current);
+      const def = current._def;
+      switch (def?.typeName) {
+        case "ZodObject": {
+          const siblings = typeof current.shape === "function" ? current.shape() : current.shape;
+          for (const [key, prop] of Object.entries(siblings)) {
+            const declaration = { schema: prop, siblings };
+            const declarations = declared.get(key);
+            if (declarations) {
+              declarations.push(declaration);
+            } else {
+              declared.set(key, [declaration]);
+            }
+          }
+          return declared;
+        }
+        case "ZodIntersection":
+          collectDeclaredProperties(def.left, declared, visited);
+          collectDeclaredProperties(def.right, declared, visited);
+          return declared;
+        case "ZodUnion":
+        case "ZodDiscriminatedUnion":
+          for (const option of def.options)
+            collectDeclaredProperties(option, declared, visited);
+          return declared;
+        case "ZodPipeline":
+          collectDeclaredProperties(def.in, declared, visited);
+          collectDeclaredProperties(def.out, declared, visited);
+          return declared;
+      }
+      current = unwrapSchemaLayer(def);
+    }
+    return declared;
+  }
+  function unwrapProperty(schema) {
+    let current = schema;
+    while (current && !standardMixinSchemas.has(current)) {
+      const inner = unwrapSchemaLayer(current._def);
+      if (!inner)
+        break;
+      current = inner;
+    }
+    return current;
+  }
+  function refDefName(schema) {
+    const description = schema?.description;
+    if (typeof description !== "string" || !description.startsWith("REF:"))
+      return void 0;
+    const ref = description.slice(4).split("|")[0];
+    return ref.split("/").pop();
+  }
+  function isStandardMixinProperty(componentSchema, key, { schema: prop, siblings }) {
+    const inner = unwrapProperty(prop);
+    if (standardMixinSchemas.has(prop) || standardMixinSchemas.has(inner))
+      return true;
+    const mixins = getSpecAnnotation(componentSchema)?.mixins ?? [];
+    switch (key) {
+      case "checks": {
+        if (mixins.includes("Checkable"))
+          return true;
+        if (inner?._def?.typeName !== "ZodArray")
+          return false;
+        const element = unwrapProperty(inner._def.type);
+        return standardMixinSchemas.has(element) || refDefName(element) === "CheckRule";
+      }
+      case "accessibility":
+        return refDefName(inner) === "AccessibilityAttributes";
+      case "catalogId":
+        return Object.hasOwn(siblings, "id") && inner?._def?.typeName === "ZodString";
+      case "metadata": {
+        if (!Object.hasOwn(siblings, "id") || inner?._def?.typeName !== "ZodObject")
+          return false;
+        const keys = Object.keys(typeof inner.shape === "function" ? inner.shape() : inner.shape);
+        return keys.length === 1 && keys[0] === "extensions";
+      }
+    }
+  }
+  function componentMixinLayout(schema) {
+    if (!schema)
+      return EMPTY_LAYOUT;
+    const cached = layoutCache.get(schema);
+    if (cached)
+      return cached;
+    const declared = collectDeclaredProperties(schema);
+    const customKeys = /* @__PURE__ */ new Set();
+    const schemaKeys = /* @__PURE__ */ new Map();
+    for (const key of COMPONENT_MIXIN_KEYS) {
+      const atKey = atMixinKey(key);
+      const bare = declared.get(key);
+      if (declared.has(atKey)) {
+        schemaKeys.set(key, atKey);
+        if (bare && !bare.every(({ schema: prop }) => standardMixinSchemas.has(prop))) {
+          customKeys.add(key);
+        }
+      } else if (bare) {
+        if (bare.every((declaration) => isStandardMixinProperty(schema, key, declaration))) {
+          schemaKeys.set(key, key);
+        } else {
+          customKeys.add(key);
+        }
+      }
+    }
+    const layout = { customKeys, schemaKeys };
+    layoutCache.set(schema, layout);
+    return layout;
+  }
+  function routeLegacyCatalogId(layout, comp, defaultCatalogSchema) {
+    if (!layout.customKeys.has("catalogId") || comp[atMixinKey("catalogId")] !== void 0 || comp["catalogId"] === void 0 || componentMixinLayout(defaultCatalogSchema).customKeys.has("catalogId")) {
+      return layout;
+    }
+    const customKeys = new Set(layout.customKeys);
+    customKeys.delete("catalogId");
+    return { customKeys, schemaKeys: layout.schemaKeys };
+  }
+  function splitComponentEnvelope(comp, layout) {
+    const properties = {};
+    for (const [key, value] of Object.entries(comp)) {
+      if (key === "id" || key === "component" || AT_COMPONENT_MIXIN_KEYS.has(key))
+        continue;
+      properties[key] = value;
+    }
+    const mixins = {};
+    for (const key of COMPONENT_MIXIN_KEYS) {
+      const atKey = atMixinKey(key);
+      const hasAt = comp[atKey] !== void 0;
+      const hasBare = comp[key] !== void 0;
+      const custom2 = layout.customKeys.has(key);
+      if (hasAt && hasBare && !custom2) {
+        const msg = `Component '${String(comp["id"])}' cannot specify both '${atKey}' and legacy '${key}'.`;
+        throw new A2uiValidationError(msg, [{ path: `/${atKey}`, code: "invalid_value", message: msg }], "VALIDATION_ERROR", { path: `/${atKey}` });
+      }
+      if (hasAt) {
+        mixins[key] = { value: comp[atKey], wireKey: atKey };
+      } else if (hasBare && !custom2 && (key !== "checks" || layout.schemaKeys.has("checks"))) {
+        mixins[key] = { value: comp[key], wireKey: key };
+        delete properties[key];
+      }
+    }
+    return { properties, mixins };
+  }
+  function componentPayloadState(comp, protocolVersion, schema, options) {
+    if (!isAtLeastVersion(protocolVersion, "1.0")) {
+      const { id: _id, component: _component, ...properties2 } = comp;
+      return { properties: properties2, metadata: void 0 };
+    }
+    let layout = componentMixinLayout(schema);
+    if (options)
+      layout = routeLegacyCatalogId(layout, comp, options.defaultCatalogSchema);
+    const { properties, mixins } = splitComponentEnvelope(comp, layout);
+    if (mixins.accessibility)
+      properties[atMixinKey("accessibility")] = mixins.accessibility.value;
+    if (mixins.checks)
+      properties[atMixinKey("checks")] = mixins.checks.value;
+    return { properties, metadata: mixins.metadata?.value };
+  }
 
   // node_modules/zod-to-json-schema/dist/esm/Options.js
   var ignoreOverride = /* @__PURE__ */ Symbol("Let zodToJsonSchema decide on which parser to use");
@@ -6749,99 +9434,6 @@ var bwA2UI = (() => {
     return def.description === void 0 ? { oneOf } : { oneOf, description: def.description };
   };
 
-  // node_modules/@a2ui/web_core/src/catalog/json_entries.js
-  var definitions = /* @__PURE__ */ new WeakMap();
-  function loadedDefinition(entry) {
-    return definitions.get(entry);
-  }
-  function defineViews(target, views) {
-    for (const [key, compute] of Object.entries(views)) {
-      let computed2 = false;
-      let value;
-      Object.defineProperty(target, key, {
-        enumerable: true,
-        get() {
-          if (!computed2) {
-            value = compute();
-            computed2 = true;
-          }
-          return value;
-        }
-      });
-    }
-  }
-  function isObject(value) {
-    return typeof value === "object" && value !== null && !Array.isArray(value);
-  }
-  function stringList(value) {
-    return Array.isArray(value) ? value.filter((item) => typeof item === "string") : void 0;
-  }
-  var JsonComponentApi = class {
-    /**
-     * @param name The component's name.
-     * @param jsonSchema The component's definition, deeply frozen.
-     * @param deriveSchema Derives the component's Zod schema from its definition.
-     */
-    constructor(name, jsonSchema, deriveSchema) {
-      this.name = name;
-      definitions.set(this, jsonSchema);
-      defineViews(this, {
-        schema: () => deriveSchema(jsonSchema),
-        allowedParents: () => stringList(jsonSchema["allowedParents"]),
-        allowedChildren: () => stringList(jsonSchema["allowedChildren"]),
-        metadata: () => isObject(jsonSchema["metadata"]) ? jsonSchema["metadata"] : void 0
-      });
-      Object.freeze(this);
-    }
-    /** The component's JSON Schema definition, as its catalog document writes it. */
-    get jsonSchema() {
-      return definitions.get(this);
-    }
-  };
-  var JsonFunctionApi = class {
-    /**
-     * @param name The function's name.
-     * @param jsonSchema The function's definition, deeply frozen.
-     * @param deriveSchema Derives the Zod schema of the function's arguments
-     *     from its definition.
-     */
-    constructor(name, jsonSchema, deriveSchema) {
-      this.name = name;
-      definitions.set(this, jsonSchema);
-      const props = isObject(jsonSchema["properties"]) ? jsonSchema["properties"] : void 0;
-      const constant = (key) => {
-        const property = props?.[key];
-        return isObject(property) ? property["const"] : void 0;
-      };
-      defineViews(this, {
-        schema: () => deriveSchema(jsonSchema),
-        returnType: () => {
-          const declared = jsonSchema["returnType"] ?? constant("returnType");
-          return typeof declared === "string" ? declared : "any";
-        },
-        description: () => typeof jsonSchema["description"] === "string" ? jsonSchema["description"] : void 0,
-        allowedCallers: () => jsonSchema["allowedCallers"] ?? constant("allowedCallers"),
-        requiresUserActivation: () => jsonSchema["requiresUserActivation"] ?? constant("requiresUserActivation")
-      });
-      Object.freeze(this);
-    }
-    /** The function's JSON Schema definition, as its catalog document writes it. */
-    get jsonSchema() {
-      return definitions.get(this);
-    }
-  };
-
-  // node_modules/@a2ui/web_core/src/catalog/spec_annotations.js
-  var annotations = /* @__PURE__ */ new WeakMap();
-  function spec(schema, annotation) {
-    const copy = external_exports.ZodType.prototype.describe.call(schema, schema.description);
-    annotations.set(copy, { ...annotations.get(schema), ...annotation });
-    return copy;
-  }
-  function getSpecAnnotation(schema) {
-    return typeof schema === "object" && schema !== null ? annotations.get(schema) : void 0;
-  }
-
   // node_modules/@a2ui/web_core/src/v0_8/standard_defs.js
   var V08_CHILD_REF_OPTIONS = {
     childRefNames: /* @__PURE__ */ new Set(["ComponentId", "Child", "ChildComponentId"]),
@@ -7442,7 +10034,7 @@ var bwA2UI = (() => {
     }
     return V09_STANDARD_DEFS;
   }
-  function copyJson(value) {
+  function copyJson2(value) {
     return JSON.parse(JSON.stringify(value));
   }
   function isObject2(value) {
@@ -7804,8 +10396,8 @@ var bwA2UI = (() => {
         core = this.coreJson(coreSchema(schema), annotation, catalogDefs);
       }
       if (effectiveAnnotation.keywords)
-        Object.assign(core, copyJson(effectiveAnnotation.keywords));
-      const result = effectiveAnnotation.allOf ? { allOf: [core, ...effectiveAnnotation.allOf.map((s2) => copyJson(s2))] } : core;
+        Object.assign(core, copyJson2(effectiveAnnotation.keywords));
+      const result = effectiveAnnotation.allOf ? { allOf: [core, ...effectiveAnnotation.allOf.map((s2) => copyJson2(s2))] } : core;
       if (ownDescription)
         result["description"] = ownDescription;
       if (effectiveDefault !== void 0)
@@ -8104,7 +10696,7 @@ var bwA2UI = (() => {
   function retainedDefs(defs, before, after, extensionFields) {
     if (!defs)
       return defs;
-    const definitions2 = (entries) => entries.map((entry) => entryDefinition(entry, defs)).filter((d2) => d2 !== void 0);
+    const definitions2 = (entries) => entries.map((entry) => entryDefinition(entry, defs) ?? (isAgentFunction(entry) ? entry.jsonSchema : void 0)).filter((d2) => d2 !== void 0);
     const reachedBefore = reachableDefs(definitions2(before), defs);
     const unconditional = Object.keys(defs).filter((name) => !reachedBefore.has(name));
     const reachedAfter = reachableDefs([...definitions2(after), extensionFields, ...unconditional.map((name) => defs[name])], defs);
@@ -8174,16 +10766,17 @@ var bwA2UI = (() => {
     delete json.additionalProperties;
     json.unevaluatedProperties = typeof extra === "boolean" || isObject3(extra) ? extra : false;
   }
-  function serializeComponentModel(name, comp, localDefs, commonTypesUri = DEFAULT_COMMON_TYPES_URI) {
+  function serializeComponentModel(name, comp, localDefs, isAtLeastV10, commonTypesUri = DEFAULT_COMMON_TYPES_URI) {
     const json = zodToUnbundledJson(comp.schema, localDefs, commonTypesUri);
     const { component: _component, id: _id, ...props } = isObject3(json.properties) ? json.properties : {};
     const required = Array.isArray(json.required) ? json.required.filter((r2) => r2 !== "component" && r2 !== "id") : [];
     const extra = json.unevaluatedProperties ?? json.additionalProperties;
+    const closure = isAtLeastV10 ? extra === true ? true : void 0 : typeof extra === "boolean" || isObject3(extra) ? extra : false;
     const result = {
       type: "object",
       properties: { component: { const: name }, ...props },
       required: ["component", ...required],
-      unevaluatedProperties: typeof extra === "boolean" || isObject3(extra) ? extra : false
+      ...closure !== void 0 ? { unevaluatedProperties: closure } : {}
     };
     if (comp.allowedParents && comp.allowedParents.length > 0) {
       result.allowedParents = [...comp.allowedParents];
@@ -8198,14 +10791,16 @@ var bwA2UI = (() => {
   }
   function serializeFunctionModel(name, fn, localDefs, isAtLeastV10, asListItem, commonTypesUri = DEFAULT_COMMON_TYPES_URI, defs) {
     const args = zodToUnbundledJson(fn.schema, localDefs, commonTypesUri);
+    const allowedCallers = isAgentFunction(fn) ? fn.explicitAllowedCallers : fn.allowedCallers;
+    const requiresUserActivation = isAgentFunction(fn) ? fn.explicitRequiresUserActivation : fn.requiresUserActivation;
     if (asListItem) {
       return {
         name,
         ...fn.description ? { description: fn.description } : {},
         returnType: fn.returnType,
         parameters: args,
-        ...fn.allowedCallers ? { allowedCallers: fn.allowedCallers } : {},
-        ...fn.requiresUserActivation !== void 0 ? { requiresUserActivation: fn.requiresUserActivation } : {}
+        ...allowedCallers ? { allowedCallers } : {},
+        ...requiresUserActivation !== void 0 ? { requiresUserActivation } : {}
       };
     }
     closeObjectSchema(args);
@@ -8215,19 +10810,19 @@ var bwA2UI = (() => {
       result.description = fn.description;
     if (isAtLeastV10) {
       result.returnType = fn.returnType;
-      if (fn.allowedCallers)
-        result.allowedCallers = fn.allowedCallers;
-      if (fn.requiresUserActivation !== void 0) {
-        result.requiresUserActivation = fn.requiresUserActivation;
+      if (allowedCallers)
+        result.allowedCallers = allowedCallers;
+      if (requiresUserActivation !== void 0) {
+        result.requiresUserActivation = requiresUserActivation;
       }
       result.properties = { "@call": { const: name }, args };
       result.required = argsRequired ? ["@call", "args"] : ["@call"];
       return result;
     }
-    if (fn.allowedCallers)
-      result.allowedCallers = fn.allowedCallers;
-    if (fn.requiresUserActivation !== void 0) {
-      result.requiresUserActivation = fn.requiresUserActivation;
+    if (allowedCallers)
+      result.allowedCallers = allowedCallers;
+    if (requiresUserActivation !== void 0) {
+      result.requiresUserActivation = requiresUserActivation;
     }
     result.properties = { call: { const: name }, args, returnType: { const: fn.returnType } };
     result.required = argsRequired ? ["call", "args"] : ["call"];
@@ -8356,7 +10951,7 @@ var bwA2UI = (() => {
       const components = {};
       for (const [name, comp] of catalog.components) {
         const definition = model.components.get(name);
-        components[name] = definition ? deepCopyJson(definition) : serializeComponentModel(name, comp, localDefs, commonTypesUri);
+        components[name] = definition ? deepCopyJson(definition) : serializeComponentModel(name, comp, localDefs, isAtLeastV10, commonTypesUri);
       }
       doc.components = components;
     }
@@ -8423,7 +11018,7 @@ var bwA2UI = (() => {
   }
   function resolveProtocolRef(ref) {
     const defName = ref.split(/#\/(?:\$defs|definitions)\//)[1];
-    return defName && Object.hasOwn(CommonSchemas, defName) ? CommonSchemas[defName] : void 0;
+    return defName && Object.hasOwn(CommonSchemas2, defName) ? CommonSchemas2[defName] : void 0;
   }
   function convertEnumToZod(values) {
     if (values.length === 0) {
@@ -8452,9 +11047,15 @@ var bwA2UI = (() => {
     let result = baseZod;
     if (propSchema.not && typeof propSchema.not === "object") {
       const notSchema = convertPropertyToZod(propSchema.not, rootDoc, new Set(visitedPointers), defCache);
-      result = result.refine((val2) => !notSchema.safeParse(val2).success, {
-        message: 'Value matched prohibited "not" schema'
-      });
+      result = external_exports.preprocess((val2, ctx) => {
+        if (notSchema.safeParse(val2).success) {
+          ctx.addIssue({
+            code: external_exports.ZodIssueCode.custom,
+            message: 'Value matched prohibited "not" schema'
+          });
+        }
+        return val2;
+      }, result);
     }
     if (propSchema.default !== void 0) {
       result = result.default(propSchema.default);
@@ -8561,7 +11162,10 @@ var bwA2UI = (() => {
         }
         const baseObj = external_exports.object(shape);
         const forbidExtra = propSchema.additionalProperties === false || propSchema.unevaluatedProperties === false || subSchemas.some((s2) => s2.kind === "json" && (s2.schema.additionalProperties === false || s2.schema.unevaluatedProperties === false));
-        const obj = forbidExtra ? baseObj.strict() : baseObj.passthrough();
+        const obj = closeObjectSchema2(baseObj, [
+          propSchema,
+          ...subSchemas.flatMap((s2) => s2.kind === "json" && s2.schema !== propSchema ? [s2.schema] : [])
+        ], forbidExtra, rootDoc, visitedPointers, defCache);
         return finalizePropertyZod(obj, propSchema, rootDoc, visitedPointers, defCache);
       }
     }
@@ -8631,6 +11235,9 @@ var bwA2UI = (() => {
           } catch {
           }
         }
+        if (propSchema.format === "uri") {
+          return finalizePropertyZod(s2.refine((v2) => v2.trim().length > 0 && !/\s/.test(v2.trim()), "Invalid URI"), propSchema, rootDoc, visitedPointers, defCache);
+        }
         return finalizePropertyZod(s2, propSchema, rootDoc, visitedPointers, defCache);
       }
       case "integer":
@@ -8658,12 +11265,13 @@ var bwA2UI = (() => {
       }
       case "object": {
         const props = propSchema.properties;
+        const hasPatterns = typeof propSchema.patternProperties === "object" && propSchema.patternProperties !== null;
         let obj;
-        if (typeof props === "object" && props !== null) {
+        if (typeof props === "object" && props !== null || hasPatterns) {
           const required = Array.isArray(propSchema.required) ? new Set(propSchema.required.filter((r2) => typeof r2 === "string")) : /* @__PURE__ */ new Set();
-          const baseObj = external_exports.object(convertPropertiesToShape(props, required, false, rootDoc, visitedPointers, defCache));
+          const baseObj = external_exports.object(convertPropertiesToShape(props ?? {}, required, false, rootDoc, visitedPointers, defCache));
           const forbidExtra = propSchema.additionalProperties === false || propSchema.unevaluatedProperties === false;
-          obj = forbidExtra ? baseObj.strict() : baseObj.passthrough();
+          obj = closeObjectSchema2(baseObj, [propSchema], forbidExtra, rootDoc, visitedPointers, defCache);
         } else {
           obj = external_exports.record(external_exports.unknown());
         }
@@ -8675,7 +11283,24 @@ var bwA2UI = (() => {
     }
   }
   function isEnvelopeField(propName) {
-    return propName === "id" || propName === "component" || propName === "catalogId";
+    return propName === "id" || propName === "component" || propName === "@catalogId";
+  }
+  function isInlineStandardMixinProperty(properties, propName, propSchema) {
+    if (!Object.hasOwn(properties, "id") || !isPlainObject3(propSchema))
+      return false;
+    switch (propName) {
+      case "catalogId":
+        return propSchema.type === "string";
+      case "metadata": {
+        const metadataProps = propSchema.properties;
+        if (propSchema.type !== "object" || !isPlainObject3(metadataProps))
+          return false;
+        const keys = Object.keys(metadataProps);
+        return keys.length === 1 && keys[0] === "extensions";
+      }
+      default:
+        return false;
+    }
   }
   function convertPropertiesToShape(properties, requiredSet, omitEnvelopeFields = false, rootDoc, visitedPointers, defCache = /* @__PURE__ */ new Map()) {
     const shape = {};
@@ -8685,14 +11310,92 @@ var bwA2UI = (() => {
       }
       const zodField = convertPropertyToZod(typeof propSchema === "object" && propSchema !== null ? propSchema : {}, rootDoc, visitedPointers ? new Set(visitedPointers) : /* @__PURE__ */ new Set(), defCache);
       if (!requiredSet.has(propName)) {
-        shape[propName] = zodField.optional();
-      } else if (zodField.safeParse(void 0).success) {
-        shape[propName] = zodField.refine((value) => value !== void 0, { message: "Required" });
+        shape[propName] = zodField instanceof external_exports.ZodDefault ? zodField : zodField.optional();
+        continue;
+      }
+      if (zodField.safeParse(void 0).success) {
+        shape[propName] = external_exports.preprocess((value, ctx) => {
+          if (value === void 0) {
+            ctx.addIssue({ code: external_exports.ZodIssueCode.custom, message: "Required" });
+          }
+          return value;
+        }, zodField);
       } else {
         shape[propName] = zodField;
       }
     }
+    for (const [propName, propSchema] of Object.entries(properties)) {
+      if (Object.hasOwn(shape, propName) && isInlineStandardMixinProperty(properties, propName, propSchema)) {
+        markStandardMixinSchema(shape[propName]);
+      }
+    }
     return shape;
+  }
+  function closeObjectSchema2(obj, pieces, forbidExtra, rootDoc, visitedPointers, defCache = /* @__PURE__ */ new Map()) {
+    const patterns = [];
+    for (const piece of new Set(pieces)) {
+      const raw = piece.patternProperties;
+      if (!raw || typeof raw !== "object" || Array.isArray(raw))
+        continue;
+      for (const [pattern, patternSchema] of Object.entries(raw)) {
+        let regex;
+        try {
+          regex = new RegExp(pattern, "u");
+        } catch {
+          continue;
+        }
+        patterns.push({
+          regex,
+          schema: convertPropertyToZod(typeof patternSchema === "object" && patternSchema !== null ? patternSchema : {}, rootDoc, visitedPointers ? new Set(visitedPointers) : /* @__PURE__ */ new Set(), defCache)
+        });
+      }
+    }
+    if (patterns.length === 0) {
+      return forbidExtra ? obj.strict() : obj.passthrough();
+    }
+    const declared = new Set(Object.keys(obj.shape));
+    return obj.passthrough().superRefine((value, ctx) => {
+      const unrecognized = [];
+      for (const [key, entry] of Object.entries(value)) {
+        if (declared.has(key))
+          continue;
+        let matched = false;
+        for (const { regex, schema } of patterns) {
+          if (!regex.test(key))
+            continue;
+          matched = true;
+          const result = schema.safeParse(entry);
+          if (!result.success) {
+            for (const issue of result.error.issues) {
+              ctx.addIssue({
+                code: external_exports.ZodIssueCode.custom,
+                message: issue.message,
+                path: [key, ...issue.path]
+              });
+            }
+          }
+        }
+        if (!matched && forbidExtra)
+          unrecognized.push(key);
+      }
+      if (unrecognized.length > 0) {
+        ctx.addIssue({ code: external_exports.ZodIssueCode.unrecognized_keys, keys: unrecognized });
+      }
+    });
+  }
+  function componentCommonMixinProperties(isAtLeastV10) {
+    const properties = {};
+    for (const [key, schema] of Object.entries(ComponentCommonSchema2.shape)) {
+      if (!isAtLeastV10 && key.startsWith("@"))
+        continue;
+      const bareKey = key.replace(/^@/, "");
+      if (bareKey === "id" || bareKey === "catalogId")
+        continue;
+      if (bareKey === "metadata" && !isAtLeastV10)
+        continue;
+      properties[key] = markStandardMixinSchema(schema);
+    }
+    return properties;
   }
   function collectComponentSubSchemas(schema, rootDoc, visitedPointers = /* @__PURE__ */ new Set(), isAtLeastV10 = false) {
     if (!schema || typeof schema !== "object")
@@ -8707,11 +11410,7 @@ var bwA2UI = (() => {
         if (typeof sub.$ref === "string") {
           const ref = sub.$ref;
           if (ref.includes("common_types.json") && ref.includes("ComponentCommon")) {
-            const { accessibility, metadata } = ComponentCommonSchema2.shape;
-            mixins.push({
-              kind: "zod",
-              properties: isAtLeastV10 ? { accessibility, metadata } : { accessibility }
-            });
+            mixins.push({ kind: "zod", properties: componentCommonMixinProperties(isAtLeastV10) });
           } else if (ref.startsWith("#/")) {
             if (!visitedPointers.has(ref)) {
               visitedPointers.add(ref);
@@ -8723,7 +11422,13 @@ var bwA2UI = (() => {
           } else {
             const mirror = resolveProtocolRef(ref);
             if (mirror instanceof external_exports.ZodObject) {
-              mixins.push({ kind: "zod", properties: { ...mirror.shape } });
+              const properties = {};
+              for (const [key, prop] of Object.entries(mirror.shape)) {
+                if (!isAtLeastV10 && key.startsWith("@"))
+                  continue;
+                properties[key] = markStandardMixinSchema(prop);
+              }
+              mixins.push({ kind: "zod", properties });
             }
           }
         } else {
@@ -8824,13 +11529,32 @@ var bwA2UI = (() => {
         }
       }
     }
-    if (Array.isArray(schema.anyOf) || Array.isArray(schema.oneOf)) {
+    const requiredDisjunction = extractRequiredDisjunction(schema.anyOf);
+    if (Array.isArray(schema.anyOf) && !requiredDisjunction || Array.isArray(schema.oneOf)) {
       result.hasUnresolvable = true;
     }
-    if (schema.properties || schema.required || schema.additionalProperties !== void 0 || schema.unevaluatedProperties !== void 0) {
+    if (schema.properties || schema.required || requiredDisjunction || schema.patternProperties || schema.additionalProperties !== void 0 || schema.unevaluatedProperties !== void 0) {
       result.schemas.push(schema);
     }
     return result;
+  }
+  function extractRequiredDisjunction(branches) {
+    if (!Array.isArray(branches) || branches.length === 0)
+      return void 0;
+    const groups = [];
+    for (const branch of branches) {
+      if (!isPlainObject3(branch))
+        return void 0;
+      const keys = Object.keys(branch);
+      if (keys.length !== 1 || keys[0] !== "required" || !Array.isArray(branch.required)) {
+        return void 0;
+      }
+      const req = branch.required.filter((r2) => typeof r2 === "string");
+      if (req.length === 0 || req.length !== branch.required.length)
+        return void 0;
+      groups.push(req);
+    }
+    return groups;
   }
   function convertFunctionArgsJsonSchemaToZod(rawSchema, rootDoc, defCache = /* @__PURE__ */ new Map()) {
     const collected = collectArgSubSchemas(rawSchema, rootDoc);
@@ -8853,7 +11577,65 @@ var bwA2UI = (() => {
     }
     const obj = external_exports.object(shape);
     const allowExtra = collected.hasUnresolvable || collected.schemas.some(isExplicitlyOpen) || isExplicitlyOpen(rawSchema);
-    return allowExtra ? obj.passthrough() : obj.strict();
+    const allSchemas = [rawSchema, ...collected.schemas.filter((s2) => s2 !== rawSchema)];
+    let closed = closeObjectSchema2(obj, allSchemas, !allowExtra, rootDoc, void 0, defCache);
+    for (const s2 of allSchemas) {
+      const groups = extractRequiredDisjunction(s2.anyOf);
+      if (groups) {
+        const label = groups.map((g2) => g2.map((k) => `'${k}'`).join("+")).join(", ");
+        closed = closed.refine((args) => isPlainObject3(args) && groups.some((group) => group.every((key) => args[key] !== void 0)), { message: `At least one of ${label} must be provided.` });
+      }
+    }
+    return closed;
+  }
+  function isZodSchema(value) {
+    return typeof value === "object" && value !== null && typeof value.safeParse === "function";
+  }
+  function getDeclaredSchemaKeys(schema) {
+    const keys = /* @__PURE__ */ new Set();
+    const visit = (node) => {
+      const def = node?._def;
+      switch (def?.typeName) {
+        case "ZodObject": {
+          const shape = typeof node.shape === "function" ? node.shape() : node.shape;
+          if (shape && typeof shape === "object") {
+            for (const key of Object.keys(shape))
+              keys.add(key);
+          }
+          return;
+        }
+        case "ZodEffects":
+          visit(def.schema);
+          return;
+        case "ZodOptional":
+        case "ZodNullable":
+        case "ZodDefault":
+        case "ZodCatch":
+        case "ZodReadonly":
+          visit(def.innerType);
+          return;
+        case "ZodBranded":
+          visit(def.type);
+          return;
+        case "ZodPipeline":
+          visit(def.in);
+          visit(def.out);
+          return;
+        case "ZodIntersection":
+          visit(def.left);
+          visit(def.right);
+          return;
+        case "ZodUnion":
+        case "ZodDiscriminatedUnion":
+          for (const option of def.options)
+            visit(option);
+          return;
+        default:
+          return;
+      }
+    };
+    visit(schema);
+    return keys;
   }
   function functionParameterNames(schema, rootDoc) {
     if (!schema || typeof schema !== "object" || Array.isArray(schema)) {
@@ -8878,13 +11660,15 @@ var bwA2UI = (() => {
       if (n2.properties && typeof n2.properties === "object" && n2.properties !== null && !Array.isArray(n2.properties)) {
         names.push(...Object.keys(n2.properties));
       }
-      if (Array.isArray(n2.allOf)) {
-        for (const member of n2.allOf) {
-          extractProperties(member);
+      for (const combinator of [n2.allOf, n2.anyOf, n2.oneOf]) {
+        if (Array.isArray(combinator)) {
+          for (const member of combinator) {
+            extractProperties(member);
+          }
         }
       }
     };
-    if (s2.properties && typeof s2.properties === "object" && s2.properties !== null && !Array.isArray(s2.properties) || Array.isArray(s2.allOf) || typeof s2.$ref === "string") {
+    if (s2.properties && typeof s2.properties === "object" && s2.properties !== null && !Array.isArray(s2.properties) || Array.isArray(s2.allOf) || Array.isArray(s2.anyOf) || Array.isArray(s2.oneOf) || typeof s2.$ref === "string") {
       extractProperties(s2);
       return names;
     }
@@ -8906,15 +11690,24 @@ var bwA2UI = (() => {
         assertUax31Identifier(argName, `argument identifier: '${argName}' in function '${name}'`);
       }
     };
+    const assertUserActivationCallers = (entry) => {
+      if (!atLeastV10)
+        return;
+      if (entry.requiresUserActivation === true && entry.allowedCallers !== void 0 && entry.allowedCallers !== "rendererOnly") {
+        throw new A2uiCatalogError(`Function '${entry.name}' declares requiresUserActivation=true with allowedCallers='${entry.allowedCallers}'; requiresUserActivation=true requires allowedCallers='rendererOnly'.`);
+      }
+    };
     if (Array.isArray(rawFunctions)) {
       for (const fn of rawFunctions) {
         if (fn && typeof fn === "object" && typeof fn.name === "string") {
           const paramNames = functionParameterNames(fn.parameters, rootDoc);
           assertFunctionIdentifiers(fn.name, paramNames);
+          const entry = new JsonFunctionApi(fn.name, fn, (definition) => definition["parameters"] && typeof definition["parameters"] === "object" ? convertFunctionArgsJsonSchemaToZod(definition["parameters"], rootDoc, defCache) : external_exports.record(external_exports.unknown()));
+          assertUserActivationCallers(entry);
           if (permittedNames && !permittedNames.has(fn.name)) {
             continue;
           }
-          result.push(new JsonFunctionApi(fn.name, fn, (definition) => definition["parameters"] && typeof definition["parameters"] === "object" ? convertFunctionArgsJsonSchemaToZod(definition["parameters"], rootDoc, defCache) : external_exports.record(external_exports.unknown())));
+          result.push(entry);
         }
       }
       return result;
@@ -8925,21 +11718,33 @@ var bwA2UI = (() => {
         const argsSchema = functionArgsSchema(rawDefn);
         const paramNames = functionParameterNames(argsSchema, rootDoc);
         assertFunctionIdentifiers(name, paramNames);
+        if (!defn || typeof defn !== "object")
+          continue;
+        const entry = new JsonFunctionApi(name, defn, (definition) => {
+          const argsSchema2 = functionArgsSchema(definition);
+          return argsSchema2 ? convertFunctionArgsJsonSchemaToZod(argsSchema2, rootDoc, defCache) : external_exports.record(external_exports.unknown());
+        });
+        assertUserActivationCallers(entry);
         if (permittedNames && !permittedNames.has(name)) {
           continue;
         }
-        if (!defn || typeof defn !== "object")
-          continue;
-        result.push(new JsonFunctionApi(name, defn, (definition) => {
-          const argsSchema2 = functionArgsSchema(definition);
-          return argsSchema2 ? convertFunctionArgsJsonSchemaToZod(argsSchema2, rootDoc, defCache) : external_exports.record(external_exports.unknown());
-        }));
+        result.push(entry);
       }
     }
     return result;
   }
   function functionArgsSchema(d2) {
-    const props = d2.properties && typeof d2.properties === "object" && d2.properties !== null && !Array.isArray(d2.properties) ? d2.properties : void 0;
+    let props = d2.properties && typeof d2.properties === "object" && d2.properties !== null && !Array.isArray(d2.properties) ? d2.properties : void 0;
+    if (!props?.args && Array.isArray(d2.allOf)) {
+      for (const member of d2.allOf) {
+        if (member && typeof member === "object" && !Array.isArray(member) && member.properties && typeof member.properties === "object" && member.properties !== null && !Array.isArray(member.properties)) {
+          props = {
+            ...props,
+            ...member.properties
+          };
+        }
+      }
+    }
     let argsSchema = props?.args ?? d2.args ?? d2.parameters;
     if (!argsSchema && props && !("call" in props) && !("@call" in props) && !("function" in props)) {
       argsSchema = d2;
@@ -9113,6 +11918,189 @@ var bwA2UI = (() => {
     return fields;
   }
 
+  // node_modules/@a2ui/web_core/src/catalog/agent_function.js
+  var _a;
+  var FROM_API = /* @__PURE__ */ Symbol("AgentFunction.fromApi");
+  var BOUND_DEFS = /* @__PURE__ */ Symbol("AgentFunction.boundDefs");
+  var AgentFunction = class _AgentFunction {
+    /**
+     * Initializes a new `rendererOnly` agent function.
+     *
+     * @param init The function's name, handler and signature.
+     * @throws {TypeError} If `handler` is not callable.
+     */
+    constructor(init) {
+      this[_a] = true;
+      if (typeof init?.handler !== "function") {
+        throw new TypeError(`Agent function '${init?.name ?? ""}' requires a callable handler.`);
+      }
+      const fromApi = init[FROM_API];
+      const bound = init[BOUND_DEFS];
+      this.name = init.name;
+      this.returnType = init.returnType ?? "any";
+      this.schema = bound ? bound.resolvedSchema : resolveAgentFunctionSchema(init.schema);
+      if (init.schema !== void 0 && !isZodSchema(init.schema)) {
+        this.jsonSchema = init.schema;
+        this.declaredParameterNames = bound ? bound.declaredParameterNames : functionParameterNames(init.schema, init.schema);
+      }
+      this.boundCatalogDefs = bound?.catalogDefs;
+      this.handler = init.handler;
+      this.explicitAllowedCallers = fromApi?.allowedCallers;
+      this.allowedCallers = fromApi?.allowedCallers ?? "rendererOnly";
+      this.explicitRequiresUserActivation = init.requiresUserActivation;
+      this.requiresUserActivation = init.requiresUserActivation ?? false;
+      this.description = init.description;
+      this.declaration = fromApi?.declaration;
+    }
+    /**
+     * Binds an agent-side `handler` to a function a catalog declares (for
+     * example, an entry from `Catalog.fromJson(doc).functions`).
+     *
+     * Keeps the declaration's signature, `allowedCallers` and JSON Schema
+     * definition, so `Catalog.toJson()` continues to emit the authored catalog
+     * document unchanged, and records `declaration` so
+     * `catalog.copyWith({agentFunctions: [...]})` replaces the declaration in
+     * place. That catalog must declare `api`.
+     *
+     * @param api Existing schema-only function declaration.
+     * @param handler Agent-side execution callback.
+     * @returns A new `AgentFunction` wrapping `api`.
+     * @throws {TypeError} If `api` is already an `AgentFunction` or `handler` is not callable.
+     * @throws {A2uiCatalogError} If `api` is `agentOnly`, which a renderer
+     *   never calls, or requires user activation without being `rendererOnly`.
+     */
+    static fromApi(api, handler) {
+      if (isAgentFunction(api)) {
+        throw new TypeError(`Function '${api.name}' is already an agent function.`);
+      }
+      if (api.allowedCallers === "agentOnly") {
+        throw new A2uiCatalogError(`Function '${api.name}' is agentOnly, so a renderer never calls it and it can't be an agent function.`);
+      }
+      if (api.requiresUserActivation === true && api.allowedCallers !== void 0 && api.allowedCallers !== "rendererOnly") {
+        throw new A2uiCatalogError(`Function '${api.name}' requires user activation, so its allowedCallers must be rendererOnly, not ${api.allowedCallers}.`);
+      }
+      const init = {
+        name: api.name,
+        returnType: api.returnType,
+        schema: api.schema,
+        handler,
+        requiresUserActivation: api.requiresUserActivation,
+        description: api.description,
+        [FROM_API]: { declaration: api, allowedCallers: api.allowedCallers }
+      };
+      const fn = new _AgentFunction(init);
+      copyLoadedDefinition(api, fn);
+      return fn;
+    }
+    /**
+     * Returns a copy of this agent function bound to a different handler, with
+     * the same name, signature, `allowedCallers` and description: for example,
+     * to swap in a test double, or a handler for one session. One built with
+     * `fromApi` is rebuilt from the same declaration, so it still replaces that
+     * declaration in its catalog.
+     *
+     * @param handler The new agent-side execution callback.
+     * @returns A new `AgentFunction`.
+     * @throws {TypeError} If `handler` is not callable.
+     */
+    withHandler(handler) {
+      if (this.declaration !== void 0) {
+        return _AgentFunction.fromApi(this.declaration, handler);
+      }
+      return new _AgentFunction({
+        name: this.name,
+        returnType: this.returnType,
+        schema: this.jsonSchema ?? this.schema,
+        handler,
+        requiresUserActivation: this.explicitRequiresUserActivation,
+        description: this.description
+      });
+    }
+  };
+  _a = AGENT_FUNCTION_BRAND;
+  function resolveAgentFunctionSchema(schema) {
+    if (schema === void 0) {
+      return external_exports.record(external_exports.unknown());
+    }
+    if (isZodSchema(schema)) {
+      return schema;
+    }
+    if (typeof schema === "object" && schema !== null && !Array.isArray(schema)) {
+      if (Object.keys(schema).length === 0) {
+        return external_exports.record(external_exports.unknown());
+      }
+      return convertFunctionArgsJsonSchemaToZod(schema, schema);
+    }
+    return external_exports.record(external_exports.unknown());
+  }
+  function isPlainDefsMap(value) {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+  function referencesCatalogDefs(jsonSchema, catalogDefs) {
+    const localDefs = isPlainDefsMap(jsonSchema.$defs) ? jsonSchema.$defs : void 0;
+    const visited = /* @__PURE__ */ new Set();
+    const scan = (node) => {
+      if (typeof node !== "object" || node === null || visited.has(node))
+        return false;
+      visited.add(node);
+      if (Array.isArray(node)) {
+        return node.some(scan);
+      }
+      const obj = node;
+      if (typeof obj.$ref === "string" && obj.$ref.startsWith("#/$defs/")) {
+        const defName = obj.$ref.slice("#/$defs/".length).split("/")[0].replace(/~1/g, "/").replace(/~0/g, "~");
+        if (defName in catalogDefs && !(localDefs && defName in localDefs)) {
+          return true;
+        }
+      }
+      for (const value of Object.values(obj)) {
+        if (scan(value))
+          return true;
+      }
+      return false;
+    };
+    return scan(jsonSchema);
+  }
+  function bindAgentFunctionDefs(fn, catalogDefs) {
+    const jsonSchema = fn.jsonSchema;
+    if (jsonSchema === void 0 || fn.boundCatalogDefs === catalogDefs) {
+      return fn;
+    }
+    const hasCatalogRefs = catalogDefs !== void 0 && Object.keys(catalogDefs).length > 0 && referencesCatalogDefs(jsonSchema, catalogDefs);
+    if (!hasCatalogRefs && fn.boundCatalogDefs === void 0) {
+      return fn;
+    }
+    const localDefs = isPlainDefsMap(jsonSchema.$defs) ? jsonSchema.$defs : void 0;
+    const rootDoc = hasCatalogRefs ? {
+      ...jsonSchema,
+      $defs: { ...catalogDefs, ...localDefs }
+    } : { ...jsonSchema };
+    const resolvedSchema = Object.keys(jsonSchema).length === 0 ? external_exports.record(external_exports.unknown()) : convertFunctionArgsJsonSchemaToZod(jsonSchema, rootDoc);
+    const declaredParameterNames = functionParameterNames(jsonSchema, rootDoc);
+    const init = {
+      name: fn.name,
+      returnType: fn.returnType,
+      schema: jsonSchema,
+      handler: fn.handler,
+      requiresUserActivation: fn.explicitRequiresUserActivation,
+      description: fn.description,
+      ...fn.declaration !== void 0 ? {
+        [FROM_API]: {
+          declaration: fn.declaration,
+          allowedCallers: fn.explicitAllowedCallers
+        }
+      } : {},
+      [BOUND_DEFS]: {
+        catalogDefs: hasCatalogRefs ? catalogDefs : void 0,
+        resolvedSchema,
+        declaredParameterNames
+      }
+    };
+    const bound = new AgentFunction(init);
+    copyLoadedDefinition(fn, bound);
+    return bound;
+  }
+
   // node_modules/@a2ui/web_core/src/catalog/schema_generator.js
   function getStandardDefsForCatalog(catalog, options) {
     if (options?.standardDefs) {
@@ -9214,7 +12202,8 @@ var bwA2UI = (() => {
     "writeOnly",
     "examples"
   ]);
-  var COMPONENT_ENVELOPE_KEYS = /* @__PURE__ */ new Set(["id", "component", "catalogId"]);
+  var COMPONENT_ENVELOPE_KEYS = /* @__PURE__ */ new Set(["id", "component", "catalogId", "@catalogId"]);
+  var standardMixinPieces = /* @__PURE__ */ new WeakSet();
   var GENERATED_DEF_NAMES = /* @__PURE__ */ new Set(["anyComponent", "anyFunction", "theme"]);
   var COMMON_TYPE_REF = /^(?:([^#]*common_types\.json))?#\/\$defs\/([^/]+)(\/.*)?$/;
   var STANDARD_MIXIN_REF = /\/(ComponentCommon|Checkable)$/;
@@ -9292,10 +12281,12 @@ var bwA2UI = (() => {
       const name = mixinName ?? (external && !external[2] ? external[1] : void 0);
       const mixin = name !== void 0 ? context.standardDefs[name] : void 0;
       if (isJsonObject(mixin) && isJsonObject(mixin["properties"])) {
-        mixins.push({
+        const piece = {
           properties: deepCopyJson(mixin["properties"]),
           ...Array.isArray(mixin["required"]) ? { required: mixin["required"] } : {}
-        });
+        };
+        standardMixinPieces.add(piece);
+        mixins.push(piece);
       }
     }
     const pieces = [...mixins, ...local, ...inline2];
@@ -9307,12 +12298,18 @@ var bwA2UI = (() => {
     const pieces = collectSourceSubSchemas(source, context, /* @__PURE__ */ new Set());
     let description;
     const props = {};
+    const ownEnvelopeKeys = /* @__PURE__ */ new Set();
     const required = /* @__PURE__ */ new Set();
     for (const piece of pieces) {
       if (typeof piece["description"] === "string")
         description = piece["description"];
-      if (isJsonObject(piece["properties"]))
+      if (isJsonObject(piece["properties"])) {
         Object.assign(props, piece["properties"]);
+        if (!standardMixinPieces.has(piece)) {
+          for (const name of Object.keys(piece["properties"]))
+            ownEnvelopeKeys.add(name);
+        }
+      }
       if (Array.isArray(piece["required"])) {
         for (const name of piece["required"]) {
           if (typeof name === "string")
@@ -9320,9 +12317,10 @@ var bwA2UI = (() => {
         }
       }
     }
+    const isEnvelopeKey = (name) => COMPONENT_ENVELOPE_KEYS.has(name) && !(name === "catalogId" && ownEnvelopeKeys.has(name));
     const copied = {};
     for (const [name, schema] of Object.entries(props)) {
-      if (COMPONENT_ENVELOPE_KEYS.has(name))
+      if (isEnvelopeKey(name))
         continue;
       const copy = deepCopyJson(schema);
       restoreSourceRefs(copy, context.standardDefs, true);
@@ -9330,7 +12328,7 @@ var bwA2UI = (() => {
     }
     return {
       props: copied,
-      required: [...required].filter((name) => !COMPONENT_ENVELOPE_KEYS.has(name)).sort(),
+      required: [...required].filter((name) => !isEnvelopeKey(name)).sort(),
       ...description !== void 0 ? { description } : {}
     };
   }
@@ -9451,7 +12449,7 @@ var bwA2UI = (() => {
       props = sanitized;
       reqList = extracted.reqList;
       description = zodComponentDescription(comp);
-      closure = context.isV10 ? void 0 : extracted.additionalProps ?? false;
+      closure = context.isV10 ? extracted.additionalProps === true ? true : void 0 : extracted.additionalProps ?? false;
     }
     const id = {};
     localizeStandardRef(id, "ComponentId", context.standardDefs);
@@ -9580,7 +12578,7 @@ var bwA2UI = (() => {
       }))
     };
   }
-  var MIRROR_REF_DESCRIPTIONS = new Map(Object.values(CommonSchemas).flatMap((mirror) => {
+  var MIRROR_REF_DESCRIPTIONS = new Map(Object.values(CommonSchemas2).flatMap((mirror) => {
     const description = mirror.description;
     if (typeof description !== "string" || !description.startsWith("REF:"))
       return [];
@@ -9723,7 +12721,7 @@ var bwA2UI = (() => {
     return schema;
   }
 
-  // node_modules/@a2ui/web_core/src/catalog/reference-map.js
+  // node_modules/@a2ui/web_core/src/resolution/ref-fields.js
   function extractRefDefName(ref) {
     if (!ref)
       return "";
@@ -9732,58 +12730,1066 @@ var bwA2UI = (() => {
     const segments = target.split("/").filter(Boolean);
     return segments.pop() ?? "";
   }
-  function unwrapNextZodLayer(current, visited) {
-    if (!current?._def)
-      return null;
-    if (visited) {
-      if (visited.has(current))
-        return null;
-      visited.add(current);
+  var DEFAULT_SINGLE_CHILD_DEF_NAMES = /* @__PURE__ */ new Set([
+    "ComponentId",
+    "Child",
+    "ChildComponentId"
+  ]);
+  var DEFAULT_CHILD_LIST_DEF_NAMES = /* @__PURE__ */ new Set([
+    "ChildList",
+    "TemplateChildList",
+    "ChildrenItem",
+    "TemplateItem"
+  ]);
+  var EMPTY_REF_FIELDS = /* @__PURE__ */ new Map();
+  var DEFAULT_OPTIONS_CACHE_KEY = {};
+  var refFieldsCache = /* @__PURE__ */ new WeakMap();
+  function isCombinatorInheritedDescription(schema, desc) {
+    const typeName = schema?._def?.typeName;
+    if (typeName === "ZodUnion") {
+      const first2 = getUnionOptions(schema)?.[0];
+      return Boolean(first2 && (first2.description === desc || first2._def?.description === desc));
     }
-    const typeName = current._def.typeName;
-    switch (typeName) {
-      case "ZodOptional":
-      case "ZodNullable":
-      case "ZodDefault":
-      case "ZodReadonly":
-        return current._def.innerType;
-      case "ZodBranded":
-        return current._def.type;
-      case "ZodEffects":
-        return current._def.schema;
-      case "ZodLazy":
-        return current._def.getter();
-      default:
-        return null;
+    if (typeName === "ZodIntersection") {
+      const left = schema._def.left;
+      return Boolean(left && (left.description === desc || left._def?.description === desc));
     }
+    return false;
   }
-  function getDescriptions(type) {
+  function unwrapZodField(schema) {
     const descriptions = [];
-    const visited = /* @__PURE__ */ new Set();
-    let current = type;
-    while (current) {
-      if (current.description)
+    const refDefNames = /* @__PURE__ */ new Set();
+    const bareDefNames = /* @__PURE__ */ new Set();
+    const refs = /* @__PURE__ */ new Set();
+    const traversed = /* @__PURE__ */ new Set();
+    const visitedGetters = /* @__PURE__ */ new Set();
+    let firstRefDefName = "";
+    let hasTransform = false;
+    let current = schema;
+    while (current && typeof current === "object" && current._def) {
+      if (traversed.has(current)) {
+        break;
+      }
+      traversed.add(current);
+      if (current.description && !isCombinatorInheritedDescription(current, current.description)) {
         descriptions.push(current.description);
-      if (current._def?.description)
-        descriptions.push(current._def.description);
-      const next = unwrapNextZodLayer(current, visited);
-      if (!next)
+        const parsedRef = collectRefDefName(current.description, refDefNames, bareDefNames);
+        if (!firstRefDefName && parsedRef) {
+          firstRefDefName = parsedRef;
+        }
+      }
+      const defDescription = current._def.description;
+      if (defDescription && defDescription !== current.description && !isCombinatorInheritedDescription(current, defDescription)) {
+        descriptions.push(defDescription);
+        const parsedRef = collectRefDefName(defDescription, refDefNames, bareDefNames);
+        if (!firstRefDefName && parsedRef) {
+          firstRefDefName = parsedRef;
+        }
+      }
+      const ref = childRefKindOf(current);
+      if (ref) {
+        refs.add(ref);
+      }
+      const typeName = current._def.typeName;
+      if (typeName === "ZodOptional" || typeName === "ZodNullable" || typeName === "ZodDefault" || typeName === "ZodReadonly" || typeName === "ZodCatch") {
+        current = current._def.innerType;
+      } else if (typeName === "ZodEffects") {
+        const effectDef = current._def.effect;
+        if (effectDef?.type === "transform" || effectDef?.type === "preprocess") {
+          hasTransform = true;
+        }
+        current = current._def.schema;
+      } else if (typeName === "ZodBranded") {
+        current = current._def.type;
+      } else if (typeName === "ZodLazy") {
+        const getter = current._def.getter;
+        if (visitedGetters.has(getter)) {
+          break;
+        }
+        visitedGetters.add(getter);
+        current = getter();
+      } else {
         break;
-      current = next;
+      }
     }
-    return descriptions;
+    return {
+      schema: current,
+      descriptions,
+      firstRefDefName,
+      refDefNames,
+      bareDefNames,
+      refs,
+      traversed,
+      hasTransform
+    };
   }
-  function unwrapZodType(type) {
+  function getUnionOptions(schema) {
+    const typeName = schema?._def?.typeName;
+    if (typeName !== "ZodUnion" && typeName !== "ZodDiscriminatedUnion") {
+      return void 0;
+    }
+    const rawOptions = schema._def.options;
+    if (!rawOptions) {
+      return void 0;
+    }
+    return Array.isArray(rawOptions) ? rawOptions : Array.from(rawOptions.values());
+  }
+  function isTemplateRefObject(schema) {
+    if (schema?._def?.typeName !== "ZodObject") {
+      return false;
+    }
+    const shape = schema.shape;
+    return Boolean(Object.hasOwn(shape, "componentId") && (Object.hasOwn(shape, "path") || Object.hasOwn(shape, "dataBinding")) || Object.hasOwn(shape, "explicitList") || Object.hasOwn(shape, "template"));
+  }
+  function canSchemaHoldSingleRef(schema, options) {
+    return canHoldSingleRef(unwrapZodField(schema), /* @__PURE__ */ new Set(), options);
+  }
+  function canSchemaHoldListRef(schema, options) {
+    return canHoldListRef(unwrapZodField(schema), /* @__PURE__ */ new Set(), options);
+  }
+  function isSingleChildPropertySchema(key, schema, options) {
+    return classifyProperty(key, schema, /* @__PURE__ */ new Set(), options)?.kind === "single";
+  }
+  function canSchemaHoldObjectOrArray(schema) {
+    const field = unwrapZodField(schema);
+    return canHoldObjectElement(field, /* @__PURE__ */ new Set()) || canHoldNestedRef(field, /* @__PURE__ */ new Set()) || field.schema?._def?.typeName === "ZodArray";
+  }
+  function extractRefFields(schema, options) {
+    if (!schema) {
+      return EMPTY_REF_FIELDS;
+    }
+    const cacheKey = options ?? DEFAULT_OPTIONS_CACHE_KEY;
+    let schemaCache = refFieldsCache.get(cacheKey);
+    if (schemaCache) {
+      const cached = schemaCache.get(schema);
+      if (cached) {
+        return cached;
+      }
+    } else {
+      schemaCache = /* @__PURE__ */ new WeakMap();
+      refFieldsCache.set(cacheKey, schemaCache);
+    }
+    const analysis = analyzeSchema(schema, /* @__PURE__ */ new Set(), options);
+    const fields = analysis.fields;
+    if (analysis.isEmptyObject && !analysis.declaredKeys.has("child") || analysis.openChildFallback) {
+      mergeRefKind(fields, "child", { kind: "single" });
+    }
+    if (analysis.isEmptyObject && !analysis.declaredKeys.has("children") || analysis.openChildrenFallback) {
+      mergeRefKind(fields, "children", { kind: "list" });
+    }
+    const result = fields.size === 0 ? EMPTY_REF_FIELDS : fields;
+    schemaCache.set(schema, result);
+    return result;
+  }
+  function emptyAnalysis() {
+    return {
+      fields: /* @__PURE__ */ new Map(),
+      declaredKeys: /* @__PURE__ */ new Set(),
+      compatibleSingleKeys: /* @__PURE__ */ new Set(),
+      compatibleListKeys: /* @__PURE__ */ new Set(),
+      compatibleNestedKeys: /* @__PURE__ */ new Set(),
+      nestedElementAnalyses: /* @__PURE__ */ new Map(),
+      constrainsUnknownKeys: true,
+      isEmptyObject: false,
+      openSingle: false,
+      openList: false,
+      openChildFallback: false,
+      openChildrenFallback: false
+    };
+  }
+  function canPipelineStagePassKey(key, kind, stage) {
+    if (stage.declaredKeys.has(key)) {
+      return true;
+    }
+    return kind.kind === "single" ? stage.openSingle : stage.openList;
+  }
+  function analyzeSchema(schema, visited, options) {
+    const unwrapped = unwrapZodField(schema);
+    for (const s2 of unwrapped.traversed) {
+      if (visited.has(s2)) {
+        return emptyAnalysis();
+      }
+    }
+    for (const s2 of unwrapped.traversed) {
+      visited.add(s2);
+    }
+    const typeName = unwrapped.schema?._def?.typeName;
+    switch (typeName) {
+      case "ZodObject": {
+        const objSchema = unwrapped.schema;
+        const shape = objSchema.shape;
+        const fields = /* @__PURE__ */ new Map();
+        const declaredKeys = new Set(Object.keys(shape));
+        const compatibleSingleKeys = /* @__PURE__ */ new Set();
+        const compatibleListKeys = /* @__PURE__ */ new Set();
+        const compatibleNestedKeys = /* @__PURE__ */ new Set();
+        const nestedElementAnalyses = /* @__PURE__ */ new Map();
+        for (const [key, value] of Object.entries(shape)) {
+          const kind = classifyProperty(key, value, visited, options);
+          if (kind) {
+            fields.set(key, kind);
+          }
+          const propField = unwrapZodField(value);
+          if (canHoldSingleRef(propField, new Set(visited), options, true)) {
+            compatibleSingleKeys.add(key);
+          }
+          if (canHoldListRef(propField, new Set(visited), options, true)) {
+            compatibleListKeys.add(key);
+          }
+          if (canHoldNestedRef(propField, new Set(visited))) {
+            compatibleNestedKeys.add(key);
+            const elemAnalysis = extractNestedElementAnalysis(propField, new Set(visited), options);
+            if (elemAnalysis) {
+              nestedElementAnalyses.set(key, elemAnalysis);
+            }
+          }
+        }
+        const def = objSchema._def;
+        const unknownKeys = def["unknownKeys"];
+        const catchall = def["catchall"];
+        let openSingle = false;
+        let openList = false;
+        let openChildFallback = false;
+        let openChildrenFallback = false;
+        let constrainsUnknownKeys = false;
+        if (unknownKeys === "passthrough") {
+          openSingle = true;
+          openList = true;
+          openChildFallback = !declaredKeys.has("child");
+          openChildrenFallback = !declaredKeys.has("children");
+        } else if (catchall && catchall._def.typeName !== "ZodNever") {
+          const catchallField = unwrapZodField(catchall);
+          openSingle = canHoldSingleRef(catchallField, new Set(visited), options, true);
+          openList = canHoldListRef(catchallField, new Set(visited), options, true);
+          openChildFallback = !declaredKeys.has("child") && canHoldSingleRef(catchallField, new Set(visited), options, false);
+          openChildrenFallback = !declaredKeys.has("children") && canHoldListRef(catchallField, new Set(visited), options, false);
+          constrainsUnknownKeys = true;
+        } else if (unknownKeys === "strict") {
+          constrainsUnknownKeys = true;
+        }
+        return {
+          fields,
+          declaredKeys,
+          compatibleSingleKeys,
+          compatibleListKeys,
+          compatibleNestedKeys,
+          nestedElementAnalyses,
+          constrainsUnknownKeys,
+          isEmptyObject: declaredKeys.size === 0 && !constrainsUnknownKeys && !openSingle && !openList,
+          openSingle,
+          openList,
+          openChildFallback,
+          openChildrenFallback
+        };
+      }
+      case "ZodRecord": {
+        const valueType = unwrapped.schema._def["valueType"];
+        let openSingle = true;
+        let openList = true;
+        let openChildFallback = true;
+        let openChildrenFallback = true;
+        if (valueType) {
+          const valueField = unwrapZodField(valueType);
+          openSingle = canHoldSingleRef(valueField, new Set(visited), options, true);
+          openList = canHoldListRef(valueField, new Set(visited), options, true);
+          openChildFallback = canHoldSingleRef(valueField, new Set(visited), options, false);
+          openChildrenFallback = canHoldListRef(valueField, new Set(visited), options, false);
+        }
+        return {
+          fields: /* @__PURE__ */ new Map(),
+          declaredKeys: /* @__PURE__ */ new Set(),
+          compatibleSingleKeys: /* @__PURE__ */ new Set(),
+          compatibleListKeys: /* @__PURE__ */ new Set(),
+          compatibleNestedKeys: /* @__PURE__ */ new Set(),
+          nestedElementAnalyses: /* @__PURE__ */ new Map(),
+          constrainsUnknownKeys: true,
+          isEmptyObject: false,
+          openSingle,
+          openList,
+          openChildFallback,
+          openChildrenFallback
+        };
+      }
+      case "ZodAny":
+      case "ZodUnknown":
+        return {
+          fields: /* @__PURE__ */ new Map(),
+          declaredKeys: /* @__PURE__ */ new Set(),
+          compatibleSingleKeys: /* @__PURE__ */ new Set(),
+          compatibleListKeys: /* @__PURE__ */ new Set(),
+          compatibleNestedKeys: /* @__PURE__ */ new Set(),
+          nestedElementAnalyses: /* @__PURE__ */ new Map(),
+          constrainsUnknownKeys: false,
+          isEmptyObject: false,
+          openSingle: true,
+          openList: true,
+          openChildFallback: true,
+          openChildrenFallback: true
+        };
+      case "ZodIntersection": {
+        const def = unwrapped.schema._def;
+        const left = analyzeSchema(def.left, new Set(visited), options);
+        const right = analyzeSchema(def.right, new Set(visited), options);
+        return intersectAnalyses(left, right);
+      }
+      case "ZodPipeline": {
+        const def = unwrapped.schema._def;
+        const left = analyzeSchema(def["in"], new Set(visited), options);
+        const right = analyzeSchema(def["out"], new Set(visited), options);
+        return pipeAnalyses(left, right);
+      }
+      case "ZodUnion":
+      case "ZodDiscriminatedUnion": {
+        const unionOptions = getUnionOptions(unwrapped.schema) ?? [];
+        const subs = unionOptions.map((option) => analyzeSchema(option, new Set(visited), options));
+        return unionAnalyses(subs);
+      }
+      default:
+        return emptyAnalysis();
+    }
+  }
+  function unionAnalyses(subs) {
+    const fields = /* @__PURE__ */ new Map();
+    const declaredKeys = /* @__PURE__ */ new Set();
+    const compatibleSingleKeys = /* @__PURE__ */ new Set();
+    const compatibleListKeys = /* @__PURE__ */ new Set();
+    const compatibleNestedKeys = /* @__PURE__ */ new Set();
+    let allEmpty = subs.length > 0;
+    let allConstrainUnknown = subs.length > 0;
+    let openSingle = false;
+    let openList = false;
+    let openChildFallback = false;
+    let openChildrenFallback = false;
+    for (const sub of subs) {
+      for (const [key, kind] of sub.fields) {
+        mergeRefKind(fields, key, kind);
+      }
+      for (const key of sub.declaredKeys) {
+        declaredKeys.add(key);
+      }
+      allEmpty = allEmpty && sub.isEmptyObject;
+      allConstrainUnknown = allConstrainUnknown && sub.constrainsUnknownKeys;
+      openSingle = openSingle || sub.openSingle;
+      openList = openList || sub.openList;
+      openChildFallback = openChildFallback || sub.openChildFallback;
+      openChildrenFallback = openChildrenFallback || sub.openChildrenFallback;
+    }
+    for (const key of declaredKeys) {
+      if (subs.some((sub) => isRefCompatibleWithSide(key, { kind: "single" }, sub))) {
+        compatibleSingleKeys.add(key);
+      }
+      if (subs.some((sub) => isRefCompatibleWithSide(key, { kind: "list" }, sub))) {
+        compatibleListKeys.add(key);
+      }
+      if (subs.some((sub) => isRefCompatibleWithSide(key, { kind: "nested", keys: /* @__PURE__ */ new Set() }, sub))) {
+        compatibleNestedKeys.add(key);
+      }
+    }
+    return {
+      fields,
+      declaredKeys,
+      compatibleSingleKeys,
+      compatibleListKeys,
+      compatibleNestedKeys,
+      nestedElementAnalyses: /* @__PURE__ */ new Map(),
+      constrainsUnknownKeys: allConstrainUnknown,
+      isEmptyObject: allEmpty,
+      openSingle,
+      openList,
+      openChildFallback,
+      openChildrenFallback
+    };
+  }
+  function pipeAnalyses(left, right) {
+    const piped = intersectAnalyses(left, right, true);
+    for (const [key, kind] of [...piped.fields]) {
+      if (!canPipelineStagePassKey(key, kind, left) || !canPipelineStagePassKey(key, kind, right)) {
+        piped.fields.delete(key);
+      }
+    }
+    for (const key of [...piped.compatibleSingleKeys]) {
+      if (!canPipelineStagePassKey(key, { kind: "single" }, left) || !canPipelineStagePassKey(key, { kind: "single" }, right)) {
+        piped.compatibleSingleKeys.delete(key);
+      }
+    }
+    for (const key of [...piped.compatibleListKeys]) {
+      if (!canPipelineStagePassKey(key, { kind: "list" }, left) || !canPipelineStagePassKey(key, { kind: "list" }, right)) {
+        piped.compatibleListKeys.delete(key);
+      }
+    }
+    for (const key of [...piped.compatibleNestedKeys]) {
+      const dummyNested = { kind: "nested", keys: /* @__PURE__ */ new Set() };
+      if (!canPipelineStagePassKey(key, dummyNested, left) || !canPipelineStagePassKey(key, dummyNested, right)) {
+        piped.compatibleNestedKeys.delete(key);
+        piped.nestedElementAnalyses.delete(key);
+      }
+    }
+    piped.openSingle = !piped.isEmptyObject && left.openSingle && right.openSingle;
+    piped.openList = !piped.isEmptyObject && left.openList && right.openList;
+    piped.openChildFallback = !piped.isEmptyObject && left.openChildFallback && right.openChildFallback;
+    piped.openChildrenFallback = !piped.isEmptyObject && left.openChildrenFallback && right.openChildrenFallback;
+    return piped;
+  }
+  function intersectAnalyses(left, right, isPipeline = false) {
+    const fields = /* @__PURE__ */ new Map();
+    for (const [key, kind] of left.fields) {
+      mergeCompatibleField(fields, key, kind, left, right, isPipeline);
+    }
+    for (const [key, kind] of right.fields) {
+      mergeCompatibleField(fields, key, kind, right, left, isPipeline);
+    }
+    const declaredKeys = /* @__PURE__ */ new Set([...left.declaredKeys, ...right.declaredKeys]);
+    const compatibleSingleKeys = /* @__PURE__ */ new Set();
+    const compatibleListKeys = /* @__PURE__ */ new Set();
+    const compatibleNestedKeys = /* @__PURE__ */ new Set();
+    const nestedElementAnalyses = /* @__PURE__ */ new Map();
+    for (const key of declaredKeys) {
+      if (isRefCompatibleWithSide(key, { kind: "single" }, left) && isRefCompatibleWithSide(key, { kind: "single" }, right)) {
+        compatibleSingleKeys.add(key);
+      }
+      if (isRefCompatibleWithSide(key, { kind: "list" }, left) && isRefCompatibleWithSide(key, { kind: "list" }, right)) {
+        compatibleListKeys.add(key);
+      }
+      if (isRefCompatibleWithSide(key, { kind: "nested", keys: /* @__PURE__ */ new Set() }, left) && isRefCompatibleWithSide(key, { kind: "nested", keys: /* @__PURE__ */ new Set() }, right)) {
+        compatibleNestedKeys.add(key);
+        const leftElem = left.nestedElementAnalyses.get(key);
+        const rightElem = right.nestedElementAnalyses.get(key);
+        if (leftElem && rightElem) {
+          nestedElementAnalyses.set(key, isPipeline ? pipeAnalyses(leftElem, rightElem) : intersectAnalyses(leftElem, rightElem));
+        } else if (leftElem || rightElem) {
+          nestedElementAnalyses.set(key, leftElem ?? rightElem);
+        }
+      }
+    }
+    const constrainsUnknownKeys = left.constrainsUnknownKeys || right.constrainsUnknownKeys;
+    const isEmptyObject = !constrainsUnknownKeys && left.isEmptyObject && right.isEmptyObject;
+    const openSingle = !isEmptyObject && (left.openSingle || right.openSingle) && (left.openSingle || !left.constrainsUnknownKeys) && (right.openSingle || !right.constrainsUnknownKeys);
+    const openList = !isEmptyObject && (left.openList || right.openList) && (left.openList || !left.constrainsUnknownKeys) && (right.openList || !right.constrainsUnknownKeys);
+    const openChildFallback = !isEmptyObject && !declaredKeys.has("child") && (left.openChildFallback || right.openChildFallback) && (left.openChildFallback || !left.constrainsUnknownKeys) && (right.openChildFallback || !right.constrainsUnknownKeys);
+    const openChildrenFallback = !isEmptyObject && !declaredKeys.has("children") && (left.openChildrenFallback || right.openChildrenFallback) && (left.openChildrenFallback || !left.constrainsUnknownKeys) && (right.openChildrenFallback || !right.constrainsUnknownKeys);
+    return {
+      fields,
+      declaredKeys,
+      compatibleSingleKeys,
+      compatibleListKeys,
+      compatibleNestedKeys,
+      nestedElementAnalyses,
+      constrainsUnknownKeys,
+      isEmptyObject,
+      openSingle,
+      openList,
+      openChildFallback,
+      openChildrenFallback
+    };
+  }
+  function filterNestedSubKeys(keys, ownElem, otherElem, isPipeline = false) {
+    const filteredKeys = /* @__PURE__ */ new Set();
+    for (const subKey of keys) {
+      const singleOk = (!ownElem || isRefCompatibleWithSide(subKey, { kind: "single" }, ownElem) && (!isPipeline || canPipelineStagePassKey(subKey, { kind: "single" }, ownElem))) && (!otherElem || isRefCompatibleWithSide(subKey, { kind: "single" }, otherElem) && (!isPipeline || canPipelineStagePassKey(subKey, { kind: "single" }, otherElem)));
+      const listOk = (!ownElem || isRefCompatibleWithSide(subKey, { kind: "list" }, ownElem) && (!isPipeline || canPipelineStagePassKey(subKey, { kind: "list" }, ownElem))) && (!otherElem || isRefCompatibleWithSide(subKey, { kind: "list" }, otherElem) && (!isPipeline || canPipelineStagePassKey(subKey, { kind: "list" }, otherElem)));
+      if (singleOk || listOk) {
+        filteredKeys.add(subKey);
+      }
+    }
+    return filteredKeys;
+  }
+  function mergeCompatibleField(target, key, kind, source, other, isPipeline = false) {
+    if (kind.kind === "nested") {
+      if (!isRefCompatibleWithSide(key, kind, other)) {
+        if (source.compatibleListKeys.has(key) && isRefCompatibleWithSide(key, { kind: "list" }, other)) {
+          mergeRefKind(target, key, { kind: "list" });
+        } else if (source.compatibleSingleKeys.has(key) && isRefCompatibleWithSide(key, { kind: "single" }, other)) {
+          mergeRefKind(target, key, { kind: "single" });
+        }
+        return;
+      }
+      const otherElem = other.nestedElementAnalyses.get(key);
+      if (!otherElem && !isPipeline) {
+        mergeRefKind(target, key, kind);
+        return;
+      }
+      const filteredKeys = filterNestedSubKeys(kind.keys, source.nestedElementAnalyses.get(key), otherElem, isPipeline);
+      if (filteredKeys.size > 0) {
+        mergeRefKind(target, key, { kind: "nested", keys: filteredKeys });
+      } else if (source.compatibleListKeys.has(key) && isRefCompatibleWithSide(key, { kind: "list" }, other)) {
+        mergeRefKind(target, key, { kind: "list" });
+      } else if (source.compatibleSingleKeys.has(key) && isRefCompatibleWithSide(key, { kind: "single" }, other)) {
+        mergeRefKind(target, key, { kind: "single" });
+      }
+      return;
+    }
+    if (isRefCompatibleWithSide(key, kind, other)) {
+      mergeRefKind(target, key, kind);
+      return;
+    }
+    if (kind.kind === "list" && source.compatibleSingleKeys.has(key) && isRefCompatibleWithSide(key, { kind: "single" }, other)) {
+      mergeRefKind(target, key, { kind: "single" });
+    }
+  }
+  function isRefCompatibleWithSide(key, kind, other) {
+    if (other.declaredKeys.has(key)) {
+      if (kind.kind === "single") {
+        return other.compatibleSingleKeys.has(key);
+      }
+      if (kind.kind === "list") {
+        return other.compatibleListKeys.has(key);
+      }
+      return other.compatibleNestedKeys.has(key);
+    }
+    if (other.constrainsUnknownKeys) {
+      if (kind.kind === "single") {
+        return other.openSingle;
+      }
+      if (kind.kind === "list") {
+        return other.openList;
+      }
+      return other.openList;
+    }
+    return true;
+  }
+  function mergeRefKind(target, key, incoming) {
+    const existing = target.get(key);
+    if (!existing) {
+      target.set(key, incoming);
+      return;
+    }
+    if (existing.kind === "single" && (incoming.kind === "list" || incoming.kind === "nested") || existing.kind === "list" && incoming.kind === "nested") {
+      target.set(key, incoming);
+      return;
+    }
+    if (existing.kind === "nested" && incoming.kind === "nested") {
+      target.set(key, {
+        kind: "nested",
+        keys: /* @__PURE__ */ new Set([...existing.keys, ...incoming.keys])
+      });
+    }
+  }
+  function classifyProperty(key, value, visited, options) {
+    const explicitKind = classifyExplicitProperty(value, visited, options);
+    if (explicitKind) {
+      return explicitKind;
+    }
+    const field = unwrapZodField(value);
+    const isSingleChildKey = key === "child" || Boolean(options?.childPropertyNames?.has(key));
+    if (isSingleChildKey && canHoldSingleRef(field, new Set(visited), options)) {
+      return { kind: "single" };
+    }
+    if (key === "children" && canHoldListRef(field, new Set(visited), options)) {
+      return { kind: "list" };
+    }
+    return void 0;
+  }
+  function classifyExplicitProperty(value, visited, options) {
+    const field = unwrapZodField(value);
+    for (const s2 of field.traversed) {
+      if (visited.has(s2)) {
+        return void 0;
+      }
+    }
+    const nextVisited = new Set(visited);
+    for (const s2 of field.traversed) {
+      nextVisited.add(s2);
+    }
+    const typeName = field.schema?._def?.typeName;
+    if (typeName === "ZodIntersection") {
+      const def = field.schema._def;
+      return classifyIntersectedProperty(def.left, def.right, nextVisited, options, field, false);
+    }
+    const unionOptions = getUnionOptions(field.schema);
+    if (unionOptions) {
+      const merged = /* @__PURE__ */ new Map();
+      const unionKind = classifyExplicitUnionOptions(unionOptions, nextVisited, options);
+      if (unionKind) {
+        mergeRefKind(merged, "prop", unionKind);
+      }
+      if (marksChildList(field, options) || isChildListUnion(field.schema)) {
+        mergeRefKind(merged, "prop", { kind: "list" });
+      } else if (marksComponentId(field, options)) {
+        mergeRefKind(merged, "prop", { kind: "single" });
+      }
+      return merged.get("prop");
+    }
+    if (marksChildList(field, options) || isTemplateRefObject(field.schema)) {
+      return { kind: "list" };
+    }
+    if (marksComponentId(field, options)) {
+      return { kind: "single" };
+    }
+    if (typeName === "ZodArray") {
+      const rawElement = field.schema._def.type;
+      const elementAnalysis = analyzeSchema(rawElement, new Set(nextVisited), options);
+      const subKeys = /* @__PURE__ */ new Set();
+      for (const [subKey, subKind] of elementAnalysis.fields) {
+        if (subKind.kind === "single" || subKind.kind === "list") {
+          subKeys.add(subKey);
+        }
+      }
+      if (subKeys.size > 0) {
+        return { kind: "nested", keys: subKeys };
+      }
+      const elementKind = classifyExplicitProperty(rawElement, nextVisited, options);
+      if (elementKind?.kind === "single" || elementKind?.kind === "list") {
+        return { kind: "list" };
+      }
+      return void 0;
+    }
+    if (typeName === "ZodPipeline") {
+      const def = field.schema._def;
+      const pipeIn = def["in"];
+      const pipeOut = def["out"];
+      const inField = unwrapZodField(pipeIn);
+      if (inField.hasTransform) {
+        const inKind = classifyExplicitProperty(pipeIn, new Set(nextVisited), options);
+        if (inKind) {
+          if (inKind.kind === "nested") {
+            const outField = unwrapZodField(pipeOut);
+            if (canHoldNestedRef(outField, new Set(nextVisited))) {
+              const ownElem = extractNestedElementAnalysis(inField, new Set(nextVisited), options);
+              const outElem = extractNestedElementAnalysis(outField, new Set(nextVisited), options);
+              const filteredKeys = filterNestedSubKeys(inKind.keys, ownElem, outElem, true);
+              return filteredKeys.size > 0 ? { kind: "nested", keys: filteredKeys } : void 0;
+            }
+          }
+          return inKind;
+        }
+        const outKind = classifyExplicitProperty(pipeOut, new Set(nextVisited), options);
+        if (outKind && canHoldRefKind(outKind, inField, new Set(nextVisited), options)) {
+          return outKind;
+        }
+        return void 0;
+      }
+      return classifyIntersectedProperty(pipeIn, pipeOut, nextVisited, options, field, true);
+    }
+    return void 0;
+  }
+  function extractNestedElementAnalysis(field, visited, options) {
+    for (const s2 of field.traversed) {
+      if (visited.has(s2)) {
+        return void 0;
+      }
+    }
+    const nextVisited = new Set(visited);
+    for (const s2 of field.traversed) {
+      nextVisited.add(s2);
+    }
+    const unionOptions = getUnionOptions(field.schema);
+    if (unionOptions) {
+      const nestedBranches = unionOptions.filter((opt) => canHoldNestedRef(unwrapZodField(opt), new Set(nextVisited)));
+      if (nestedBranches.length === 0) {
+        return emptyAnalysis();
+      }
+      const branchAnalyses = [];
+      for (const opt of nestedBranches) {
+        const elem = extractNestedElementAnalysis(unwrapZodField(opt), new Set(nextVisited), options);
+        if (!elem) {
+          return void 0;
+        }
+        branchAnalyses.push(elem);
+      }
+      return unionAnalyses(branchAnalyses);
+    }
+    const typeName = field.schema?._def?.typeName;
+    switch (typeName) {
+      case "ZodAny":
+      case "ZodUnknown":
+        return void 0;
+      case "ZodArray":
+        return analyzeSchema(field.schema._def.type, new Set(nextVisited), options);
+      case "ZodIntersection": {
+        const def = field.schema._def;
+        const leftElem = extractNestedElementAnalysis(unwrapZodField(def.left), new Set(nextVisited), options);
+        const rightElem = extractNestedElementAnalysis(unwrapZodField(def.right), new Set(nextVisited), options);
+        return leftElem && rightElem ? intersectAnalyses(leftElem, rightElem) : leftElem ?? rightElem;
+      }
+      case "ZodPipeline": {
+        const def = field.schema._def;
+        const inElem = extractNestedElementAnalysis(unwrapZodField(def["in"]), new Set(nextVisited), options);
+        const outElem = extractNestedElementAnalysis(unwrapZodField(def["out"]), new Set(nextVisited), options);
+        return inElem && outElem ? pipeAnalyses(inElem, outElem) : inElem ?? outElem;
+      }
+      default:
+        return emptyAnalysis();
+    }
+  }
+  function classifyIntersectedProperty(leftRaw, rightRaw, visited, options, outerField, isPipeline = false) {
+    const leftField = unwrapZodField(leftRaw);
+    const rightField = unwrapZodField(rightRaw);
+    const leftKind = classifyExplicitProperty(leftRaw, new Set(visited), options);
+    const rightKind = classifyExplicitProperty(rightRaw, new Set(visited), options);
+    const merged = /* @__PURE__ */ new Map();
+    if (outerField) {
+      if (marksChildList(outerField, options) && canHoldListRef(leftField, new Set(visited), options, true) && canHoldListRef(rightField, new Set(visited), options, true)) {
+        mergeRefKind(merged, "prop", { kind: "list" });
+      } else if (marksComponentId(outerField, options) && canHoldSingleRef(leftField, new Set(visited), options, true) && canHoldSingleRef(rightField, new Set(visited), options, true)) {
+        mergeRefKind(merged, "prop", { kind: "single" });
+      }
+    }
+    const mergeSide = (sideKind, ownField, otherField) => {
+      if (!sideKind)
+        return;
+      if (canHoldRefKind(sideKind, otherField, new Set(visited), options)) {
+        if (sideKind.kind === "nested") {
+          const ownElem = extractNestedElementAnalysis(ownField, new Set(visited), options);
+          const otherElem = extractNestedElementAnalysis(otherField, new Set(visited), options);
+          const filteredKeys = filterNestedSubKeys(sideKind.keys, ownElem, otherElem, isPipeline);
+          if (filteredKeys.size > 0) {
+            mergeRefKind(merged, "prop", { kind: "nested", keys: filteredKeys });
+            return;
+          }
+        } else {
+          mergeRefKind(merged, "prop", sideKind);
+          return;
+        }
+      }
+      if (sideKind.kind === "nested" && canHoldListRef(ownField, new Set(visited), options, true) && canHoldListRef(otherField, new Set(visited), options, true)) {
+        mergeRefKind(merged, "prop", { kind: "list" });
+      } else if ((sideKind.kind === "list" || sideKind.kind === "nested") && canHoldSingleRef(ownField, new Set(visited), options, true) && canHoldSingleRef(otherField, new Set(visited), options, true)) {
+        mergeRefKind(merged, "prop", { kind: "single" });
+      }
+    };
+    mergeSide(leftKind, leftField, rightField);
+    mergeSide(rightKind, rightField, leftField);
+    return merged.get("prop");
+  }
+  function canHoldRefKind(kind, field, visited, options) {
+    if (kind.kind === "single") {
+      return canHoldSingleRef(field, visited, options, true);
+    }
+    if (kind.kind === "list") {
+      return canHoldListRef(field, visited, options, true);
+    }
+    return canHoldNestedRef(field, visited);
+  }
+  function classifyExplicitUnionOptions(unionOptions, visited, options) {
+    const merged = /* @__PURE__ */ new Map();
+    for (const option of unionOptions) {
+      const optKind = classifyExplicitProperty(option, new Set(visited), options);
+      if (optKind) {
+        mergeRefKind(merged, "prop", optKind);
+      }
+    }
+    return merged.get("prop");
+  }
+  function collectRefDefName(description, refDefNames, bareDefNames) {
+    if (!description) {
+      return "";
+    }
+    if (description.startsWith("REF:")) {
+      const defName = extractRefDefName(description.slice(4).split("|")[0]);
+      if (defName) {
+        refDefNames.add(defName);
+      }
+      return defName;
+    }
+    const refTarget = extractRefDefName(description.split("|")[0]);
+    if (refTarget) {
+      bareDefNames.add(refTarget);
+    }
+    const trimmed = description.trim();
+    if (trimmed) {
+      bareDefNames.add(trimmed);
+    }
+    return "";
+  }
+  function marksComponentId(field, options) {
+    if (field.refs.has("component-id")) {
+      return true;
+    }
+    const singleNames = options?.childRefNames ?? DEFAULT_SINGLE_CHILD_DEF_NAMES;
+    for (const name of singleNames) {
+      if (field.refDefNames.has(name) || field.bareDefNames.has(name)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  function marksChildList(field, options) {
+    if (field.refs.has("child-list")) {
+      return true;
+    }
+    const listNames = options?.childListRefNames ?? DEFAULT_CHILD_LIST_DEF_NAMES;
+    for (const name of listNames) {
+      if (field.refDefNames.has(name) || field.bareDefNames.has(name)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  function hasNonChildRefMarker(field, options) {
+    if (field.refDefNames.size === 0) {
+      return false;
+    }
+    return !marksComponentId(field, options) && !marksChildList(field, options);
+  }
+  function isDynamicBindingObject(schema) {
+    if (schema?._def?.typeName !== "ZodObject" || isTemplateRefObject(schema)) {
+      return false;
+    }
+    const shape = schema.shape;
+    return Object.hasOwn(shape, "path") || Object.hasOwn(shape, "@path") || Object.hasOwn(shape, "call") || Object.hasOwn(shape, "@call");
+  }
+  function isDynamicValueUnion(unionOptions, options) {
+    let hasExplicitChildMarker = false;
+    let hasDynamicBranch = false;
     const visited = /* @__PURE__ */ new Set();
-    let current = type;
-    while (current) {
-      const next = unwrapNextZodLayer(current, visited);
-      if (!next)
-        break;
-      current = next;
-    }
-    return current;
+    const visit = (opts) => {
+      for (const opt of opts) {
+        const unwrapped = unwrapZodField(opt);
+        let seen = false;
+        for (const s2 of unwrapped.traversed) {
+          if (visited.has(s2)) {
+            seen = true;
+            break;
+          }
+        }
+        if (seen) {
+          continue;
+        }
+        for (const s2 of unwrapped.traversed) {
+          visited.add(s2);
+        }
+        if (marksComponentId(unwrapped, options) || marksChildList(unwrapped, options)) {
+          hasExplicitChildMarker = true;
+          return;
+        }
+        if (hasNonChildRefMarker(unwrapped, options) || isDynamicBindingObject(unwrapped.schema)) {
+          hasDynamicBranch = true;
+        }
+        const nestedOptions = getUnionOptions(unwrapped.schema);
+        if (nestedOptions) {
+          visit(nestedOptions);
+          if (hasExplicitChildMarker) {
+            return;
+          }
+        } else if (unwrapped.schema?._def?.typeName === "ZodPipeline") {
+          const def = unwrapped.schema._def;
+          const inField = unwrapZodField(def["in"]);
+          visit([def["in"]]);
+          if (hasExplicitChildMarker) {
+            return;
+          }
+          if (!inField.hasTransform && (canHoldObjectElement(inField, /* @__PURE__ */ new Set()) || canHoldSingleRef(inField, /* @__PURE__ */ new Set(), options, true) || canHoldListRef(inField, /* @__PURE__ */ new Set(), options, true))) {
+            visit([def["out"]]);
+            if (hasExplicitChildMarker) {
+              return;
+            }
+          }
+        }
+      }
+    };
+    visit(unionOptions);
+    return hasDynamicBranch && !hasExplicitChildMarker;
   }
+  function canHoldSingleRef(field, visited = /* @__PURE__ */ new Set(), options, allowDynamicValue = false) {
+    for (const s2 of field.traversed) {
+      if (visited.has(s2)) {
+        return false;
+      }
+    }
+    for (const s2 of field.traversed) {
+      visited.add(s2);
+    }
+    const typeName = field.schema?._def?.typeName;
+    if (typeName === "ZodIntersection") {
+      const def = field.schema._def;
+      return canHoldSingleRef(unwrapZodField(def.left), new Set(visited), options, allowDynamicValue) && canHoldSingleRef(unwrapZodField(def.right), new Set(visited), options, allowDynamicValue);
+    }
+    if (marksComponentId(field, options)) {
+      return true;
+    }
+    if (!allowDynamicValue && hasNonChildRefMarker(field, options)) {
+      return false;
+    }
+    const unionOptions = getUnionOptions(field.schema);
+    if (unionOptions) {
+      if (!allowDynamicValue && isDynamicValueUnion(unionOptions, options)) {
+        return false;
+      }
+      return unionOptions.some((option) => canHoldSingleRef(unwrapZodField(option), new Set(visited), options, allowDynamicValue));
+    }
+    if (marksChildList(field, options)) {
+      return false;
+    }
+    switch (typeName) {
+      case "ZodString":
+      case "ZodAny":
+      case "ZodUnknown":
+        return true;
+      case "ZodPipeline": {
+        const def = field.schema._def;
+        const inField = unwrapZodField(def["in"]);
+        if (inField.hasTransform) {
+          return canHoldSingleRef(inField, new Set(visited), options, allowDynamicValue);
+        }
+        return canHoldSingleRef(inField, new Set(visited), options, allowDynamicValue) && canHoldSingleRef(unwrapZodField(def["out"]), new Set(visited), options, allowDynamicValue);
+      }
+      default:
+        return false;
+    }
+  }
+  function canHoldListRef(field, visited = /* @__PURE__ */ new Set(), options, allowDynamicValue = false) {
+    for (const s2 of field.traversed) {
+      if (visited.has(s2)) {
+        return false;
+      }
+    }
+    for (const s2 of field.traversed) {
+      visited.add(s2);
+    }
+    const typeName = field.schema?._def?.typeName;
+    if (typeName === "ZodIntersection") {
+      const def = field.schema._def;
+      return canHoldListRef(unwrapZodField(def.left), new Set(visited), options, allowDynamicValue) && canHoldListRef(unwrapZodField(def.right), new Set(visited), options, allowDynamicValue);
+    }
+    if (marksChildList(field, options) || isChildListUnion(field.schema)) {
+      return true;
+    }
+    if (!allowDynamicValue && hasNonChildRefMarker(field, options)) {
+      return false;
+    }
+    const unionOptions = getUnionOptions(field.schema);
+    if (unionOptions) {
+      if (!allowDynamicValue && isDynamicValueUnion(unionOptions, options)) {
+        return false;
+      }
+      return unionOptions.some((option) => canHoldListRef(unwrapZodField(option), new Set(visited), options, allowDynamicValue));
+    }
+    if (marksComponentId(field, options)) {
+      return false;
+    }
+    switch (typeName) {
+      case "ZodAny":
+      case "ZodUnknown":
+        return true;
+      case "ZodArray": {
+        const element = unwrapZodField(field.schema._def.type);
+        return canHoldSingleRef(element, new Set(visited), options, allowDynamicValue) || isTemplateRefObject(element.schema);
+      }
+      case "ZodObject":
+        return isTemplateRefObject(field.schema);
+      case "ZodPipeline": {
+        const def = field.schema._def;
+        const inField = unwrapZodField(def["in"]);
+        if (inField.hasTransform) {
+          return canHoldListRef(inField, new Set(visited), options, allowDynamicValue);
+        }
+        return canHoldListRef(inField, new Set(visited), options, allowDynamicValue) && canHoldListRef(unwrapZodField(def["out"]), new Set(visited), options, allowDynamicValue);
+      }
+      default:
+        return false;
+    }
+  }
+  function canHoldNestedRef(field, visited = /* @__PURE__ */ new Set()) {
+    for (const s2 of field.traversed) {
+      if (visited.has(s2)) {
+        return false;
+      }
+    }
+    for (const s2 of field.traversed) {
+      visited.add(s2);
+    }
+    const unionOptions = getUnionOptions(field.schema);
+    if (unionOptions) {
+      return unionOptions.some((option) => canHoldNestedRef(unwrapZodField(option), new Set(visited)));
+    }
+    const typeName = field.schema?._def?.typeName;
+    switch (typeName) {
+      case "ZodAny":
+      case "ZodUnknown":
+        return true;
+      case "ZodArray":
+        return canHoldObjectElement(unwrapZodField(field.schema._def.type), new Set(visited));
+      case "ZodIntersection": {
+        const def = field.schema._def;
+        return canHoldNestedRef(unwrapZodField(def.left), new Set(visited)) && canHoldNestedRef(unwrapZodField(def.right), new Set(visited));
+      }
+      case "ZodPipeline": {
+        const def = field.schema._def;
+        const inField = unwrapZodField(def["in"]);
+        if (inField.hasTransform) {
+          return canHoldNestedRef(inField, new Set(visited));
+        }
+        return canHoldNestedRef(inField, new Set(visited)) && canHoldNestedRef(unwrapZodField(def["out"]), new Set(visited));
+      }
+      default:
+        return false;
+    }
+  }
+  function canHoldObjectElement(field, visited) {
+    for (const s2 of field.traversed) {
+      if (visited.has(s2)) {
+        return false;
+      }
+    }
+    for (const s2 of field.traversed) {
+      visited.add(s2);
+    }
+    const unionOptions = getUnionOptions(field.schema);
+    if (unionOptions) {
+      return unionOptions.some((option) => canHoldObjectElement(unwrapZodField(option), new Set(visited)));
+    }
+    const typeName = field.schema?._def?.typeName;
+    switch (typeName) {
+      case "ZodObject":
+      case "ZodRecord":
+      case "ZodAny":
+      case "ZodUnknown":
+        return true;
+      case "ZodIntersection": {
+        const def = field.schema._def;
+        return canHoldObjectElement(unwrapZodField(def.left), new Set(visited)) && canHoldObjectElement(unwrapZodField(def.right), new Set(visited));
+      }
+      case "ZodPipeline": {
+        const def = field.schema._def;
+        const inField = unwrapZodField(def["in"]);
+        if (inField.hasTransform) {
+          return canHoldObjectElement(inField, new Set(visited));
+        }
+        return canHoldObjectElement(inField, new Set(visited)) && canHoldObjectElement(unwrapZodField(def["out"]), new Set(visited));
+      }
+      default:
+        return false;
+    }
+  }
+  function isChildListUnion(schema, visited = /* @__PURE__ */ new Set()) {
+    const options = getUnionOptions(schema);
+    if (!options) {
+      return false;
+    }
+    for (const o2 of options) {
+      const unwrapped = unwrapZodField(o2);
+      let seen = false;
+      for (const s2 of unwrapped.traversed) {
+        if (visited.has(s2)) {
+          seen = true;
+          break;
+        }
+      }
+      if (seen) {
+        continue;
+      }
+      const nextVisited = new Set(visited);
+      for (const s2 of unwrapped.traversed) {
+        nextVisited.add(s2);
+      }
+      if (isTemplateRefObject(unwrapped.schema)) {
+        return true;
+      }
+      if (isChildListUnion(unwrapped.schema, nextVisited)) {
+        return true;
+      }
+      if (unwrapped.schema?._def?.typeName === "ZodPipeline") {
+        const def = unwrapped.schema._def;
+        const inField = unwrapZodField(def["in"]);
+        if (!inField.hasTransform && canHoldListRef(inField, new Set(nextVisited)) && (isTemplateRefObject(unwrapZodField(def["out"]).schema) || isChildListUnion(unwrapZodField(def["out"]).schema, nextVisited))) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // node_modules/@a2ui/web_core/src/catalog/reference-map.js
   function checkDirectJsonRef(ref, options) {
     if (!ref)
       return null;
@@ -9830,7 +13836,7 @@ var bwA2UI = (() => {
     const directMatch = checkDirectJsonRef(ref, options);
     if (directMatch)
       return directMatch;
-    if (schema.type === "array" && schema.items) {
+    if (schema.type === "array" && typeof schema.items === "object" && schema.items !== null) {
       const itemsRes = checkJsonSchemaRef(schema.items, options);
       if (itemsRes.isChild || itemsRes.isChildList) {
         return { isChild: false, isChildList: true };
@@ -9839,47 +13845,22 @@ var bwA2UI = (() => {
     const combinerMatch = checkCombinerRefs(schema, options);
     if (combinerMatch)
       return combinerMatch;
-    if (schema.type === "object" && schema.properties && ("componentId" in schema.properties && ("path" in schema.properties || "dataBinding" in schema.properties) || "explicitList" in schema.properties || "template" in schema.properties)) {
+    const props = typeof schema.properties === "object" && schema.properties !== null ? schema.properties : void 0;
+    if (schema.type === "object" && props && (Object.hasOwn(props, "componentId") && (Object.hasOwn(props, "path") || Object.hasOwn(props, "dataBinding")) || Object.hasOwn(props, "explicitList") || Object.hasOwn(props, "template"))) {
       return { isChild: false, isChildList: true };
     }
     return { isChild: false, isChildList: false };
   }
-  function isTemplateShape(unwrappedOpt) {
-    if (unwrappedOpt?._def?.typeName === "ZodObject" && typeof unwrappedOpt._def.shape === "function") {
-      const shape = unwrappedOpt._def.shape();
-      return Boolean(shape.componentId && (shape.path || shape.dataBinding) || shape.explicitList || shape.template);
-    }
-    return false;
-  }
-  function isArrayOfChild(unwrappedOpt, options) {
-    if (unwrappedOpt?._def?.typeName === "ZodArray") {
-      const elem = unwrapZodType(unwrappedOpt._def.type);
-      return analyzeChildRefSchema(elem, options).isChild;
-    }
-    return false;
-  }
-  function analyzeUnionOptions(options, analysisOptions) {
-    let hasTemplate = false;
-    let hasArrayOfChild = false;
+  function analyzeUnionOptions(options, analysisOptions, path) {
     let hasChildRef = false;
     for (const opt of options) {
-      const unwrappedOpt = unwrapZodType(opt);
-      if (isTemplateShape(unwrappedOpt)) {
-        hasTemplate = true;
-      }
-      if (isArrayOfChild(unwrappedOpt, analysisOptions)) {
-        hasArrayOfChild = true;
-      }
-      const optRes = analyzeChildRefSchema(unwrappedOpt, analysisOptions);
+      const optRes = analyzeChildRefSchemaOnPath(opt, analysisOptions, path);
       if (optRes.isChildList) {
         return { isChild: false, isChildList: true };
       }
       if (optRes.isChild) {
         hasChildRef = true;
       }
-    }
-    if (hasTemplate || hasArrayOfChild) {
-      return { isChild: false, isChildList: true };
     }
     if (hasChildRef) {
       return { isChild: true, isChildList: false };
@@ -9935,52 +13916,114 @@ var bwA2UI = (() => {
     }
     return null;
   }
-  function analyzeZodArray(elem, options) {
-    const elemRes = analyzeChildRefSchema(elem, options);
+  function analyzeZodArray(elem, options, path) {
+    const elemRes = analyzeChildRefSchemaOnPath(elem, options, path);
     if (elemRes.isChild || elemRes.isChildList) {
       return { isChild: false, isChildList: true };
     }
     return { isChild: false, isChildList: false };
   }
+  function analyzeIntersectedSchemas(left, right, options, path, outerMatch) {
+    const leftRes = analyzeChildRefSchemaOnPath(left, options, path);
+    const rightRes = analyzeChildRefSchemaOnPath(right, options, path);
+    const isList = Boolean(outerMatch?.isChildList) && canSchemaHoldListRef(left, options) && canSchemaHoldListRef(right, options) || leftRes.isChildList && canSchemaHoldListRef(right, options) || rightRes.isChildList && canSchemaHoldListRef(left, options);
+    if (isList) {
+      return { isChild: false, isChildList: true };
+    }
+    const isSingle = Boolean(outerMatch?.isChild) && canSchemaHoldSingleRef(left, options) && canSchemaHoldSingleRef(right, options) || leftRes.isChild && canSchemaHoldSingleRef(right, options) || rightRes.isChild && canSchemaHoldSingleRef(left, options) || leftRes.isChildList && canSchemaHoldSingleRef(left, options) && canSchemaHoldSingleRef(right, options) || rightRes.isChildList && canSchemaHoldSingleRef(right, options) && canSchemaHoldSingleRef(left, options);
+    if (isSingle) {
+      return { isChild: true, isChildList: false };
+    }
+    return { isChild: false, isChildList: false };
+  }
   function analyzeChildRefSchema(schema, options) {
+    return analyzeChildRefSchemaOnPath(schema, options, /* @__PURE__ */ new Set());
+  }
+  function analyzeChildRefSchemaOnPath(schema, options, path) {
     if (!schema || typeof schema !== "object") {
       return { isChild: false, isChildList: false };
     }
-    const directKind = childRefKindOf(schema);
-    if (directKind === "component-id") {
-      return { isChild: true, isChildList: false };
+    if (path.has(schema)) {
+      return { isChild: false, isChildList: false };
     }
-    if (directKind === "child-list") {
-      return { isChild: false, isChildList: true };
+    path.add(schema);
+    try {
+      return analyzeSchemaNode(schema, options, path);
+    } finally {
+      path.delete(schema);
     }
-    const descMatch = checkDescriptionChildRef(getDescriptions(schema), options);
-    if (descMatch)
-      return descMatch;
-    const current = unwrapZodType(schema);
-    if (!current?._def) {
+  }
+  function analyzeSchemaNode(schema, options, path) {
+    if (!("_def" in schema) || !schema._def) {
       return checkJsonSchemaRef(schema, options);
     }
-    const unwrappedKind = childRefKindOf(current);
-    if (unwrappedKind === "component-id") {
-      return { isChild: true, isChildList: false };
-    }
-    if (unwrappedKind === "child-list") {
-      return { isChild: false, isChildList: true };
-    }
-    const typeName = current._def.typeName;
-    if (typeName === "ZodArray") {
-      const elem = unwrapZodType(current._def.type);
-      return analyzeZodArray(elem, options);
-    }
-    if (typeName === "ZodUnion") {
-      const unionOptions = current._def.options ?? [];
-      return analyzeUnionOptions(unionOptions, options);
-    }
-    if (typeName === "ZodObject" && typeof current._def.shape === "function") {
-      const shape = current._def.shape();
-      if (shape.componentId && (shape.path || shape.dataBinding) || shape.explicitList || shape.template) {
-        return { isChild: false, isChildList: true };
+    const field = unwrapZodField(schema);
+    for (const s2 of field.traversed) {
+      if (s2 !== schema && path.has(s2)) {
+        return { isChild: false, isChildList: false };
       }
+    }
+    const explicitMatch = field.refs.has("child-list") ? { isChild: false, isChildList: true } : field.refs.has("component-id") ? { isChild: true, isChildList: false } : checkDescriptionChildRef(field.descriptions, options);
+    const current = field.schema;
+    if (!current?._def) {
+      return explicitMatch ?? { isChild: false, isChildList: false };
+    }
+    if (current !== schema && path.has(current)) {
+      return { isChild: false, isChildList: false };
+    }
+    const nextPath = new Set(path);
+    for (const s2 of field.traversed) {
+      nextPath.add(s2);
+    }
+    nextPath.add(current);
+    const typeName = current._def.typeName;
+    if (typeName === "ZodIntersection") {
+      const def = current._def;
+      return analyzeIntersectedSchemas(def.left, def.right, options, nextPath, explicitMatch);
+    }
+    if (explicitMatch?.isChildList) {
+      return explicitMatch;
+    }
+    const unionOptions = getUnionOptions(current);
+    if (unionOptions) {
+      const unionRes = analyzeUnionOptions(unionOptions, options, nextPath);
+      if (unionRes.isChildList) {
+        return unionRes;
+      }
+      if (unionRes.isChild || explicitMatch?.isChild) {
+        return { isChild: true, isChildList: false };
+      }
+      return { isChild: false, isChildList: false };
+    }
+    if (explicitMatch) {
+      return explicitMatch;
+    }
+    if (typeName === "ZodArray") {
+      return analyzeZodArray(current._def.type, options, nextPath);
+    }
+    if (typeName === "ZodPipeline") {
+      const def = current._def;
+      const pipeIn = def["in"];
+      const pipeOut = def["out"];
+      const inField = unwrapZodField(pipeIn);
+      if (inField.hasTransform) {
+        const inRes = analyzeChildRefSchemaOnPath(pipeIn, options, nextPath);
+        if (inRes.isChild || inRes.isChildList) {
+          return inRes;
+        }
+        const outRes = analyzeChildRefSchemaOnPath(pipeOut, options, nextPath);
+        if (outRes.isChildList && canSchemaHoldListRef(pipeIn, options)) {
+          return { isChild: false, isChildList: true };
+        }
+        if (outRes.isChild && canSchemaHoldSingleRef(pipeIn, options)) {
+          return { isChild: true, isChildList: false };
+        }
+        return { isChild: false, isChildList: false };
+      }
+      return analyzeIntersectedSchemas(pipeIn, pipeOut, options, nextPath);
+    }
+    if (isTemplateRefObject(current)) {
+      return { isChild: false, isChildList: true };
     }
     return { isChild: false, isChildList: false };
   }
@@ -9992,52 +14035,68 @@ var bwA2UI = (() => {
     }
     acc.nestedRefs[key] = /* @__PURE__ */ new Set([subKey]);
   }
-  function inspectShapeField(key, fieldSchema, acc, options) {
-    const res = analyzeChildRefSchema(fieldSchema, options);
-    if (res.isChildList) {
-      acc.listRefs.add(key);
-      return;
-    }
-    if (res.isChild) {
-      acc.singleRefs.add(key);
-      return;
-    }
-    const inner = unwrapZodType(fieldSchema);
-    if (options.childPropertyNames?.has(key) && inner?._def?.typeName === "ZodString") {
-      acc.singleRefs.add(key);
-      return;
-    }
-    if (inner?._def?.typeName !== "ZodArray")
-      return;
-    const elem = unwrapZodType(inner._def.type);
-    if (elem?._def?.typeName !== "ZodObject" || typeof elem._def.shape !== "function")
-      return;
-    const elemShape = elem._def.shape();
-    for (const [subKey, subSchema] of Object.entries(elemShape)) {
-      const subRes = analyzeChildRefSchema(subSchema, options);
-      const subInner = unwrapZodType(subSchema);
-      if (subRes.isChild || subRes.isChildList || options.childPropertyNames?.has(subKey) && subInner?._def?.typeName === "ZodString") {
-        acc.listRefs.add(key);
-        addNestedRef(acc, key, subKey);
+  function collectRawArrayItemProperties(propSchema) {
+    if (typeof propSchema !== "object" || propSchema === null)
+      return [];
+    const result = [];
+    const schema = propSchema;
+    if (schema["type"] === "array" || Object.hasOwn(schema, "items")) {
+      const items = schema["items"];
+      if (typeof items === "object" && items !== null) {
+        const itemProps = items["properties"];
+        if (typeof itemProps === "object" && itemProps !== null) {
+          result.push(itemProps);
+        }
       }
     }
+    for (const combiner of ["oneOf", "anyOf", "allOf"]) {
+      const list = schema[combiner];
+      if (!Array.isArray(list))
+        continue;
+      for (const sub of list) {
+        result.push(...collectRawArrayItemProperties(sub));
+      }
+    }
+    return result;
   }
-  function rawArrayItemProperties(propSchema) {
-    if (typeof propSchema !== "object" || propSchema === null)
-      return null;
-    const schema = propSchema;
-    if (schema["type"] !== "array" && !("items" in schema))
-      return null;
-    const items = schema["items"];
-    if (typeof items !== "object" || items === null)
-      return null;
-    const itemProps = items["properties"];
-    if (typeof itemProps !== "object" || itemProps === null)
-      return null;
-    return itemProps;
+  function canRawSchemaHoldString(raw) {
+    if (raw === true)
+      return true;
+    if (typeof raw !== "object" || raw === null)
+      return false;
+    const obj = raw;
+    return obj["type"] === void 0 || obj["type"] === "string";
+  }
+  function canRawSchemaHoldStringArray(raw) {
+    if (raw === true)
+      return true;
+    if (typeof raw !== "object" || raw === null)
+      return false;
+    const obj = raw;
+    if (obj["type"] === void 0)
+      return true;
+    if (obj["type"] !== "array")
+      return false;
+    return obj["items"] === void 0 || canRawSchemaHoldString(obj["items"]);
   }
   function inspectRawProperties(properties, acc, options) {
     for (const [key, propSchema] of Object.entries(properties)) {
+      const itemPropsList = collectRawArrayItemProperties(propSchema);
+      let foundNestedSubKey = false;
+      for (const itemProps of itemPropsList) {
+        for (const [subKey, subSchema] of Object.entries(itemProps)) {
+          const subRes = analyzeChildRefSchema(subSchema, options);
+          const isSingleSubKey = subKey === "child" || Boolean(options.childPropertyNames?.has(subKey));
+          if (subRes.isChild || subRes.isChildList || isSingleSubKey && typeof subSchema === "object" && subSchema !== null && subSchema["type"] === "string") {
+            acc.listRefs.add(key);
+            addNestedRef(acc, key, subKey);
+            foundNestedSubKey = true;
+          }
+        }
+      }
+      if (foundNestedSubKey) {
+        continue;
+      }
       const res = analyzeChildRefSchema(propSchema, options);
       if (res.isChildList) {
         acc.listRefs.add(key);
@@ -10047,43 +14106,60 @@ var bwA2UI = (() => {
         acc.singleRefs.add(key);
         continue;
       }
-      if (options.childPropertyNames?.has(key) && typeof propSchema === "object" && propSchema !== null && propSchema["type"] === "string") {
+      const isSingleChildKey = key === "child" || Boolean(options.childPropertyNames?.has(key));
+      if (isSingleChildKey && typeof propSchema === "object" && propSchema !== null && propSchema["type"] === "string") {
         acc.singleRefs.add(key);
         continue;
       }
-      const itemProps = rawArrayItemProperties(propSchema);
-      if (!itemProps)
-        continue;
-      for (const [subKey, subSchema] of Object.entries(itemProps)) {
-        const subRes = analyzeChildRefSchema(subSchema, options);
-        if (subRes.isChild || subRes.isChildList || options.childPropertyNames?.has(subKey) && typeof subSchema === "object" && subSchema !== null && subSchema["type"] === "string") {
-          acc.listRefs.add(key);
-          addNestedRef(acc, key, subKey);
-        }
+      if (key === "children" && typeof propSchema === "object" && propSchema !== null && propSchema["type"] === "array" && canRawSchemaHoldStringArray(propSchema)) {
+        acc.listRefs.add(key);
       }
     }
   }
   function inspectComponentSchema(schema, acc, options) {
-    if (!schema)
+    if (!schema || typeof schema !== "object")
       return;
-    const current = unwrapZodType(schema);
-    if (current?._def?.typeName === "ZodObject" && typeof current._def.shape === "function") {
-      const shape = current._def.shape();
-      for (const [key, fieldSchema] of Object.entries(shape)) {
-        inspectShapeField(key, fieldSchema, acc, options);
+    if (schema._def) {
+      const refFields = extractRefFields(schema, options);
+      for (const [key, refKind] of refFields) {
+        if (refKind.kind === "single") {
+          acc.singleRefs.add(key);
+        } else if (refKind.kind === "list") {
+          acc.listRefs.add(key);
+        } else if (refKind.kind === "nested") {
+          acc.listRefs.add(key);
+          for (const subKey of refKind.keys) {
+            addNestedRef(acc, key, subKey);
+          }
+        }
       }
       return;
     }
-    if (typeof schema === "object" && schema !== null && "properties" in schema) {
-      const rawProps = schema.properties;
-      if (typeof rawProps === "object" && rawProps !== null) {
-        inspectRawProperties(rawProps, acc, options);
+    const rawSchema = schema;
+    const rawProps = typeof rawSchema["properties"] === "object" && rawSchema["properties"] !== null ? rawSchema["properties"] : void 0;
+    if (rawProps) {
+      inspectRawProperties(rawProps, acc, options);
+    }
+    for (const combiner of ["allOf", "oneOf", "anyOf"]) {
+      const list = rawSchema[combiner];
+      if (!Array.isArray(list))
+        continue;
+      for (const sub of list) {
+        inspectComponentSchema(sub, acc, options);
       }
+    }
+    const extraRule = rawSchema["additionalProperties"] ?? rawSchema["unevaluatedProperties"];
+    if (canRawSchemaHoldString(extraRule) && (!rawProps || !Object.hasOwn(rawProps, "child"))) {
+      acc.singleRefs.add("child");
+    }
+    if (canRawSchemaHoldStringArray(extraRule) && (!rawProps || !Object.hasOwn(rawProps, "children"))) {
+      acc.listRefs.add("children");
     }
   }
   function buildComponentRefMap(catalogOrComponents, options) {
     const refMap = {};
-    const componentApis = typeof catalogOrComponents?.components?.values === "function" ? Array.from(catalogOrComponents.components.values()) : Array.isArray(catalogOrComponents) ? catalogOrComponents : Array.from(catalogOrComponents.values());
+    const maybeCatalog = catalogOrComponents;
+    const componentApis = typeof maybeCatalog?.components?.values === "function" ? Array.from(maybeCatalog.components.values()) : Array.isArray(catalogOrComponents) ? catalogOrComponents : Array.from(catalogOrComponents.values());
     for (const compApi of componentApis) {
       const acc = {
         singleRefs: /* @__PURE__ */ new Set(),
@@ -10108,6 +14184,22 @@ var bwA2UI = (() => {
     }
     const valid = value.valid;
     return typeof valid === "boolean" ? valid : void 0;
+  }
+  function coerceDynamicBoolean(value) {
+    if (typeof value === "boolean") {
+      return value;
+    }
+    const valid = validityOf(value);
+    if (valid !== void 0) {
+      return valid;
+    }
+    if (typeof value === "string") {
+      return value.toLowerCase() === "true";
+    }
+    if (typeof value === "number") {
+      return value !== 0 && !Number.isNaN(value);
+    }
+    return false;
   }
   function innerSchema2(schema) {
     const def = schema._def;
@@ -10147,12 +14239,12 @@ var bwA2UI = (() => {
   function isPlainObject4(value) {
     return typeof value === "object" && value !== null && !Array.isArray(value);
   }
-  function coerceValidationResults(schema, value) {
+  function coerceDynamicBooleans(schema, value) {
+    if (isDynamicBooleanSchema(schema)) {
+      return coerceDynamicBoolean(value);
+    }
     if (typeof value !== "object" || value === null) {
       return value;
-    }
-    if (isDynamicBooleanSchema(schema)) {
-      return validityOf(value) ?? value;
     }
     const core = unwrap(schema);
     const def = core._def;
@@ -10160,7 +14252,7 @@ var bwA2UI = (() => {
       const itemSchema = def.type;
       let changed = false;
       const items = value.map((item) => {
-        const coerced = coerceValidationResults(itemSchema, item);
+        const coerced = coerceDynamicBooleans(itemSchema, item);
         changed || (changed = coerced !== item);
         return coerced;
       });
@@ -10171,8 +14263,8 @@ var bwA2UI = (() => {
       let changed = false;
       const result = {};
       for (const [key, item] of Object.entries(value)) {
-        const propertySchema2 = shape[key];
-        const coerced = propertySchema2 ? coerceValidationResults(propertySchema2, item) : item;
+        const propertySchema3 = shape[key];
+        const coerced = propertySchema3 ? coerceDynamicBooleans(propertySchema3, item) : item;
         changed || (changed = coerced !== item);
         result[key] = coerced;
       }
@@ -10271,6 +14363,52 @@ var bwA2UI = (() => {
       });
     }
     /**
+     * Returns a shallow copy of this catalog with the specified fields or
+     * entries replaced.
+     *
+     * When `agentFunctions` is provided and `functions` is omitted, any existing
+     * `AgentFunction` entries in this catalog are first restored to their
+     * original `declaration` (or dropped when they had no `declaration`) before
+     * the new `agentFunctions` are merged in.
+     *
+     * @param options Fields and entries to override on the copied catalog.
+     * @returns A new `Catalog` instance.
+     * @throws {A2uiCatalogError} If an agent function's JSON Schema has a local
+     *   `$defs` entry that the catalog's `$defs`, or another agent function's,
+     *   defines differently.
+     */
+    copyWith(options = {}) {
+      const nextComponents = options.components !== void 0 ? [...options.components] : [...this.components.values()];
+      let baseFunctions;
+      if (options.functions !== void 0) {
+        baseFunctions = [...options.functions];
+      } else if (options.agentFunctions !== void 0) {
+        baseFunctions = [];
+        for (const fn of this.functions.values()) {
+          if (isAgentFunction(fn)) {
+            if (fn.declaration !== void 0) {
+              baseFunctions.push(fn.declaration);
+            }
+          } else {
+            baseFunctions.push(fn);
+          }
+        }
+      } else {
+        baseFunctions = [...this.functions.values()];
+      }
+      const nextId = options.catalogId ?? this.id;
+      const mergedFunctions = mergeAgentFunctions(nextId, baseFunctions, options.agentFunctions);
+      return this.rebuild(nextComponents, mergedFunctions, {
+        id: nextId,
+        protocolVersion: options.protocolVersion ?? this.protocolVersion,
+        themeSchema: options.themeSchema ?? this.themeSchema,
+        schemaId: this.schemaId,
+        title: this.title,
+        description: this.description,
+        instructions: options.instructions ?? this.instructions
+      });
+    }
+    /**
      * Returns a new catalog, under its own ID, built from entries of this one
      * and new entries.
      *
@@ -10325,8 +14463,8 @@ var bwA2UI = (() => {
         anyComponent: this.unions.anyComponent || componentsChanged,
         anyFunction: this.unions.anyFunction || functionsChanged
       } : void 0;
-      return new _Catalog(described.id, this.protocolVersion, components, functions, {
-        themeSchema: this.themeSchema,
+      return new _Catalog(described.id, described.protocolVersion ?? this.protocolVersion, components, functions, {
+        themeSchema: described.themeSchema ?? this.themeSchema,
         instructions: described.instructions,
         schemaUri: this.schemaUri,
         schemaId: described.schemaId,
@@ -10383,12 +14521,43 @@ var bwA2UI = (() => {
         compMap.set(comp.name, comp);
       }
       this.components = compMap;
+      const options = isZodSchema(themeSchemaOrOptions) ? { themeSchema: themeSchemaOrOptions } : themeSchemaOrOptions ?? {};
+      const defs = frozenJson(options.defs);
+      if (functions.some(isAgentFunction)) {
+        assertUniqueFunctionNames(this.id, functions);
+      }
       const funcMap = /* @__PURE__ */ new Map();
+      const agentFuncMap = /* @__PURE__ */ new Map();
+      const rendererFuncMap = /* @__PURE__ */ new Map();
       for (const fn of functions) {
-        funcMap.set(fn.name, fn);
+        if (isAgentFunction(fn)) {
+          const boundFn = bindAgentFunctionDefs(fn, defs);
+          funcMap.set(fn.name, boundFn);
+          agentFuncMap.set(fn.name, boundFn);
+        } else {
+          funcMap.set(fn.name, fn);
+          rendererFuncMap.set(fn.name, fn);
+        }
+      }
+      if (agentFuncMap.size > 0) {
+        if (!isAtLeastVersion(this.protocolVersion, SpecVersion.V1_0)) {
+          throw new A2uiCatalogError(`Catalog '${this.id}' targets protocol version ${this.protocolVersion}, but agent functions need v1.0 or later.`);
+        }
+        assertAgentFunctionDefsAgree(defs, agentFuncMap.values());
+        for (const [name, agentFn] of agentFuncMap) {
+          assertUax31Identifier(name, `function identifier: '${name}'`);
+          const argNames = /* @__PURE__ */ new Set([
+            ...getDeclaredSchemaKeys(agentFn.schema),
+            ...agentFn.declaredParameterNames ?? []
+          ]);
+          for (const argName of argNames) {
+            assertUax31Identifier(argName, `argument identifier: '${argName}' in function '${name}'`);
+          }
+        }
       }
       this.functions = funcMap;
-      const options = isZodSchema(themeSchemaOrOptions) ? { themeSchema: themeSchemaOrOptions } : themeSchemaOrOptions ?? {};
+      this.agentFunctions = agentFuncMap;
+      this.rendererFunctions = rendererFuncMap;
       this.themeSchema = options.themeSchema;
       this.instructions = options.instructions ?? resolvedInstructions;
       this.schemaUri = options.schemaUri;
@@ -10400,12 +14569,12 @@ var bwA2UI = (() => {
       this.declaresComponents = options.declaresComponents ?? true;
       this.functionsLayout = options.functionsLayout;
       this.unions = options.unions ? Object.freeze({ ...options.unions }) : void 0;
-      this.defs = frozenJson(options.defs);
+      this.defs = defs;
       this.extensionFields = frozenJson(options.extensionFields);
       this.commonTypesUri = options.commonTypesUri;
       this.themeLocation = options.themeLocation;
       this.defModels = options.defModels ? Object.freeze([...options.defModels]) : void 0;
-      this.invoker = createCatalogInvoker(this.id, this.protocolVersion, this.functions);
+      this.invoker = createCatalogInvoker(this.id, this.protocolVersion, this.functions, this);
     }
     /**
      * Constructs a schema-only Catalog from an authored A2UI catalog document.
@@ -10452,39 +14621,133 @@ var bwA2UI = (() => {
       return _Catalog.fromJson(catalogSchema, protocolVersion);
     }
   };
-  function isZodSchema(value) {
-    return typeof value === "object" && value !== null && typeof value.safeParse === "function";
+  function assertUniqueFunctionNames(catalogId, functions) {
+    const seen = /* @__PURE__ */ new Set();
+    for (const fn of functions) {
+      if (seen.has(fn.name)) {
+        throw new A2uiCatalogError(`Catalog '${catalogId}' already has a function named '${fn.name}'.`);
+      }
+      seen.add(fn.name);
+    }
   }
-  function createCatalogInvoker(catalogId, protocolVersion, functions) {
+  function assertAgentFunctionDefsAgree(catalogDefs, agentFunctions) {
+    const seen = /* @__PURE__ */ new Map();
+    for (const [name, definition] of Object.entries(catalogDefs ?? {})) {
+      seen.set(name, { definition });
+    }
+    for (const agentFn of agentFunctions) {
+      const localDefs = agentFn.jsonSchema?.["$defs"];
+      if (typeof localDefs !== "object" || localDefs === null || Array.isArray(localDefs)) {
+        continue;
+      }
+      for (const [defName, definition] of Object.entries(localDefs)) {
+        const previous = seen.get(defName);
+        if (previous === void 0) {
+          seen.set(defName, { definition, owner: agentFn.name });
+          continue;
+        }
+        if (!jsonValueEquals(previous.definition, definition)) {
+          const other = previous.owner === void 0 ? "the catalog" : `agent function '${previous.owner}'`;
+          throw new A2uiCatalogError(`Agent function '${agentFn.name}' defines $defs '${defName}' differently from ${other}.`);
+        }
+      }
+    }
+  }
+  function mergeAgentFunctions(catalogId, functions, agentFunctions) {
+    if (agentFunctions === void 0) {
+      return [...functions];
+    }
+    const merged = [...functions];
+    const indexByName = /* @__PURE__ */ new Map();
+    for (let i2 = 0; i2 < merged.length; i2++) {
+      indexByName.set(merged[i2].name, i2);
+    }
+    const seenAgentNames = /* @__PURE__ */ new Set();
+    for (const agentFn of agentFunctions) {
+      if (!isAgentFunction(agentFn)) {
+        throw new A2uiCatalogError(`Catalog '${catalogId}' agentFunctions entry '${String(agentFn?.name ?? agentFn)}' is not an \`AgentFunction\`.`);
+      }
+      if (seenAgentNames.has(agentFn.name)) {
+        throw new A2uiCatalogError(`agentFunctions lists '${agentFn.name}' more than once; give each agent function its own name.`);
+      }
+      seenAgentNames.add(agentFn.name);
+      const existingIndex = indexByName.get(agentFn.name);
+      if (agentFn.declaration !== void 0) {
+        if (existingIndex === void 0) {
+          throw new A2uiCatalogError(`Catalog '${catalogId}' has no function named '${agentFn.name}' for AgentFunction.fromApi to bind; build an agent function the catalog doesn't declare with new AgentFunction(...).`);
+        }
+        if (merged[existingIndex] !== agentFn.declaration) {
+          throw new A2uiCatalogError(`Agent function '${agentFn.name}' was built with AgentFunction.fromApi from a different declaration than the one in catalog '${catalogId}' (for example, from a reloaded or copied catalog); build it from this catalog's entry: AgentFunction.fromApi(catalog.functions.get('${agentFn.name}')!, handler).`);
+        }
+        merged[existingIndex] = agentFn;
+      } else if (existingIndex === void 0) {
+        indexByName.set(agentFn.name, merged.length);
+        merged.push(agentFn);
+      } else {
+        throw new A2uiCatalogError(`Catalog '${catalogId}' already has a function named '${agentFn.name}', so an agent function can't use that name: a renderer that implements the other function would run it instead of calling the agent. Give the agent function its own name, or bind a handler to the declared function with AgentFunction.fromApi(catalog.functions.get('${agentFn.name}')!, handler).`);
+      }
+    }
+    return merged;
+  }
+  function createCatalogInvoker(catalogId, protocolVersion, functions, catalog) {
+    const atLeastV10 = isAtLeastVersion(protocolVersion, SpecVersion.V1_0);
     return (name, rawArgs, ctx, abortSignal) => {
-      const fn = functions.get(name) ?? (isAtLeastVersion(protocolVersion, SpecVersion.V1_0) && name === "@index" ? IndexImplementation : void 0);
+      const fn = functions.get(name) ?? (atLeastV10 && name === "@index" ? IndexImplementation : void 0);
+      const execute = fn?.execute;
+      if (typeof execute !== "function") {
+        const surface = atLeastV10 && !name.startsWith("@") && ctx && allowsAgentRouting(ctx) ? ctx.surface : void 0;
+        if (surface?.agentFunctionCaller) {
+          return routeToAgent(surface, catalogId, name, fn, rawArgs, ctx, abortSignal);
+        }
+      }
       if (!fn) {
         throw new A2uiExpressionError(`Function not found in catalog '${catalogId}': ${name}`, name);
       }
       assertRendererCaller(fn);
       assertUserActivation(fn, ctx);
-      const execute = fn.execute;
       if (typeof execute !== "function") {
         throw new A2uiExpressionError(`Function '${name}' in catalog '${catalogId}' is schema-only and has no implementation.`, name);
       }
-      const parseAndExecute = (resolvedArgs) => {
+      const callCtx = atLeastV10 && !name.startsWith("@") && catalogId && ctx instanceof DataContext ? withActiveCallCatalogId(ctx, catalogId, catalog) : ctx;
+      return whenArgumentsSettle(rawArgs, abortSignal, (resolvedArgs) => {
         try {
-          const args = isAtLeastVersion(protocolVersion, SpecVersion.V1_0) ? coerceValidationResults(fn.schema, resolvedArgs) : resolvedArgs;
+          const args = coerceDynamicBooleans(fn.schema, resolvedArgs);
           const safeArgs = fn.schema.parse(args);
-          return execute.call(fn, safeArgs, ctx, abortSignal);
+          return execute.call(fn, safeArgs, callCtx, abortSignal);
         } catch (e2) {
           if (e2?.name === "ZodError" || e2 instanceof external_exports.ZodError) {
             throw new A2uiExpressionError(`Validation failed for function '${name}': ${e2.message}`, name, e2.errors ?? e2.issues);
           }
           throw e2;
         }
-      };
-      const settledArgs = settleDeep(rawArgs);
-      if (!isThenable(settledArgs)) {
-        return parseAndExecute(settledArgs);
-      }
-      return Promise.resolve(settledArgs).then((resolvedArgs) => abortSignal?.aborted ? void 0 : parseAndExecute(resolvedArgs));
+      });
     };
+  }
+  function whenArgumentsSettle(rawArgs, abortSignal, run) {
+    const settledArgs = settleDeep(rawArgs);
+    if (!isThenable(settledArgs)) {
+      return findFailedArgument(settledArgs) ?? run(settledArgs);
+    }
+    return Promise.resolve(settledArgs).then((resolvedArgs) => findFailedArgument(resolvedArgs) ?? (abortSignal?.aborted ? void 0 : run(resolvedArgs)));
+  }
+  function routeToAgent(surface, catalogId, name, fn, rawArgs, ctx, abortSignal) {
+    if (fn) {
+      assertRendererCaller(fn);
+      assertUserActivation(fn, ctx);
+    }
+    const bypassCache = Boolean(ctx.isActionExecution);
+    return whenArgumentsSettle(rawArgs, abortSignal, (resolvedArgs) => {
+      let args = resolvedArgs ?? {};
+      if (fn) {
+        args = coerceDynamicBooleans(fn.schema, args);
+        const parsed = fn.schema.safeParse(args);
+        if (!parsed.success) {
+          throw new A2uiExpressionError(`Validation failed for function '${name}': ${parsed.error.message}`, name, parsed.error.errors);
+        }
+        args = parsed.data;
+      }
+      return surface.callAgentFunction({ "@call": name, catalogId, args }, { abortSignal, bypassCache });
+    });
   }
   function assertRendererCaller(fn) {
     if (fn.allowedCallers === "agentOnly") {
@@ -10501,1708 +14764,6 @@ var bwA2UI = (() => {
       throw new A2uiExpressionError(`Function '${fn.name}' requires user activation and cannot be evaluated without an active user gesture.`, fn.name);
     }
   }
-
-  // node_modules/@preact/signals-core/dist/signals-core.module.js
-  var i = /* @__PURE__ */ Symbol.for("preact-signals");
-  function t() {
-    if (!(v > 1)) {
-      var i2, t2 = false;
-      !(function() {
-        var i3 = c;
-        c = void 0;
-        while (void 0 !== i3) {
-          var t3 = i3.S;
-          if (t3.v === i3.v) {
-            for (var r3 = t3.t; void 0 !== r3; r3 = r3.x) if (r3.i === i3.i) r3.i = t3.i;
-          }
-          i3 = i3.o;
-        }
-      })();
-      while (void 0 !== h) {
-        var r2 = h;
-        h = void 0;
-        s++;
-        while (void 0 !== r2) {
-          var n2 = r2.u;
-          r2.u = void 0;
-          r2.f &= -3;
-          if (!(8 & r2.f) && w(r2)) try {
-            r2.c();
-          } catch (r3) {
-            if (!t2) {
-              i2 = r3;
-              t2 = true;
-            }
-          }
-          r2 = n2;
-        }
-      }
-      s = 0;
-      v--;
-      if (t2) throw i2;
-    } else v--;
-  }
-  function r(i2) {
-    if (v > 0) return i2();
-    u = ++e;
-    v++;
-    try {
-      return i2();
-    } finally {
-      t();
-    }
-  }
-  var n;
-  var o = void 0;
-  function f(i2) {
-    var t2 = o, r2 = n;
-    o = void 0;
-    n = void 0;
-    try {
-      return i2();
-    } finally {
-      o = t2;
-      n = r2;
-    }
-  }
-  var h = void 0;
-  var v = 0;
-  var s = 0;
-  var e = 0;
-  var u = 0;
-  var c = void 0;
-  var a = 0;
-  function d(i2) {
-    if (void 0 !== o) {
-      var t2 = i2.n;
-      if (void 0 === t2 || t2.t !== o) {
-        t2 = { i: 0, S: i2, p: o.s, n: void 0, t: o, e: void 0, x: void 0, r: t2 };
-        if (void 0 !== o.s) o.s.n = t2;
-        o.s = t2;
-        i2.n = t2;
-        if (32 & o.f) i2.S(t2);
-        return t2;
-      } else if (-1 === t2.i) {
-        t2.i = 0;
-        if (void 0 !== t2.n) {
-          t2.n.p = t2.p;
-          if (void 0 !== t2.p) t2.p.n = t2.n;
-          t2.p = o.s;
-          t2.n = void 0;
-          o.s.n = t2;
-          o.s = t2;
-        }
-        return t2;
-      }
-    }
-  }
-  function l(i2, t2) {
-    this.v = i2;
-    this.i = 0;
-    this.n = void 0;
-    this.t = void 0;
-    this.l = 0;
-    this.W = null == t2 ? void 0 : t2.watched;
-    this.Z = null == t2 ? void 0 : t2.unwatched;
-    this.name = null == t2 ? void 0 : t2.name;
-  }
-  l.prototype.brand = i;
-  l.prototype.h = function() {
-    return true;
-  };
-  l.prototype.S = function(i2) {
-    var t2 = this, r2 = this.t;
-    if (r2 !== i2 && void 0 === i2.e) {
-      i2.x = r2;
-      this.t = i2;
-      if (void 0 !== r2) r2.e = i2;
-      else f(function() {
-        var i3;
-        null == (i3 = t2.W) || i3.call(t2);
-      });
-    }
-  };
-  l.prototype.U = function(i2) {
-    var t2 = this;
-    if (void 0 !== this.t) {
-      var r2 = i2.e, n2 = i2.x;
-      if (void 0 !== r2) {
-        r2.x = n2;
-        i2.e = void 0;
-      }
-      if (void 0 !== n2) {
-        n2.e = r2;
-        i2.x = void 0;
-      }
-      if (i2 === this.t) {
-        this.t = n2;
-        if (void 0 === n2) f(function() {
-          var i3;
-          null == (i3 = t2.Z) || i3.call(t2);
-        });
-      }
-    }
-  };
-  l.prototype.subscribe = function(i2) {
-    var t2 = this;
-    return x(function() {
-      var r2 = t2.value;
-      f(function() {
-        return i2(r2);
-      });
-    }, { name: "sub" });
-  };
-  l.prototype.valueOf = function() {
-    return this.value;
-  };
-  l.prototype.toString = function() {
-    return this.value + "";
-  };
-  l.prototype.toJSON = function() {
-    return this.value;
-  };
-  l.prototype.peek = function() {
-    var i2 = this;
-    return f(function() {
-      return i2.value;
-    });
-  };
-  Object.defineProperty(l.prototype, "value", { get: function() {
-    var i2 = d(this);
-    if (void 0 !== i2) i2.i = this.i;
-    return this.v;
-  }, set: function(i2) {
-    if (i2 !== this.v) {
-      if (s > 100) throw new Error("Cycle detected");
-      !(function(i3) {
-        if (0 !== v && 0 === s) {
-          if (i3.l !== u) {
-            i3.l = u;
-            c = { S: i3, v: i3.v, i: i3.i, o: c };
-          }
-        }
-      })(this);
-      this.v = i2;
-      this.i++;
-      a++;
-      v++;
-      try {
-        for (var r2 = this.t; void 0 !== r2; r2 = r2.x) r2.t.N();
-      } finally {
-        t();
-      }
-    }
-  } });
-  function y(i2, t2) {
-    return new l(i2, t2);
-  }
-  function w(i2) {
-    for (var t2 = i2.s; void 0 !== t2; t2 = t2.n) if (t2.S.i !== t2.i || !t2.S.h() || t2.S.i !== t2.i) return true;
-    return false;
-  }
-  function b(i2) {
-    for (var t2 = i2.s; void 0 !== t2; t2 = t2.n) {
-      var r2 = t2.S.n;
-      if (void 0 !== r2) t2.r = r2;
-      t2.S.n = t2;
-      t2.i = -1;
-      if (void 0 === t2.n) {
-        i2.s = t2;
-        break;
-      }
-    }
-  }
-  function _(i2) {
-    var t2 = i2.s, r2 = void 0;
-    while (void 0 !== t2) {
-      var n2 = t2.p;
-      if (-1 === t2.i) {
-        t2.S.U(t2);
-        if (void 0 !== n2) n2.n = t2.n;
-        if (void 0 !== t2.n) t2.n.p = n2;
-      } else r2 = t2;
-      t2.S.n = t2.r;
-      if (void 0 !== t2.r) t2.r = void 0;
-      t2 = n2;
-    }
-    i2.s = r2;
-  }
-  function j(i2, t2) {
-    l.call(this, void 0, t2);
-    this.x = i2;
-    this.s = void 0;
-    this.g = a - 1;
-    this.f = 4;
-  }
-  j.prototype = new l();
-  j.prototype.h = function() {
-    this.f &= -3;
-    if (1 & this.f) return false;
-    if (32 == (36 & this.f)) return true;
-    this.f &= -5;
-    if (this.g === a) return true;
-    this.g = a;
-    this.f |= 1;
-    if (this.i > 0 && !w(this)) {
-      this.f &= -2;
-      return true;
-    }
-    var i2 = o;
-    try {
-      b(this);
-      o = this;
-      var t2 = this.x();
-      if (16 & this.f || this.v !== t2 || 0 === this.i) {
-        this.v = t2;
-        this.f &= -17;
-        this.i++;
-      }
-    } catch (i3) {
-      this.v = i3;
-      this.f |= 16;
-      this.i++;
-    }
-    o = i2;
-    _(this);
-    this.f &= -2;
-    return true;
-  };
-  j.prototype.S = function(i2) {
-    if (void 0 === this.t) {
-      this.f |= 36;
-      for (var t2 = this.s; void 0 !== t2; t2 = t2.n) t2.S.S(t2);
-    }
-    l.prototype.S.call(this, i2);
-  };
-  j.prototype.U = function(i2) {
-    if (void 0 !== this.t) {
-      l.prototype.U.call(this, i2);
-      if (void 0 === this.t) {
-        this.f &= -33;
-        for (var t2 = this.s; void 0 !== t2; t2 = t2.n) t2.S.U(t2);
-      }
-    }
-  };
-  j.prototype.N = function() {
-    if (!(2 & this.f)) {
-      this.f |= 6;
-      for (var i2 = this.t; void 0 !== i2; i2 = i2.x) i2.t.N();
-    }
-  };
-  Object.defineProperty(j.prototype, "value", { get: function() {
-    if (1 & this.f) throw new Error("Cycle detected");
-    var i2 = d(this);
-    this.h();
-    if (void 0 !== i2) i2.i = this.i;
-    if (16 & this.f) throw this.v;
-    return this.v;
-  } });
-  function O(i2, t2) {
-    return new j(i2, t2);
-  }
-  function p(i2) {
-    var r2 = i2.j;
-    i2.j = void 0;
-    if ("function" == typeof r2) {
-      v++;
-      var n2 = o;
-      o = void 0;
-      try {
-        r2();
-      } catch (t2) {
-        i2.f &= -2;
-        i2.f |= 8;
-        g(i2);
-        throw t2;
-      } finally {
-        o = n2;
-        t();
-      }
-    }
-  }
-  function g(i2) {
-    for (var t2 = i2.s; void 0 !== t2; t2 = t2.n) t2.S.U(t2);
-    i2.x = void 0;
-    i2.s = void 0;
-    p(i2);
-  }
-  function S(i2) {
-    if (o !== this) throw new Error("Out-of-order effect");
-    _(this);
-    o = i2;
-    this.f &= -2;
-    try {
-      if (8 & this.f) g(this);
-    } finally {
-      t();
-    }
-  }
-  function m(i2, t2) {
-    this.x = i2;
-    this.j = void 0;
-    this.s = void 0;
-    this.u = void 0;
-    this.f = 32;
-    this.name = null == t2 ? void 0 : t2.name;
-    if (n) n.push(this);
-  }
-  m.prototype.c = function() {
-    var i2 = this.S();
-    try {
-      if (8 & this.f) return;
-      if (void 0 === this.x) return;
-      var t2 = this.x();
-      if ("function" == typeof t2) this.j = t2;
-    } finally {
-      i2();
-    }
-  };
-  m.prototype.S = function() {
-    if (1 & this.f) throw new Error("Cycle detected");
-    this.f |= 1;
-    this.f &= -9;
-    p(this);
-    b(this);
-    v++;
-    var i2 = o;
-    o = this;
-    return S.bind(this, i2);
-  };
-  m.prototype.N = function() {
-    if (!(2 & this.f)) {
-      this.f |= 2;
-      this.u = h;
-      h = this;
-    }
-  };
-  m.prototype.d = function() {
-    this.f |= 8;
-    if (!(1 & this.f)) g(this);
-  };
-  m.prototype.dispose = function() {
-    this.d();
-  };
-  function x(i2, t2) {
-    var r2 = new m(i2, t2);
-    try {
-      r2.c();
-    } catch (i3) {
-      r2.d();
-      throw i3;
-    }
-    var n2 = r2.d.bind(r2);
-    n2[Symbol.dispose] = n2;
-    return n2;
-  }
-
-  // node_modules/@a2ui/web_core/src/reactivity/signals.js
-  var signalImpl;
-  var computedImpl;
-  var effectImpl;
-  var batchWriteImpl;
-  var isSignalImpl;
-  var getValueImpl;
-  var setValueImpl;
-  var peekValueImpl;
-  var _PRIVATE_DEFAULT_SIGNAL_IMPLEMENTATION = {
-    signal: y,
-    computed: O,
-    effect: x,
-    batchWrite: r,
-    isSignal: (val2) => typeof val2 === "function" || !!val2 && typeof val2 === "object" && ("value" in val2 || "peek" in val2),
-    getValue: (signal2) => {
-      if (typeof signal2 === "function") {
-        return signal2();
-      }
-      return signal2.value;
-    },
-    setValue: (signal2, value) => {
-      if (typeof signal2?.set === "function") {
-        signal2.set(value);
-        return;
-      }
-      if (signal2 instanceof j || typeof signal2 === "function") {
-        throw new TypeError("Cannot set value of a read-only computed signal.");
-      }
-      signal2.value = value;
-    },
-    peekValue: (signal2) => {
-      if (typeof signal2?.peek === "function") {
-        return signal2.peek();
-      }
-      if (typeof signal2 === "function") {
-        return signal2();
-      }
-      if (signal2 && typeof signal2 === "object" && "value" in signal2) {
-        return signal2.value;
-      }
-      return signal2;
-    }
-  };
-  setSignalImplementation(_PRIVATE_DEFAULT_SIGNAL_IMPLEMENTATION);
-  function setSignalImplementation(impl) {
-    signalImpl = impl.signal;
-    computedImpl = impl.computed;
-    effectImpl = impl.effect;
-    batchWriteImpl = impl.batchWrite;
-    isSignalImpl = impl.isSignal;
-    getValueImpl = impl.getValue;
-    setValueImpl = impl.setValue;
-    peekValueImpl = impl.peekValue;
-  }
-  function signal(initialValue) {
-    return signalImpl(initialValue);
-  }
-  function computed(computeFn) {
-    return computedImpl(computeFn);
-  }
-  function effect(effectFn) {
-    return effectImpl(effectFn);
-  }
-  function batchWrite(batchFn) {
-    return batchWriteImpl(batchFn);
-  }
-  function isSignal(val2) {
-    return isSignalImpl(val2);
-  }
-  function getValue(signal2) {
-    return getValueImpl(signal2);
-  }
-  function setValue(signal2, value) {
-    setValueImpl(signal2, value);
-  }
-  function peekValue(signal2) {
-    return peekValueImpl(signal2);
-  }
-
-  // node_modules/@a2ui/web_core/src/state/data-model.js
-  function isNumeric(value) {
-    return /^(0|[1-9]\d*)$/.test(value);
-  }
-  var MAX_ARRAY_INDEX = 1e4;
-  var FORBIDDEN_KEYS = /* @__PURE__ */ new Set(["__proto__", "constructor", "prototype"]);
-  var DataModel = class {
-    /**
-     * Initializes a new `DataModel` instance.
-     *
-     * @param initialData Initial data for the model. Defaults to an empty object.
-     */
-    constructor(initialData = {}) {
-      this.data = {};
-      this.signals = /* @__PURE__ */ new Map();
-      this.subscriptions = /* @__PURE__ */ new Set();
-      this.data = initialData;
-    }
-    /**
-     * Retrieves a Preact Signal for a specific data path.
-     *
-     * This provides a reactive way to access a value. If the value at the path
-     * changes via `set()`, the signal will automatically be updated.
-     *
-     * @param path The JSON pointer path to create or retrieve a signal for.
-     * @returns A Preact Signal representing the value at the specified path.
-     * @throws {A2uiDataError} If path is null, undefined, or contains forbidden
-     *     segments (`__proto__`, `constructor`, `prototype`).
-     */
-    getSignal(path) {
-      const normalizedPath = this.normalizePath(path);
-      if (!this.signals.has(normalizedPath)) {
-        this.signals.set(normalizedPath, signal(this.get(normalizedPath)));
-      }
-      return this.signals.get(normalizedPath);
-    }
-    /**
-     * Updates the model at the specific path and notifies all relevant signals.
-     * If path is '/' or empty, replaces the entire root.
-     *
-     * Note on `undefined` values:
-     * - For objects: Setting a property to `undefined` removes the key from the
-     * object.
-     * - For arrays: Setting an index to `undefined` sets that index to
-     * `undefined` but preserves the array length (sparse array).
-     *
-     * @param path The JSON pointer path to set value for.
-     * @param value The value to set at the specified path.
-     * @param preserveNull Whether to store `null` as a value instead of treating
-     *     it like `undefined`. Pre-1.0 data models stored `null`; the v1.0
-     *     protocol removes the entry.
-     * @returns This `DataModel` instance for chaining.
-     * @throws {A2uiDataError} If path is null, undefined, invalid for
-     *     arrays/primitives, exceeds max array bounds, or contains forbidden
-     *     segments (`__proto__`, `constructor`, `prototype`).
-     */
-    set(path, value, preserveNull = false) {
-      if (path === null || path === void 0) {
-        throw new A2uiDataError("Path cannot be null or undefined.");
-      }
-      const segments = this.parsePath(path);
-      if (segments.length === 0) {
-        this.data = value === null || value === void 0 ? {} : value;
-        this.notifyAllSignals();
-        return this;
-      }
-      const lastSegment = segments.pop();
-      const removes = value === void 0 || !preserveNull && value === null;
-      if (removes && this.get(path) === void 0) {
-        return this;
-      }
-      if (this.data === void 0 || this.data === null) {
-        this.data = {};
-      } else if (typeof this.data !== "object") {
-        throw new A2uiDataError(`Cannot set path '${path}': the data model root is a primitive value.`, path);
-      }
-      let current = this.data;
-      for (let i2 = 0; i2 < segments.length; i2++) {
-        const segment = segments[i2];
-        if (Array.isArray(current)) {
-          if (!isNumeric(segment)) {
-            throw new A2uiDataError(`Cannot use non-numeric segment '${segment}' on an array in path '${path}'.`, path);
-          }
-          const index = parseInt(segment, 10);
-          if (index > MAX_ARRAY_INDEX) {
-            throw new A2uiDataError(`Cannot set path '${path}': array index '${segment}' exceeds maximum supported index (${MAX_ARRAY_INDEX}).`, path);
-          }
-          const val2 = current[index];
-          if (val2 !== void 0 && val2 !== null && typeof val2 !== "object") {
-            throw new A2uiDataError(`Cannot set path '${path}': segment '${segment}' is a primitive value.`, path);
-          }
-          if (val2 === void 0 || val2 === null) {
-            const nextSegment = i2 < segments.length - 1 ? segments[i2 + 1] : lastSegment;
-            if (isNumeric(nextSegment)) {
-              const nextIdx = parseInt(nextSegment, 10);
-              if (nextIdx > MAX_ARRAY_INDEX) {
-                throw new A2uiDataError(`Cannot set path '${path}': array index '${nextSegment}' exceeds maximum supported index (${MAX_ARRAY_INDEX}).`, path);
-              }
-              current[index] = [];
-            } else {
-              current[index] = {};
-            }
-          }
-        } else {
-          const hasOwnProp = Object.prototype.hasOwnProperty.call(current, segment);
-          if (hasOwnProp) {
-            const propVal = current[segment];
-            if (propVal !== void 0 && propVal !== null && typeof propVal !== "object") {
-              throw new A2uiDataError(`Cannot set path '${path}': segment '${segment}' is a primitive value.`, path);
-            }
-          }
-          if (!hasOwnProp || current[segment] === void 0 || current[segment] === null) {
-            const nextSegment = i2 < segments.length - 1 ? segments[i2 + 1] : lastSegment;
-            if (isNumeric(nextSegment)) {
-              const nextIdx = parseInt(nextSegment, 10);
-              if (nextIdx > MAX_ARRAY_INDEX) {
-                throw new A2uiDataError(`Cannot set path '${path}': array index '${nextSegment}' exceeds maximum supported index (${MAX_ARRAY_INDEX}).`, path);
-              }
-              current[segment] = [];
-            } else {
-              current[segment] = {};
-            }
-          }
-        }
-        current = current[segment];
-      }
-      if (Array.isArray(current)) {
-        if (!isNumeric(lastSegment)) {
-          throw new A2uiDataError(`Cannot use non-numeric segment '${lastSegment}' on an array in path '${path}'.`, path);
-        }
-        const lastIndex = parseInt(lastSegment, 10);
-        if (lastIndex > MAX_ARRAY_INDEX) {
-          throw new A2uiDataError(`Cannot set path '${path}': array index '${lastSegment}' exceeds maximum supported index (${MAX_ARRAY_INDEX}).`, path);
-        }
-      }
-      if (removes) {
-        if (Array.isArray(current)) {
-          const idx = parseInt(lastSegment, 10);
-          if (idx < current.length) {
-            current[idx] = void 0;
-          }
-        } else {
-          delete current[lastSegment];
-        }
-      } else {
-        current[lastSegment] = value;
-      }
-      this.notifySignals(path);
-      return this;
-    }
-    /**
-     * Deletes the value at the specified JSON pointer path.
-     *
-     * If `path` is `'/'` or empty, resets the root data model to an empty object.
-     *
-     * @param path The JSON pointer path to remove.
-     * @returns This `DataModel` instance for chaining.
-     */
-    delete(path) {
-      return this.set(path, void 0);
-    }
-    /**
-     * Resolves a relative path against a base context path.
-     *
-     * @param path The path to resolve.
-     * @param contextPath The base path (optional).
-     * @returns The resolved absolute path.
-     */
-    static resolvePath(path, contextPath) {
-      if (path.startsWith("/")) {
-        return path;
-      }
-      if (contextPath) {
-        const base = contextPath.endsWith("/") ? contextPath : `${contextPath}/`;
-        return `${base}${path}`;
-      }
-      return `/${path}`;
-    }
-    /**
-     * Retrieves data at a specific JSON pointer path.
-     *
-     * @template T The expected type of the returned value. Defaults to `any`.
-     * @param path The JSON pointer path to read from.
-     * @returns The value at the specified path, or undefined if not found.
-     * @throws {A2uiDataError} If path is null, undefined, or contains forbidden
-     *     segments (`__proto__`, `constructor`, `prototype`).
-     */
-    get(path) {
-      if (path === null || path === void 0) {
-        throw new A2uiDataError("Path cannot be null or undefined.");
-      }
-      if (path === "/" || path === "") {
-        return this.data;
-      }
-      const segments = this.parsePath(path);
-      let current = this.data;
-      for (const segment of segments) {
-        if (current === void 0 || current === null || typeof current !== "object") {
-          return void 0;
-        }
-        if (Array.isArray(current)) {
-          if (!isNumeric(segment)) {
-            return void 0;
-          }
-          const index = parseInt(segment, 10);
-          if (index < 0 || index >= current.length) {
-            return void 0;
-          }
-          current = current[index];
-        } else {
-          if (!Object.prototype.hasOwnProperty.call(current, segment)) {
-            return void 0;
-          }
-          current = current[segment];
-        }
-      }
-      return current;
-    }
-    /**
-     * Checks whether a JSON pointer path physically exists in the data model.
-     *
-     * Differentiates between a path holding an explicit `null` value (`true`) and
-     * a path that is absent from the object or array hierarchy (`false`).
-     *
-     * @param path Absolute JSON pointer path to check.
-     * @returns Whether every segment along `path` exists in the hierarchy.
-     */
-    hasPath(path) {
-      if (path === null || path === void 0) {
-        return false;
-      }
-      return this.get(path) !== void 0;
-    }
-    /**
-     * Subscribes to changes at the specified data path.
-     *
-     * This is a backwards-compatible layer using Preact Signals internally. It
-     * allows listeners to be notified whenever the value at the specified path
-     * (or any of its ancestors/descendants) changes.
-     *
-     * @param path The JSON pointer path to observe.
-     * @param onChange A callback fired whenever the value changes.
-     * @returns A `DataSubscription` containing the initial value and an
-     *     `unsubscribe` method.
-     * @throws {A2uiDataError} If path is null, undefined, or contains forbidden
-     *     segments (`__proto__`, `constructor`, `prototype`).
-     */
-    subscribe(path, onChange) {
-      const sig = this.getSignal(path);
-      let isSync = true;
-      let currentValue = peekValue(sig);
-      const dispose = effect(() => {
-        const val2 = getValue(sig);
-        currentValue = val2;
-        if (!isSync) {
-          onChange(val2);
-        }
-      });
-      isSync = false;
-      this.subscriptions.add(dispose);
-      return {
-        get value() {
-          return currentValue;
-        },
-        unsubscribe: () => {
-          dispose();
-          this.subscriptions.delete(dispose);
-        }
-      };
-    }
-    /**
-     * Clears all internal subscriptions and active signals.
-     */
-    dispose() {
-      for (const dispose of this.subscriptions) {
-        dispose();
-      }
-      this.subscriptions.clear();
-      this.signals.clear();
-    }
-    normalizePath(path) {
-      const segments = path.split("/").filter((p2) => p2.length > 0);
-      return segments.length === 0 ? "/" : `/${segments.join("/")}`;
-    }
-    parsePath(path) {
-      return path.split("/").filter((p2) => p2.length > 0).map((rawSegment) => {
-        const segment = rawSegment.replace(/~([01])/g, (_2, g2) => g2 === "1" ? "/" : "~");
-        if (FORBIDDEN_KEYS.has(segment)) {
-          throw new A2uiDataError(`Forbidden path segment '${segment}' in path '${path}'.`, path);
-        }
-        return segment;
-      });
-    }
-    notifySignals(path) {
-      const normalizedPath = this.normalizePath(path);
-      batchWrite(() => {
-        this.updateSignal(normalizedPath);
-        let parentPath = normalizedPath;
-        while (parentPath !== "/" && parentPath !== "") {
-          parentPath = parentPath.substring(0, parentPath.lastIndexOf("/")) || "/";
-          this.updateSignal(parentPath);
-        }
-        for (const subPath of this.signals.keys()) {
-          if (this.isDescendant(subPath, normalizedPath)) {
-            this.updateSignal(subPath);
-          }
-        }
-      });
-    }
-    updateSignal(path) {
-      const sig = this.signals.get(path);
-      if (sig) {
-        const val2 = this.get(path);
-        if (Array.isArray(val2)) {
-          setValue(sig, val2.slice());
-        } else if (typeof val2 === "object" && val2 !== null) {
-          setValue(sig, { ...val2 });
-        } else {
-          setValue(sig, val2);
-        }
-      }
-    }
-    notifyAllSignals() {
-      batchWrite(() => {
-        for (const path of this.signals.keys()) {
-          this.updateSignal(path);
-        }
-      });
-    }
-    isDescendant(childPath, parentPath) {
-      if (parentPath === "/" || parentPath === "") {
-        return childPath !== "/";
-      }
-      return childPath.startsWith(parentPath + "/");
-    }
-  };
-
-  // node_modules/@a2ui/web_core/src/types/helpers.js
-  var MAX_FUNCTION_CALL_ARGS = 1e3;
-  var AnyComponentSchema2 = external_exports.object({
-    "component": external_exports.string().describe("The type name of the component."),
-    "id": external_exports.lazy(() => ComponentIdSchema2).optional(),
-    "weight": external_exports.number().optional()
-  }).passthrough().describe("A generic A2UI component definition.");
-
-  // node_modules/@a2ui/web_core/src/state/resolve-surface-catalog.js
-  function resolveSurfaceCatalog(surface, catalogId, subject) {
-    if (catalogId !== void 0) {
-      const found = surface.availableCatalogs?.get(catalogId);
-      if (!found) {
-        throw new A2uiCatalogError(`Catalog not found: ${catalogId}`);
-      }
-      return found;
-    }
-    if (!surface.defaultCatalog) {
-      throw new A2uiCatalogError(`${subject} names no catalogId and surface '${surface.id}' has no default catalogId.`);
-    }
-    return surface.defaultCatalog;
-  }
-
-  // node_modules/@a2ui/web_core/src/resolution/data-context.js
-  var schemaKeysCache = /* @__PURE__ */ new WeakMap();
-  var SYSTEM_FUNCTION_CATALOG_ID = "a2ui:system-functions";
-  var systemFunctionCatalog;
-  function getSystemFunctionCatalog() {
-    systemFunctionCatalog ?? (systemFunctionCatalog = new Catalog(SYSTEM_FUNCTION_CATALOG_ID, SpecVersion.V1_0, [], SYSTEM_FUNCTIONS));
-    return systemFunctionCatalog;
-  }
-  function getKnownSchemaKeys(schema) {
-    if (schemaKeysCache.has(schema)) {
-      return schemaKeysCache.get(schema);
-    }
-    const result = (() => {
-      let current = schema;
-      while (current) {
-        if (current instanceof external_exports.ZodObject || current._def?.typeName === "ZodObject") {
-          if (current._def?.unknownKeys === "passthrough") {
-            return null;
-          }
-          const shape = typeof current.shape === "function" ? current.shape() : current.shape;
-          if (shape && typeof shape === "object") {
-            return new Set(Object.keys(shape));
-          }
-          return null;
-        }
-        if (current instanceof external_exports.ZodEffects || current._def?.typeName === "ZodEffects") {
-          current = current._def.schema;
-          continue;
-        }
-        if (current instanceof external_exports.ZodOptional || current instanceof external_exports.ZodNullable || current._def?.typeName === "ZodOptional" || current._def?.typeName === "ZodNullable") {
-          current = current._def.innerType;
-          continue;
-        }
-        if (current instanceof external_exports.ZodDefault || current._def?.typeName === "ZodDefault") {
-          current = current._def.innerType;
-          continue;
-        }
-        if (current instanceof external_exports.ZodCatch || current._def?.typeName === "ZodCatch") {
-          current = current._def.innerType;
-          continue;
-        }
-        if (current instanceof external_exports.ZodIntersection || current._def?.typeName === "ZodIntersection") {
-          const leftKeys = getKnownSchemaKeys(current._def.left);
-          const rightKeys = getKnownSchemaKeys(current._def.right);
-          if (!leftKeys || !rightKeys) {
-            return null;
-          }
-          return /* @__PURE__ */ new Set([...leftKeys, ...rightKeys]);
-        }
-        if (current instanceof external_exports.ZodUnion || current._def?.typeName === "ZodUnion") {
-          const options = current._def.options;
-          const allKeys = /* @__PURE__ */ new Set();
-          for (const opt of options) {
-            const k = getKnownSchemaKeys(opt);
-            if (!k)
-              return null;
-            for (const key of k) {
-              allKeys.add(key);
-            }
-          }
-          return allKeys;
-        }
-        return null;
-      }
-      return null;
-    })();
-    schemaKeysCache.set(schema, result);
-    return result;
-  }
-  function validateFunctionArgs(functionName, rawArgs, catalog) {
-    if (!rawArgs || typeof rawArgs !== "object" || Array.isArray(rawArgs)) {
-      return;
-    }
-    const suppliedKeys = Object.keys(rawArgs);
-    if (suppliedKeys.length > MAX_FUNCTION_CALL_ARGS) {
-      throw new A2uiExpressionError(`Function call '${functionName}' exceeds maximum allowed arguments count (${MAX_FUNCTION_CALL_ARGS})`, functionName);
-    }
-    const fn = catalog?.functions?.get?.(functionName) ?? (functionName === "@index" && catalog?.protocolVersion && isAtLeastVersion(catalog.protocolVersion, SpecVersion.V1_0) ? IndexApi : void 0);
-    if (!fn?.schema) {
-      return;
-    }
-    const knownKeys = getKnownSchemaKeys(fn.schema);
-    if (!knownKeys) {
-      return;
-    }
-    for (const key of suppliedKeys) {
-      if (!knownKeys.has(key)) {
-        throw new A2uiExpressionError(`Unknown argument '${key}' passed to function '${functionName}'`, functionName);
-      }
-    }
-    if (suppliedKeys.length > knownKeys.size) {
-      throw new A2uiExpressionError(`Too many arguments for function '${functionName}': expected at most ${knownKeys.size}, received ${suppliedKeys.length}`, functionName);
-    }
-  }
-  function isSingleAtKey(key) {
-    return key.startsWith("@") && !key.startsWith("@@");
-  }
-  function unescapeObjectKey(key) {
-    return key.startsWith("@@") ? key.slice(1) : key;
-  }
-  var RESERVED_DIRECTIVES = /* @__PURE__ */ new Set(["@path", "@call"]);
-  function validateReservedDirectives(keys, protocolVersion) {
-    if (!isAtLeastVersion(protocolVersion, "1.0")) {
-      return;
-    }
-    for (const key of keys) {
-      if (isSingleAtKey(key) && !RESERVED_DIRECTIVES.has(key)) {
-        throw new A2uiValidationError(`Unrecognized reserved protocol directive '${key}' in v1.0 dynamic object. Reserved keys must be in ${Array.from(RESERVED_DIRECTIVES).join(", ")}, or escaped with prefix doubling (e.g. '@${key}').`, void 0, "INVALID_RESERVED_KEY");
-      }
-    }
-  }
-  function resolveContextIndex(startCtx) {
-    let ctx = startCtx;
-    while (ctx) {
-      if (ctx.explicitIndex !== void 0 && Number.isFinite(ctx.explicitIndex)) {
-        return ctx.explicitIndex;
-      }
-      if (!(ctx instanceof DataContext) && typeof ctx.getIndex === "function") {
-        const idx = ctx.getIndex();
-        if (idx !== void 0 && Number.isFinite(idx)) {
-          return idx;
-        }
-      }
-      if (!(ctx instanceof DataContext) && typeof ctx.index === "number" && Number.isFinite(ctx.index)) {
-        return ctx.index;
-      }
-      if (typeof ctx.path === "string") {
-        const parts = ctx.path.split("/").filter(Boolean);
-        if (parts.length > 0 && /^\d+$/.test(parts[parts.length - 1])) {
-          return parseInt(parts[parts.length - 1], 10);
-        }
-      }
-      ctx = ctx.parent;
-    }
-    return void 0;
-  }
-  var MAX_DYNAMIC_VALUE_DEPTH = 1e3;
-  var DataContext = class _DataContext {
-    /**
-     * Initializes a new DataContext instance.
-     *
-     * @param surface The surface model or data model this context belongs to.
-     * @param path The absolute path in the DataModel that this context is scoped to.
-     * @param index Optional explicit collection iteration index.
-     * @param parent Optional parent DataContext in the scope chain.
-     */
-    constructor(surface, path, index, parent) {
-      this.path = path;
-      this._isUserActivated = false;
-      this._isPassiveEvaluation = false;
-      this._isActionExecution = false;
-      if (surface instanceof DataModel) {
-        this.surface = void 0;
-        this.dataModel = surface;
-        this.functionInvoker = () => void 0;
-      } else {
-        this.surface = surface;
-        this.dataModel = surface.dataModel;
-        this.functionInvoker = surface.defaultCatalog?.invoker ?? ((name, ...rest) => resolveSurfaceCatalog(surface, void 0, `Function call '${name}'`).invoker(name, ...rest));
-      }
-      this.explicitIndex = index;
-      this.parent = parent;
-      this.warnedPaths = parent ? parent.warnedPaths : /* @__PURE__ */ new Set();
-    }
-    /** Whether the current function evaluation was initiated by an active user action. */
-    get isUserActivated() {
-      return this._isUserActivated || Boolean(this.parent?.isUserActivated);
-    }
-    /** Whether the current function evaluation is running inside a passive reactive binding. */
-    get isPassiveEvaluation() {
-      return this._isPassiveEvaluation || Boolean(this.parent?.isPassiveEvaluation);
-    }
-    /**
-     * Returns the 0-based iteration index if this context (or an ancestor context)
-     * is scoped to a collection template item, or `undefined` when outside any
-     * collection template scope.
-     *
-     * Mirrors `DataContext.index` in Python: checks an explicit `explicitIndex` first,
-     * then checks strictly the trailing segment of `ctx.path`, walking `ctx.parent`.
-     *
-     * @returns The 0-based iteration index, or `undefined` if outside an iteration scope.
-     */
-    getIndex() {
-      return resolveContextIndex(this);
-    }
-    /** Active iteration index if inside a collection template scope, or `undefined`. */
-    get index() {
-      return this.getIndex();
-    }
-    /**
-     * Mutates the underlying DataModel at the specified path.
-     *
-     * @param path JSON pointer path, resolved relative to this context's `path` if not absolute.
-     * @param value New value to store in the DataModel.
-     */
-    set(path, value) {
-      const absolutePath = this.resolvePath(path);
-      const preserveNull = Boolean(this.surfaceProtocolVersion && !this.atLeastV10);
-      this.dataModel.set(absolutePath, value, preserveNull);
-    }
-    /**
-     * Protocol version of the bound surface.
-     *
-     * Reads the surface's own version, which is set even when the surface has
-     * no default catalog, and falls back to the default catalog's version for
-     * surface-like objects that do not carry one.
-     */
-    get surfaceProtocolVersion() {
-      return this.surface?.protocolVersion ?? this.surface?.defaultCatalog?.protocolVersion;
-    }
-    /** Whether this context targets A2UI protocol v1.0 or newer. */
-    get atLeastV10() {
-      if (this._cachedAtLeastV10 === void 0) {
-        this._cachedAtLeastV10 = isAtLeastVersion(this.surfaceProtocolVersion, "1.0");
-      }
-      return this._cachedAtLeastV10;
-    }
-    /**
-     * Checks whether an object represents a data binding.
-     *
-     * In v1.0, data bindings must use `@path`. In v0.9, data bindings use `path`.
-     *
-     * @param val Candidate object to inspect.
-     * @returns Whether the object represents a valid data binding for this context's protocol version.
-     */
-    isDataBindingObject(val2) {
-      const hasPath = this.atLeastV10 ? "@path" in val2 && typeof val2["@path"] === "string" : "path" in val2 && typeof val2.path === "string";
-      return hasPath && !("componentId" in val2);
-    }
-    /**
-     * Checks whether an object represents a function call.
-     *
-     * In v1.0, function calls must use `@call`. In v0.9, function calls use `call`.
-     *
-     * @param val Candidate object to inspect.
-     * @returns Whether the object represents a valid function call for this context's protocol version.
-     */
-    isFunctionCallObject(val2) {
-      return this.atLeastV10 ? "@call" in val2 && typeof val2["@call"] === "string" : "call" in val2 && typeof val2.call === "string";
-    }
-    /**
-     * Checks whether a value contains any dynamic parts (path bindings,
-     * function calls, or escaped/reserved directive keys) at any nesting depth.
-     *
-     * @param value The value or data structure to inspect.
-     * @returns Whether the value contains dynamic elements requiring resolution.
-     */
-    containsDynamicValue(value) {
-      if (value === null || typeof value !== "object" || isThenable(value)) {
-        return false;
-      }
-      if (Array.isArray(value)) {
-        return value.some((item) => this.containsDynamicValue(item));
-      }
-      const rec = value;
-      if (this.isDataBindingObject(rec) || this.isFunctionCallObject(rec)) {
-        return true;
-      }
-      if (this.atLeastV10) {
-        for (const k of Object.keys(rec)) {
-          if (k.startsWith("@")) {
-            return true;
-          }
-        }
-      }
-      return Object.values(rec).some((v2) => this.containsDynamicValue(v2));
-    }
-    /**
-     * Emits a warning if a data binding path does not exist in the data model.
-     *
-     * @param absolutePath Absolute JSON pointer path to check.
-     */
-    emitMissingDataBindingWarning(absolutePath) {
-      if (typeof this.dataModel?.hasPath === "function" && !this.dataModel.hasPath(absolutePath) && !this.warnedPaths.has(absolutePath)) {
-        this.warnedPaths.add(absolutePath);
-        void this.surface?.dispatchWarning?.({
-          code: "MISSING_DATA_BINDING",
-          path: absolutePath,
-          message: `Preflight DataBinding Warning: The bound JSON Pointer '${absolutePath}' does not physically exist in the active DataModel. Evaluating to None.`
-        });
-      }
-    }
-    /**
-     * Synchronously evaluates a DynamicValue into its concrete runtime value.
-     *
-     * Evaluates the value once at the current moment without creating reactive subscriptions.
-     * Use `subscribeDynamicValue` for reactive updates.
-     *
-     * A pending Promise, such as the result of an asynchronous function nested
-     * in the arguments of another call, is returned unchanged: the invoker of
-     * the enclosing call awaits it before validating the arguments.
-     * @param value The DynamicValue object or raw value from the A2UI JSON payload.
-     * @param depth The current recursion depth when evaluating nested arguments or expressions.
-     * @param userActivated Whether the evaluation was initiated by an active user action.
-     * @returns The synchronously resolved value.
-     */
-    resolveDynamicValue(value, depth = 0, userActivated = false) {
-      if (depth > MAX_DYNAMIC_VALUE_DEPTH) {
-        const err = new A2uiExpressionError(`Maximum dynamic value nesting depth exceeded (${MAX_DYNAMIC_VALUE_DEPTH})`);
-        this.dispatchExpressionError(err, "DynamicValue");
-        return void 0;
-      }
-      if (value === null || typeof value !== "object" || isThenable(value)) {
-        return value;
-      }
-      if (Array.isArray(value)) {
-        if (!this.containsDynamicValue(value)) {
-          return value;
-        }
-        return value.map((item) => this.resolveDynamicValue(item, depth + 1, userActivated));
-      }
-      const rec = value;
-      if (this.isDataBindingObject(rec)) {
-        const bindingPath = rec["@path"] ?? rec.path;
-        const absolutePath = this.resolvePath(bindingPath);
-        const val2 = this.dataModel.get(absolutePath);
-        if (val2 === void 0) {
-          this.emitMissingDataBindingWarning(absolutePath);
-        }
-        return val2;
-      }
-      if (this.isFunctionCallObject(rec)) {
-        return this.resolveFunctionCallValue(rec, depth, userActivated);
-      }
-      return this.resolvePlainObjectValue(rec, depth, userActivated);
-    }
-    /**
-     * Resolves a function call by validating arguments and invoking the function.
-     *
-     * An asynchronous function returns a pending Promise. At the top level of an
-     * expression the Promise is returned with its rejection turned into an
-     * `EXPRESSION_ERROR` on the surface, since nothing else would report it;
-     * nested in the arguments of another call it is returned as it is, so the
-     * enclosing call awaits it and a rejection reaches that call's handler.
-     *
-     * @param call Function call definition to execute.
-     * @param depth Current recursion depth for nested expression tracking.
-     * @param userActivated Whether the evaluation was initiated by an active user action.
-     * @returns The resolved function return value.
-     */
-    resolveFunctionCallValue(call, depth = 0, userActivated = false) {
-      const callName = call["@call"] ?? call.call;
-      const targetCatalog = this.resolveCallCatalog(callName, call);
-      if (!targetCatalog) {
-        return void 0;
-      }
-      try {
-        validateFunctionArgs(callName, call.args, targetCatalog);
-      } catch (e2) {
-        this.dispatchExpressionError(e2, callName);
-        return void 0;
-      }
-      const args = {};
-      for (const [key, argVal] of Object.entries(call.args ?? {})) {
-        args[key] = this.resolveDynamicValue(argVal, depth + 1, userActivated);
-      }
-      const abortController = new AbortController();
-      const prevActivated = this._isUserActivated;
-      this._isUserActivated = prevActivated || userActivated;
-      let result;
-      try {
-        result = this.evaluateFunctionReactive(callName, args, targetCatalog.invoker, abortController.signal);
-      } finally {
-        this._isUserActivated = prevActivated;
-      }
-      if (result === void 0) {
-        return void 0;
-      }
-      if (isThenable(result)) {
-        if (depth > 0) {
-          return result;
-        }
-        return Promise.resolve(result).then((value) => value, (e2) => {
-          this.dispatchExpressionError(e2, callName);
-          return void 0;
-        });
-      }
-      return isSignal(result) ? peekValue(result) : result;
-    }
-    /**
-     * Recursively resolves dynamic values nested inside a plain object.
-     *
-     * @param rec Plain object dictionary to resolve.
-     * @param depth Current recursion depth for nested expression tracking.
-     * @param userActivated Whether the evaluation was initiated by an active user action.
-     * @returns A copy of the object with all nested dynamic values resolved.
-     */
-    resolvePlainObjectValue(rec, depth = 0, userActivated = false) {
-      if (this.atLeastV10) {
-        validateReservedDirectives(Object.keys(rec), this.surfaceProtocolVersion);
-      }
-      if (!this.containsDynamicValue(rec)) {
-        return rec;
-      }
-      const resolved = {};
-      for (const [k, v2] of Object.entries(rec)) {
-        const key = this.atLeastV10 ? unescapeObjectKey(k) : k;
-        resolved[key] = this.resolveDynamicValue(v2, depth + 1, userActivated);
-      }
-      return resolved;
-    }
-    /**
-     * Reactively listens to changes in a DynamicValue.
-     *
-     * Whenever the underlying data or function dependencies change, the `onChange`
-     * callback fires with the freshly evaluated result.
-     *
-     * @template V Expected type of the resolved value.
-     * @param value The DynamicValue or raw value to evaluate and observe.
-     * @param onChange Callback fired whenever the evaluated result changes.
-     * @returns A subscription containing the current value and an `unsubscribe` method.
-     */
-    subscribeDynamicValue(value, onChange) {
-      const sig = this.resolveSignal(value);
-      let isSync = true;
-      let currentValue = peekValue(sig);
-      const dispose = effect(() => {
-        const val2 = getValue(sig);
-        currentValue = val2;
-        if (!isSync) {
-          onChange(val2);
-        }
-      });
-      isSync = false;
-      return {
-        get value() {
-          return currentValue;
-        },
-        unsubscribe: () => {
-          dispose();
-          sig.unsubscribe?.();
-        }
-      };
-    }
-    /**
-     * Resolves a DynamicValue into a reactive Signal.
-     *
-     * Recursively resolves any nested path bindings or function calls into a
-     * single reactive `Signal`. Changes to underlying data or function dependencies
-     * cause the signal's value to update.
-     *
-     * @template V Expected type of the signal value.
-     * @param value The DynamicValue or raw value to evaluate and observe.
-     * @param depth The current recursion depth when evaluating nested arguments or expressions.
-     * @returns A reactive Signal containing the result of the evaluation.
-     */
-    resolveSignal(value, depth = 0) {
-      if (depth > MAX_DYNAMIC_VALUE_DEPTH) {
-        const err = new A2uiExpressionError(`Maximum dynamic value nesting depth exceeded (${MAX_DYNAMIC_VALUE_DEPTH})`);
-        this.dispatchExpressionError(err, typeof value === "object" && value && ("@call" in value || "call" in value) ? value["@call"] ?? value.call : "DynamicValue");
-        return signal(void 0);
-      }
-      if (typeof value !== "object" || value === null) {
-        return signal(value);
-      }
-      if (isThenable(value)) {
-        const pendingSig = signal(void 0);
-        this.settleIntoSignal(pendingSig, value, "DynamicValue");
-        return pendingSig;
-      }
-      if (Array.isArray(value)) {
-        if (!this.containsDynamicValue(value)) {
-          return signal(value);
-        }
-        const itemSignals = value.map((item) => this.resolveSignal(item, depth + 1));
-        const resultSig = computed(() => itemSignals.map((s2) => getValue(s2)));
-        resultSig.unsubscribe = () => {
-          for (const s2 of itemSignals) {
-            s2.unsubscribe?.();
-          }
-        };
-        return resultSig;
-      }
-      const rec = value;
-      if (this.isDataBindingObject(rec)) {
-        const bindingPath = rec["@path"] ?? rec.path;
-        const absolutePath = this.resolvePath(bindingPath);
-        this.emitMissingDataBindingWarning(absolutePath);
-        return this.dataModel.getSignal(absolutePath);
-      }
-      if (this.isFunctionCallObject(rec)) {
-        const call = rec;
-        const callName = call["@call"] ?? call.call;
-        const targetCatalog = this.resolveCallCatalog(callName, call);
-        if (!targetCatalog) {
-          return signal(void 0);
-        }
-        try {
-          validateFunctionArgs(callName, call.args, targetCatalog);
-        } catch (e2) {
-          this.dispatchExpressionError(e2, callName);
-          return signal(void 0);
-        }
-        const argSignals = {};
-        for (const [key, argVal] of Object.entries(call.args ?? {})) {
-          argSignals[key] = this.resolveSignal(argVal, depth + 1);
-        }
-        if (Object.keys(argSignals).length === 0) {
-          const abortController2 = new AbortController();
-          const result = this.evaluateFunctionPassive({
-            name: callName,
-            args: {},
-            abortSignal: abortController2.signal,
-            invoker: targetCatalog.invoker
-          });
-          let sig;
-          if (isSignal(result)) {
-            sig = result;
-          } else if (isThenable(result)) {
-            const pendingSig = signal(void 0);
-            this.settleIntoSignal(pendingSig, result, callName, abortController2.signal);
-            sig = pendingSig;
-          } else {
-            sig = signal(result);
-          }
-          sig.unsubscribe = () => abortController2.abort();
-          return sig;
-        }
-        const keys = Object.keys(argSignals);
-        const resultSig = signal(void 0);
-        let abortController;
-        let innerUnsubscribe;
-        const argsSig = computed(() => {
-          const argsRecord = {};
-          for (let i2 = 0; i2 < keys.length; i2++) {
-            argsRecord[keys[i2]] = getValue(argSignals[keys[i2]]);
-          }
-          return argsRecord;
-        });
-        const stopper = effect(() => {
-          try {
-            const args = getValue(argsSig);
-            if (abortController)
-              abortController.abort();
-            if (innerUnsubscribe) {
-              innerUnsubscribe();
-              innerUnsubscribe = void 0;
-            }
-            abortController = new AbortController();
-            const res = this.evaluateFunctionPassive({
-              name: callName,
-              args,
-              abortSignal: abortController.signal,
-              invoker: targetCatalog.invoker
-            });
-            if (isSignal(res)) {
-              setValue(resultSig, peekValue(res));
-              innerUnsubscribe = effect(() => {
-                setValue(resultSig, getValue(res));
-              });
-            } else if (isThenable(res)) {
-              this.settleIntoSignal(resultSig, res, callName, abortController.signal);
-            } else {
-              setValue(resultSig, res);
-            }
-          } catch (e2) {
-            this.dispatchExpressionError(e2, callName);
-            setValue(resultSig, void 0);
-          }
-        });
-        resultSig.unsubscribe = () => {
-          stopper();
-          if (innerUnsubscribe)
-            innerUnsubscribe();
-          if (abortController)
-            abortController.abort();
-          for (let i2 = 0; i2 < keys.length; i2++) {
-            argSignals[keys[i2]].unsubscribe?.();
-          }
-        };
-        return resultSig;
-      }
-      if (this.atLeastV10) {
-        validateReservedDirectives(Object.keys(rec), this.surfaceProtocolVersion);
-      }
-      if (!this.containsDynamicValue(rec)) {
-        return signal(value);
-      }
-      const entrySignals = Object.entries(rec).map(([k, v2]) => {
-        const key = this.atLeastV10 ? unescapeObjectKey(k) : k;
-        return [key, this.resolveSignal(v2, depth + 1)];
-      });
-      const objSig = computed(() => {
-        const resolved = {};
-        for (const [k, s2] of entrySignals) {
-          resolved[k] = getValue(s2);
-        }
-        return resolved;
-      });
-      const prevUnsubscribe = objSig.unsubscribe?.bind(objSig);
-      objSig.unsubscribe = () => {
-        prevUnsubscribe?.();
-        for (const [, s2] of entrySignals) {
-          s2.unsubscribe?.();
-        }
-      };
-      return objSig;
-    }
-    handleInvalidAction(message) {
-      this.surface?.dispatchError({
-        code: "INVALID_ACTION",
-        surfaceId: this.surface?.id,
-        message
-      });
-      return void 0;
-    }
-    resolveActionEventObject(ev) {
-      if (typeof ev.name !== "string" || ev.name.length === 0) {
-        return this.handleInvalidAction("Action event is missing required 'name' string.");
-      }
-      let resolvedContext = void 0;
-      if (ev.context && typeof ev.context === "object" && !Array.isArray(ev.context)) {
-        resolvedContext = {};
-        for (const [key, value] of Object.entries(ev.context)) {
-          resolvedContext[key] = this.resolveDynamicValue(value);
-        }
-      }
-      const resolvedEvent = {
-        ...ev,
-        ...resolvedContext !== void 0 ? { context: resolvedContext } : {}
-      };
-      if (ev.context === void 0) {
-        delete resolvedEvent.context;
-      }
-      if (ev.userMessage !== void 0) {
-        const resolvedMsg = this.resolveDynamicValue(ev.userMessage);
-        if (typeof resolvedMsg !== "string") {
-          return this.handleInvalidAction("Action event 'userMessage' must resolve to a string.");
-        }
-        resolvedEvent.userMessage = resolvedMsg;
-      }
-      return resolvedEvent;
-    }
-    executeActionFunctionCall(action, options) {
-      let callTarget = "functionCall" in action ? action.functionCall : action;
-      if (callTarget && typeof callTarget === "object") {
-        const callName = callTarget["@call"] ?? callTarget.call;
-        if (typeof callName === "string") {
-          callTarget = this.atLeastV10 && !("@call" in callTarget) ? { "@call": callName, ...callTarget } : !this.atLeastV10 && !("call" in callTarget) ? { call: callName, ...callTarget } : callTarget;
-        }
-      }
-      const userActivated = options?.userActivation ?? true;
-      const prevAction = this._isActionExecution;
-      const prevPassive = this._isPassiveEvaluation;
-      this._isActionExecution = true;
-      if (options?.userActivation === false) {
-        this._isPassiveEvaluation = true;
-      }
-      try {
-        return this.resolveDynamicValue(callTarget, 0, userActivated);
-      } finally {
-        this._isActionExecution = prevAction;
-        this._isPassiveEvaluation = prevPassive;
-      }
-    }
-    /**
-     * Resolves an action by evaluating its top-level dynamic values.
-     *
-     * For event actions, resolves each value in the context map.
-     * For function call actions, evaluates the function call.
-     *
-     * @param action The Action object to resolve.
-     * @returns The resolved action payload or function execution result.
-     */
-    resolveAction(action, options) {
-      if ("event" in action && typeof action.event === "object" && action.event !== null) {
-        const resolvedEvent = this.resolveActionEventObject(action.event);
-        if (resolvedEvent === void 0) {
-          return void 0;
-        }
-        return {
-          ...action,
-          event: resolvedEvent
-        };
-      }
-      if ("name" in action) {
-        return this.resolveActionEventObject(action);
-      }
-      if ("functionCall" in action || "call" in action || "@call" in action) {
-        return this.executeActionFunctionCall(action, options);
-      }
-      return action;
-    }
-    /**
-     * Resolves the catalog against which a function call executes.
-     *
-     * From v1.0, reserved `@`-prefixed system functions such as `@index` belong
-     * to no catalog, so they resolve to the built-in system function set
-     * whatever the surface's catalogs are. Before v1.0 a call cannot select a
-     * catalog, so a `catalogId` on it is ignored and the call runs in the
-     * surface catalog.
-     *
-     * @param name Name of the function being called.
-     * @param catalogId Identifier of the catalog named by the call, if specified.
-     * @param namesCatalog Whether the call carries a `catalogId` key, whatever
-     *   its value.
-     * @returns The resolved Catalog instance, or the surface default catalog if omitted.
-     * @throws {A2uiExpressionError} If, from v1.0, a call to a reserved `@`
-     *   system function names a catalog: such a function belongs to no catalog,
-     *   so the call is a malformed expression.
-     * @throws {A2uiCatalogError} If the call names a catalog ID that cannot be
-     *   resolved on this surface, or names none on a surface without a default
-     *   catalog. This is reported as a catalog fault rather than a missing
-     *   function, since the function may exist in a catalog that is not
-     *   available here.
-     */
-    resolveFunctionCatalog(name, catalogId, namesCatalog) {
-      if (this.atLeastV10 && name.startsWith("@")) {
-        if (namesCatalog) {
-          throw new A2uiExpressionError(`System function '${name}' belongs to no catalog and must not name a catalogId.`, name);
-        }
-        return getSystemFunctionCatalog();
-      }
-      if (!this.surface) {
-        throw new A2uiCatalogError(`No surface available to resolve catalog: ${catalogId ?? "default"}`);
-      }
-      return resolveSurfaceCatalog(this.surface, this.atLeastV10 ? catalogId : void 0, `Function call '${name}'`);
-    }
-    /**
-     * Resolves the catalog a function call runs in, dispatching a
-     * `CATALOG_ERROR` to the surface when it cannot be resolved, and an
-     * `EXPRESSION_ERROR` for any other failure, such as a system function call
-     * that names a catalog.
-     *
-     * @param name Name of the function being called.
-     * @param call The function call, whose `catalogId` selects the catalog.
-     * @returns The resolved Catalog instance, or `undefined` if resolution failed.
-     */
-    resolveCallCatalog(name, call) {
-      try {
-        return this.resolveFunctionCatalog(name, call.catalogId, "catalogId" in call);
-      } catch (e2) {
-        if (e2 instanceof A2uiCatalogError && this.surface) {
-          this.surface.dispatchError({
-            code: "CATALOG_ERROR",
-            message: e2.message,
-            expression: name
-          });
-        } else {
-          this.dispatchExpressionError(e2, name);
-        }
-        return void 0;
-      }
-    }
-    evaluateFunctionPassive(options) {
-      const { name, args, invoker, abortSignal } = options;
-      const prevPassive = this._isPassiveEvaluation;
-      this._isPassiveEvaluation = true;
-      try {
-        return this.evaluateFunctionReactive(name, args, invoker, abortSignal);
-      } finally {
-        this._isPassiveEvaluation = prevPassive;
-      }
-    }
-    /**
-     * Evaluates a catalog function and returns its reactive Signal or static value.
-     *
-     * Invokes the function with this context through the invoker of the
-     * catalog the call resolved to, and dispatches an `EXPRESSION_ERROR` if
-     * execution throws.
-     *
-     * @template V Expected return type of the function evaluation.
-     * @param name Name of the function to evaluate.
-     * @param args Resolved arguments to pass to the function.
-     * @param invoker Invoker of the catalog the call resolved to.
-     * @param abortSignal Optional abort signal to cancel asynchronous execution.
-     * @returns The evaluated result as a reactive `Signal` or static value, or `undefined` on failure.
-     */
-    evaluateFunctionReactive(name, args, invoker, abortSignal) {
-      try {
-        return invoker(name, args, this, abortSignal);
-      } catch (e2) {
-        this.dispatchExpressionError(e2, name);
-        return void 0;
-      }
-    }
-    /**
-     * Writes the settled value of a pending function result into a signal.
-     *
-     * The signal keeps its current value while the result is pending. A
-     * completion that arrives after `abortSignal` fired is ignored, since the
-     * arguments changed or the subscription ended in the meantime. A rejection
-     * is dispatched as an `EXPRESSION_ERROR` and resets the signal, as a
-     * synchronous failure of the same call would.
-     *
-     * @param sig The signal that exposes the result.
-     * @param pending The pending result.
-     * @param name Name of the function being evaluated.
-     * @param abortSignal Signal that marks the evaluation as stale.
-     */
-    settleIntoSignal(sig, pending, name, abortSignal) {
-      Promise.resolve(pending).then((value) => {
-        if (!abortSignal?.aborted) {
-          setValue(sig, value);
-        }
-      }, (e2) => {
-        if (!abortSignal?.aborted) {
-          this.dispatchExpressionError(e2, name);
-          setValue(sig, void 0);
-        }
-      });
-    }
-    /**
-     * Dispatches an evaluation failure to the surface as an `EXPRESSION_ERROR`.
-     *
-     * Every failure other than an unresolvable catalog uses this code, including
-     * a function missing from the catalog the call resolved to and an unknown
-     * system function. Unresolvable catalogs are reported by
-     * {@link resolveCallCatalog} as `CATALOG_ERROR`.
-     *
-     * @param e The error thrown while evaluating the call.
-     * @param name Name of the function being evaluated.
-     */
-    dispatchExpressionError(e2, name) {
-      if (!this.surface)
-        return;
-      if (e2 instanceof external_exports.ZodError || typeof e2 === "object" && e2 !== null && e2.name === "ZodError") {
-        const zodErr = e2;
-        const err = new A2uiExpressionError(`Validation failed for function '${name}': ${zodErr.message}`, name, zodErr.errors ?? zodErr.issues);
-        this.surface.dispatchError({
-          code: "EXPRESSION_ERROR",
-          message: err.message,
-          expression: name,
-          details: err.details
-        });
-      } else if (e2 instanceof A2uiExpressionError) {
-        this.surface.dispatchError({
-          code: "EXPRESSION_ERROR",
-          message: e2.message,
-          expression: e2.expression,
-          details: e2.details
-        });
-      } else {
-        const errObj = typeof e2 === "object" && e2 !== null ? e2 : {};
-        this.surface.dispatchError({
-          code: this._isActionExecution ? "EXECUTION_ERROR" : "EXPRESSION_ERROR",
-          message: errObj.message ?? `An unexpected error occurred in function ${name}.`,
-          expression: name
-        });
-      }
-    }
-    /**
-     * Creates a child DataContext scoped to a deeper relative path.
-     *
-     * @param relativePath The path relative to the current context's path.
-     * @param index Optional explicit iteration index for this nested scope.
-     * @returns A new DataContext instance pointing to the resolved absolute path.
-     */
-    nested(relativePath, index) {
-      const newPath = this.resolvePath(relativePath);
-      return new _DataContext(this.surface ?? this.dataModel, newPath, index, this);
-    }
-    resolvePath(path) {
-      if (path.startsWith("/")) {
-        return path;
-      }
-      let base = this.path;
-      if (base.endsWith("/") && base.length > 1) {
-        base = base.slice(0, -1);
-      }
-      if (path === "" || path === ".") {
-        return base || "/";
-      }
-      if (base === "/")
-        base = "";
-      return `${base}/${path}`;
-    }
-  };
 
   // node_modules/@a2ui/web_core/src/v1_0/functions/system_functions.js
   var IndexApi = {
@@ -12239,7 +14800,7 @@ var bwA2UI = (() => {
     description: "Checks that the value is not null, undefined, or empty.",
     schema: spec(external_exports.object({
       "value": external_exports.any().refine((v2) => v2 !== void 0, "Required").describe("The value to check.")
-    }), { closure: "unevaluatedProperties" })
+    }).strict(), { closure: "unevaluatedProperties" })
   };
   var RegexApi = {
     name: "regex",
@@ -12247,8 +14808,8 @@ var bwA2UI = (() => {
     description: "Checks that the value matches a regular expression string.",
     schema: spec(external_exports.object({
       "value": DynamicStringSchema.describe("REF:#/$defs/DynamicString"),
-      "pattern": external_exports.string().describe("The regex pattern to match against.")
-    }), { closure: "unevaluatedProperties" })
+      "pattern": external_exports.string().describe("The regular expression to search for in the value. Uses the A2UI regex dialect: a portable subset of ECMAScript pattern syntax in Unicode mode with no flags. Matching is case-sensitive, '.' excludes line terminators, and '^' and '$' match only at the ends of the value. Backreferences, lookbehind, named groups and '\\p{...}' are not allowed. Patterns longer than 256 code points or that could backtrack catastrophically are rejected.")
+    }).strict(), { closure: "unevaluatedProperties" })
   };
   var LengthApi = {
     name: "length",
@@ -12256,12 +14817,10 @@ var bwA2UI = (() => {
     description: "Checks string length constraints.",
     schema: spec(external_exports.object({
       "value": DynamicStringSchema.describe("REF:#/$defs/DynamicString"),
-      "min": spec(external_exports.number().int().describe("The minimum allowed length."), {
-        keywords: { minimum: 0 }
-      }).optional(),
-      "max": spec(external_exports.number().int().describe("The maximum allowed length."), {
-        keywords: { minimum: 0 }
-      }).optional()
+      "min": external_exports.number().int().min(0).describe("The minimum allowed length.").optional(),
+      "max": external_exports.number().int().min(0).describe("The maximum allowed length.").optional()
+    }).strict().refine((args) => args["min"] !== void 0 || args["max"] !== void 0, {
+      message: "At least one of 'min', 'max' must be provided."
     }), {
       closure: "unevaluatedProperties",
       keywords: { anyOf: [{ required: ["min"] }, { required: ["max"] }] }
@@ -12275,6 +14834,8 @@ var bwA2UI = (() => {
       "value": DynamicNumberSchema.describe("REF:#/$defs/DynamicNumber"),
       "min": external_exports.number().describe("The minimum allowed value.").optional(),
       "max": external_exports.number().describe("The maximum allowed value.").optional()
+    }).strict().refine((args) => args["min"] !== void 0 || args["max"] !== void 0, {
+      message: "At least one of 'min', 'max' must be provided."
     }), {
       closure: "unevaluatedProperties",
       keywords: { anyOf: [{ required: ["min"] }, { required: ["max"] }] }
@@ -12286,7 +14847,7 @@ var bwA2UI = (() => {
     description: "Checks that the value is a valid email address.",
     schema: spec(external_exports.object({
       "value": DynamicStringSchema.describe("REF:#/$defs/DynamicString")
-    }), { closure: "unevaluatedProperties" })
+    }).strict(), { closure: "unevaluatedProperties" })
   };
   var FormatStringApi = {
     name: "formatString",
@@ -12294,7 +14855,7 @@ var bwA2UI = (() => {
     description: "Performs string interpolation of data model values and other functions in the catalog functions list and returns the resulting string. The value string can contain interpolated expressions in the `${expression}` format. Supported expression types include: JSON Pointer paths to the data model (e.g., `${/absolute/path}` or `${relative/path}`), and renderer-side function calls (e.g., `${now()}`). Function arguments must be named (e.g., `${formatDate(value:${/currentDate}, format:'MM-dd')}`). To include a literal `${` sequence, escape it as `\\${`.",
     schema: spec(external_exports.object({
       "value": DynamicStringSchema.describe("REF:#/$defs/DynamicString")
-    }), { closure: "unevaluatedProperties" })
+    }).strict(), { closure: "unevaluatedProperties" })
   };
   var FormatNumberApi = {
     name: "formatNumber",
@@ -12304,7 +14865,7 @@ var bwA2UI = (() => {
       "value": DynamicNumberSchema.describe("REF:#/$defs/DynamicNumber|The number to format."),
       "decimals": DynamicNumberSchema.describe("REF:#/$defs/DynamicNumber|Optional. The number of decimal places to show. Defaults to 0 or 2 depending on locale.").optional(),
       "grouping": DynamicBooleanSchema.describe("REF:#/$defs/DynamicBoolean|Optional. If true, uses locale-specific grouping separators (e.g. '1,000'). If false, returns raw digits (e.g. '1000'). Defaults to true.").optional()
-    }), { closure: "unevaluatedProperties" })
+    }).strict(), { closure: "unevaluatedProperties" })
   };
   var FormatCurrencyApi = {
     name: "formatCurrency",
@@ -12315,7 +14876,7 @@ var bwA2UI = (() => {
       "currency": DynamicStringSchema.describe("REF:#/$defs/DynamicString|The ISO 4217 currency code (e.g., 'USD', 'EUR')."),
       "decimals": DynamicNumberSchema.describe("REF:#/$defs/DynamicNumber|Optional. The number of decimal places to show. Defaults to 0 or 2 depending on locale.").optional(),
       "grouping": DynamicBooleanSchema.describe("REF:#/$defs/DynamicBoolean|Optional. If true, uses locale-specific grouping separators (e.g. '1,000'). If false, returns raw digits (e.g. '1000'). Defaults to true.").optional()
-    }), { required: ["currency", "value"], closure: "unevaluatedProperties" })
+    }).strict(), { required: ["currency", "value"], closure: "unevaluatedProperties" })
   };
   var FormatDateApi = {
     name: "formatDate",
@@ -12324,7 +14885,7 @@ var bwA2UI = (() => {
     schema: spec(external_exports.object({
       "value": DynamicValueSchema.describe("REF:#/$defs/DynamicValue|The date to format."),
       "format": DynamicStringSchema.describe("REF:#/$defs/DynamicString|A Unicode TR35 date pattern string.\n\nToken Reference:\n- Year: 'yy' (26), 'yyyy' (2026)\n- Month: 'M' (1), 'MM' (01), 'MMM' (Jan), 'MMMM' (January)\n- Day: 'd' (1), 'dd' (01), 'E' (Tue), 'EEEE' (Tuesday)\n- Hour (12h): 'h' (1-12), 'hh' (01-12) - requires 'a' for AM/PM\n- Hour (24h): 'H' (0-23), 'HH' (00-23) - Military Time\n- Minute: 'mm' (00-59)\n- Second: 'ss' (00-59)\n- Period: 'a' (AM/PM)\n\nExamples:\n- 'MMM dd, yyyy' -> 'Jan 16, 2026'\n- 'HH:mm' -> '14:30' (Military)\n- 'h:mm a' -> '2:30 PM'\n- 'EEEE, d MMMM' -> 'Friday, 16 January'")
-    }), { required: ["format", "value"], closure: "unevaluatedProperties" })
+    }).strict(), { required: ["format", "value"], closure: "unevaluatedProperties" })
   };
   var PluralizeApi = {
     name: "pluralize",
@@ -12338,7 +14899,7 @@ var bwA2UI = (() => {
       "few": DynamicStringSchema.describe("REF:#/$defs/DynamicString|String for the 'few' category (e.g., small groups in Slavic languages).").optional(),
       "many": DynamicStringSchema.describe("REF:#/$defs/DynamicString|String for the 'many' category (e.g., large groups in various languages).").optional(),
       "other": DynamicStringSchema.describe("REF:#/$defs/DynamicString|The default/fallback string (used for general plural cases).")
-    }), { closure: "unevaluatedProperties" })
+    }).strict(), { closure: "unevaluatedProperties" })
   };
   var OpenUrlApi = {
     name: "openUrl",
@@ -12347,11 +14908,11 @@ var bwA2UI = (() => {
     description: "Opens the specified URL in a browser or handler (requires user activation). This function has no return value.",
     schema: spec(external_exports.object({
       "url": external_exports.union([
-        spec(external_exports.string(), { keywords: { format: "uri" } }),
+        spec(external_exports.string().refine((v2) => v2.trim().length > 0 && !/\s/.test(v2.trim()), "Invalid URI"), { keywords: { format: "uri" } }),
         DataBindingSchema.describe("REF:#/$defs/DataBinding"),
         FunctionCallSchema.describe("REF:#/$defs/FunctionCall")
       ]).describe("The URL to open.")
-    }), { closure: "unevaluatedProperties" })
+    }).strict(), { closure: "unevaluatedProperties" })
   };
   var AndApi = {
     name: "and",
@@ -12359,7 +14920,7 @@ var bwA2UI = (() => {
     description: "Performs a logical AND operation on a list of boolean values.",
     schema: spec(external_exports.object({
       "values": external_exports.array(DynamicBooleanSchema.describe("REF:#/$defs/DynamicBoolean")).min(2).describe("The list of boolean values to evaluate.")
-    }), { closure: "unevaluatedProperties" })
+    }).strict(), { closure: "unevaluatedProperties" })
   };
   var OrApi = {
     name: "or",
@@ -12367,7 +14928,7 @@ var bwA2UI = (() => {
     description: "Performs a logical OR operation on a list of boolean values.",
     schema: spec(external_exports.object({
       "values": external_exports.array(DynamicBooleanSchema.describe("REF:#/$defs/DynamicBoolean")).min(2).describe("The list of boolean values to evaluate.")
-    }), { closure: "unevaluatedProperties" })
+    }).strict(), { closure: "unevaluatedProperties" })
   };
   var NotApi = {
     name: "not",
@@ -12375,7 +14936,7 @@ var bwA2UI = (() => {
     description: "Performs a logical NOT operation on a boolean value.",
     schema: spec(external_exports.object({
       "value": DynamicBooleanSchema.describe("REF:#/$defs/DynamicBoolean|The boolean value to negate.")
-    }), { closure: "unevaluatedProperties" })
+    }).strict(), { closure: "unevaluatedProperties" })
   };
 
   // node_modules/@a2ui/web_core/src/v1_0/functions/validation_functions_api.js
@@ -12569,7 +15130,12 @@ var bwA2UI = (() => {
           throw new A2uiExpressionError(`Expected ':' after argument name '${argName}' in function '${funcName}'`);
         }
         scanner.skipWhitespace();
-        args[argName] = this.parseExpressionInternal(scanner, depth + 1);
+        Object.defineProperty(args, argName, {
+          value: this.parseExpressionInternal(scanner, depth + 1),
+          enumerable: true,
+          writable: true,
+          configurable: true
+        });
         scanner.skipWhitespace();
         if (scanner.peek() === ",") {
           scanner.advance();
@@ -12741,4168 +15307,747 @@ var bwA2UI = (() => {
     }
   };
 
-  // node_modules/redos-detector/dist/redos-detector.mjs
-  var __assign = function() {
-    __assign = Object.assign || function __assign2(t2) {
-      for (var s2, i2 = 1, n2 = arguments.length; i2 < n2; i2++) {
-        s2 = arguments[i2];
-        for (var p2 in s2) if (Object.prototype.hasOwnProperty.call(s2, p2)) t2[p2] = s2[p2];
-      }
-      return t2;
-    };
-    return __assign.apply(this, arguments);
+  // node_modules/@a2ui/web_core/src/common/regex_subset.js
+  var MAX_REGEX_PATTERN_CODE_POINTS = 256;
+  var MAX_REGEX_VALUE_CODE_POINTS = 4096;
+  var RegexSyntaxError = class extends Error {
+    constructor(message, unsupported = false) {
+      super(message);
+      this.name = "RegexSyntaxError";
+      this.unsupported = unsupported;
+    }
   };
-  function __generator(thisArg, body) {
-    var _2 = { label: 0, sent: function() {
-      if (t2[0] & 1) throw t2[1];
-      return t2[1];
-    }, trys: [], ops: [] }, f2, y2, t2, g2 = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
-    return g2.next = verb(0), g2["throw"] = verb(1), g2["return"] = verb(2), typeof Symbol === "function" && (g2[Symbol.iterator] = function() {
-      return this;
-    }), g2;
-    function verb(n2) {
-      return function(v2) {
-        return step([n2, v2]);
-      };
-    }
-    function step(op) {
-      if (f2) throw new TypeError("Generator is already executing.");
-      while (g2 && (g2 = 0, op[0] && (_2 = 0)), _2) try {
-        if (f2 = 1, y2 && (t2 = op[0] & 2 ? y2["return"] : op[0] ? y2["throw"] || ((t2 = y2["return"]) && t2.call(y2), 0) : y2.next) && !(t2 = t2.call(y2, op[1])).done) return t2;
-        if (y2 = 0, t2) op = [op[0] & 2, t2.value];
-        switch (op[0]) {
-          case 0:
-          case 1:
-            t2 = op;
-            break;
-          case 4:
-            _2.label++;
-            return { value: op[1], done: false };
-          case 5:
-            _2.label++;
-            y2 = op[1];
-            op = [0];
-            continue;
-          case 7:
-            op = _2.ops.pop();
-            _2.trys.pop();
-            continue;
-          default:
-            if (!(t2 = _2.trys, t2 = t2.length > 0 && t2[t2.length - 1]) && (op[0] === 6 || op[0] === 2)) {
-              _2 = 0;
-              continue;
-            }
-            if (op[0] === 3 && (!t2 || op[1] > t2[0] && op[1] < t2[3])) {
-              _2.label = op[1];
-              break;
-            }
-            if (op[0] === 6 && _2.label < t2[1]) {
-              _2.label = t2[1];
-              t2 = op;
-              break;
-            }
-            if (t2 && _2.label < t2[2]) {
-              _2.label = t2[2];
-              _2.ops.push(op);
-              break;
-            }
-            if (t2[2]) _2.ops.pop();
-            _2.trys.pop();
-            continue;
-        }
-        op = body.call(thisArg, _2);
-      } catch (e2) {
-        op = [6, e2];
-        y2 = 0;
-      } finally {
-        f2 = t2 = 0;
-      }
-      if (op[0] & 5) throw op[1];
-      return { value: op[0] ? op[1] : void 0, done: true };
-    }
-  }
-  function __values(o2) {
-    var s2 = typeof Symbol === "function" && Symbol.iterator, m2 = s2 && o2[s2], i2 = 0;
-    if (m2) return m2.call(o2);
-    if (o2 && typeof o2.length === "number") return {
-      next: function() {
-        if (o2 && i2 >= o2.length) o2 = void 0;
-        return { value: o2 && o2[i2++], done: !o2 };
-      }
-    };
-    throw new TypeError(s2 ? "Object is not iterable." : "Symbol.iterator is not defined.");
-  }
-  function __read(o2, n2) {
-    var m2 = typeof Symbol === "function" && o2[Symbol.iterator];
-    if (!m2) return o2;
-    var i2 = m2.call(o2), r2, ar = [], e2;
-    try {
-      while ((n2 === void 0 || n2-- > 0) && !(r2 = i2.next()).done) ar.push(r2.value);
-    } catch (error) {
-      e2 = { error };
-    } finally {
-      try {
-        if (r2 && !r2.done && (m2 = i2["return"])) m2.call(i2);
-      } finally {
-        if (e2) throw e2.error;
-      }
-    }
-    return ar;
-  }
-  function __spreadArray(to, from, pack) {
-    if (pack || arguments.length === 2) for (var i2 = 0, l2 = from.length, ar; i2 < l2; i2++) {
-      if (ar || !(i2 in from)) {
-        if (!ar) ar = Array.prototype.slice.call(from, 0, i2);
-        ar[i2] = from[i2];
-      }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-  }
-  var parser = { exports: {} };
-  (function(module2) {
-    (function() {
-      var fromCodePoint = String.fromCodePoint || (function() {
-        var stringFromCharCode = String.fromCharCode;
-        var floor = Math.floor;
-        return function fromCodePoint2() {
-          var MAX_SIZE = 16384;
-          var codeUnits = [];
-          var highSurrogate;
-          var lowSurrogate;
-          var index = -1;
-          var length = arguments.length;
-          if (!length) {
-            return "";
-          }
-          var result = "";
-          while (++index < length) {
-            var codePoint = Number(arguments[index]);
-            if (!isFinite(codePoint) || // `NaN`, `+Infinity`, or `-Infinity`
-            codePoint < 0 || // not a valid Unicode code point
-            codePoint > 1114111 || // not a valid Unicode code point
-            floor(codePoint) != codePoint) {
-              throw RangeError("Invalid code point: " + codePoint);
-            }
-            if (codePoint <= 65535) {
-              codeUnits.push(codePoint);
-            } else {
-              codePoint -= 65536;
-              highSurrogate = (codePoint >> 10) + 55296;
-              lowSurrogate = codePoint % 1024 + 56320;
-              codeUnits.push(highSurrogate, lowSurrogate);
-            }
-            if (index + 1 == length || codeUnits.length > MAX_SIZE) {
-              result += stringFromCharCode.apply(null, codeUnits);
-              codeUnits.length = 0;
-            }
-          }
-          return result;
-        };
-      })();
-      function parse2(str2, flags, features) {
-        if (!features) {
-          features = {};
-        }
-        function updateRawStart(node, start) {
-          node.range[0] = start;
-          node.raw = str2.substring(start, node.range[1]);
-          return node;
-        }
-        function createAnchor(kind, rawLength) {
-          return {
-            type: "anchor",
-            kind,
-            range: [
-              pos - rawLength,
-              pos
-            ],
-            raw: str2.substring(pos - rawLength, pos)
-          };
-        }
-        function createValue(kind, codePoint, from, to) {
-          return {
-            type: "value",
-            kind,
-            codePoint,
-            range: [from, to],
-            raw: str2.substring(from, to)
-          };
-        }
-        function createEscaped(kind, codePoint, value, fromOffset) {
-          fromOffset = fromOffset || 0;
-          return createValue(kind, codePoint, pos - (value.length + fromOffset), pos);
-        }
-        function createCharacter(matches) {
-          var _char = matches[0];
-          var first = _char.charCodeAt(0);
-          if (isUnicodeMode) {
-            var second;
-            if (_char.length === 1 && first >= 55296 && first <= 56319) {
-              second = lookahead().charCodeAt(0);
-              if (second >= 56320 && second <= 57343) {
-                pos++;
-                return createValue(
-                  "symbol",
-                  (first - 55296) * 1024 + second - 56320 + 65536,
-                  pos - 2,
-                  pos
-                );
-              }
-            }
-          }
-          return createValue("symbol", first, pos - 1, pos);
-        }
-        function createDisjunction(alternatives, from, to) {
-          return {
-            type: "disjunction",
-            body: alternatives,
-            range: [
-              from,
-              to
-            ],
-            raw: str2.substring(from, to)
-          };
-        }
-        function createDot() {
-          return {
-            type: "dot",
-            range: [
-              pos - 1,
-              pos
-            ],
-            raw: "."
-          };
-        }
-        function createCharacterClassEscape(value) {
-          return {
-            type: "characterClassEscape",
-            value,
-            range: [
-              pos - 2,
-              pos
-            ],
-            raw: str2.substring(pos - 2, pos)
-          };
-        }
-        function createReference(matchIndex) {
-          var start = pos - 1 - matchIndex.length;
-          return {
-            type: "reference",
-            matchIndex: parseInt(matchIndex, 10),
-            range: [
-              start,
-              pos
-            ],
-            raw: str2.substring(start, pos)
-          };
-        }
-        function createNamedReference(name) {
-          var start = name.range[0] - 3;
-          return {
-            type: "reference",
-            name,
-            range: [
-              start,
-              pos
-            ],
-            raw: str2.substring(start, pos)
-          };
-        }
-        function createGroup(behavior, disjunction, from, to) {
-          return {
-            type: "group",
-            behavior,
-            body: disjunction,
-            range: [
-              from,
-              to
-            ],
-            raw: str2.substring(from, to)
-          };
-        }
-        function createQuantifier(min, max, from, to, symbol) {
-          if (to == null) {
-            from = pos - 1;
-            to = pos;
-          }
-          return {
-            type: "quantifier",
-            min,
-            max,
-            greedy: true,
-            body: null,
-            // set later on
-            symbol,
-            range: [
-              from,
-              to
-            ],
-            raw: str2.substring(from, to)
-          };
-        }
-        function createAlternative(terms, from, to) {
-          return {
-            type: "alternative",
-            body: terms,
-            range: [
-              from,
-              to
-            ],
-            raw: str2.substring(from, to)
-          };
-        }
-        function createCharacterClass(contents, negative, from, to) {
-          return {
-            type: "characterClass",
-            kind: contents.kind,
-            body: contents.body,
-            negative,
-            range: [
-              from,
-              to
-            ],
-            raw: str2.substring(from, to)
-          };
-        }
-        function createClassRange(min, max, from, to) {
-          if (min.codePoint > max.codePoint) {
-            bail("invalid range in character class", min.raw + "-" + max.raw, from, to);
-          }
-          return {
-            type: "characterClassRange",
-            min,
-            max,
-            range: [
-              from,
-              to
-            ],
-            raw: str2.substring(from, to)
-          };
-        }
-        function createClassStrings(strings, from, to) {
-          return {
-            type: "classStrings",
-            strings,
-            range: [from, to],
-            raw: str2.substring(from, to)
-          };
-        }
-        function createClassString(characters, from, to) {
-          return {
-            type: "classString",
-            characters,
-            range: [from, to],
-            raw: str2.substring(from, to)
-          };
-        }
-        function flattenBody(body) {
-          if (body.type === "alternative") {
-            return body.body;
-          } else {
-            return [body];
-          }
-        }
-        function incr(amount) {
-          amount = amount || 1;
-          pos += amount;
-        }
-        function consume(amount) {
-          var res = str2.substring(pos, pos += amount);
-          return res;
-        }
-        function skip(value) {
-          if (!match(value)) {
-            bail("character", value);
-          }
-        }
-        function match(value) {
-          var len = value.length;
-          if (str2.substring(pos, pos + len) === value) {
-            incr(len);
-            return value;
-          }
-        }
-        function matchOne(value) {
-          if (str2[pos] === value) {
-            pos++;
-            return value;
-          }
-        }
-        function lookahead() {
-          return str2[pos];
-        }
-        function currentOne(value) {
-          return str2[pos] === value;
-        }
-        function current(value) {
-          var len = value.length;
-          return str2.substring(pos, pos + len) === value;
-        }
-        function next(value) {
-          return str2[pos + 1] === value;
-        }
-        function matchReg(regExp) {
-          var subStr = str2.substring(pos);
-          var res = subStr.match(regExp);
-          if (res) {
-            pos += res[0].length;
-          }
-          return res;
-        }
-        function parseDisjunction() {
-          var res = [], from = pos;
-          res.push(parseAlternative());
-          while (matchOne("|")) {
-            res.push(parseAlternative());
-          }
-          if (res.length === 1) {
-            return res[0];
-          }
-          return createDisjunction(res, from, pos);
-        }
-        function parseAlternative() {
-          var res = [], from = pos;
-          var term;
-          while (term = parseTerm()) {
-            res.push(term);
-          }
-          if (res.length === 1) {
-            return res[0];
-          }
-          return createAlternative(res, from, pos);
-        }
-        function parseTerm() {
-          if (pos >= str2.length || currentOne("|") || currentOne(")")) {
-            return null;
-          }
-          var anchor = parseAnchor();
-          var quantifier;
-          if (anchor) {
-            var pos_backup = pos;
-            quantifier = parseQuantifier() || false;
-            if (quantifier) {
-              if (!isUnicodeMode && anchor.type === "group") {
-                quantifier.body = flattenBody(anchor);
-                updateRawStart(quantifier, anchor.range[0]);
-                return quantifier;
-              }
-              pos = pos_backup;
-              bail("Expected atom");
-            }
-            return anchor;
-          }
-          var atom = parseAtomAndExtendedAtom();
-          if (!atom) {
-            pos_backup = pos;
-            quantifier = parseQuantifier() || false;
-            if (quantifier) {
-              pos = pos_backup;
-              bail("Expected atom");
-            }
-            if (!isUnicodeMode && matchOne("{")) {
-              atom = createCharacter("{");
-            } else {
-              bail("Expected atom");
-            }
-          }
-          quantifier = parseQuantifier() || false;
-          if (quantifier) {
-            var type = atom.type, behavior = atom.behavior;
-            if (type === "group" && (behavior === "negativeLookbehind" || behavior === "lookbehind")) {
-              bail(
-                "Invalid quantifier",
-                "",
-                quantifier.range[0],
-                quantifier.range[1]
-              );
-            }
-            quantifier.body = flattenBody(atom);
-            updateRawStart(quantifier, atom.range[0]);
-            return quantifier;
-          }
-          return atom;
-        }
-        function parseGroup(matchA, typeA, matchB, typeB) {
-          var type = null, from = pos;
-          if (match(matchA)) {
-            type = typeA;
-          } else if (match(matchB)) {
-            type = typeB;
-          } else {
-            return false;
-          }
-          return finishGroup(type, from);
-        }
-        function finishGroup(type, from) {
-          var body = parseDisjunction();
-          if (!body) {
-            bail("Expected disjunction");
-          }
-          skip(")");
-          var group = createGroup(type, flattenBody(body), from, pos);
-          if (type == "normal") {
-            if (firstIteration) {
-              closedCaptureCounter++;
-            }
-          }
-          return group;
-        }
-        function parseAnchor() {
-          switch (lookahead()) {
-            case "^":
-              incr();
-              return createAnchor(
-                "start",
-                1
-                /* rawLength */
-              );
-            case "$":
-              incr();
-              return createAnchor(
-                "end",
-                1
-                /* rawLength */
-              );
-            case "\\": {
-              if (next("b")) {
-                incr(2);
-                return createAnchor(
-                  "boundary",
-                  2
-                  /* rawLength */
-                );
-              } else if (next("B")) {
-                incr(2);
-                return createAnchor(
-                  "not-boundary",
-                  2
-                  /* rawLength */
-                );
-              }
-              break;
-            }
-            case "(":
-              return parseGroup("(?=", "lookahead", "(?!", "negativeLookahead");
-            default:
-              return;
-          }
-        }
-        function parseQuantifier() {
-          var res, from = pos;
-          var quantifier;
-          var min, max;
-          switch (lookahead()) {
-            case "*":
-              incr();
-              quantifier = createQuantifier(0, void 0, void 0, void 0, "*");
-              break;
-            case "+":
-              incr();
-              quantifier = createQuantifier(1, void 0, void 0, void 0, "+");
-              break;
-            case "?":
-              incr();
-              quantifier = createQuantifier(0, 1, void 0, void 0, "?");
-              break;
-            case "{": {
-              if (res = matchReg(/^\{(\d+)\}/)) {
-                min = parseInt(res[1], 10);
-                quantifier = createQuantifier(min, min, from, pos);
-              } else if (res = matchReg(/^\{(\d+),\}/)) {
-                min = parseInt(res[1], 10);
-                quantifier = createQuantifier(min, void 0, from, pos);
-              } else if (res = matchReg(/^\{(\d+),(\d+)\}/)) {
-                min = parseInt(res[1], 10);
-                max = parseInt(res[2], 10);
-                if (min > max) {
-                  bail("numbers out of order in {} quantifier", "", from, pos);
-                }
-                quantifier = createQuantifier(min, max, from, pos);
-              }
-              if (min && !Number.isSafeInteger(min) || max && !Number.isSafeInteger(max)) {
-                bail("iterations outside JS safe integer range in quantifier", "", from, pos);
-              }
-            }
-          }
-          if (quantifier) {
-            if (matchOne("?")) {
-              quantifier.greedy = false;
-              quantifier.range[1] += 1;
-            }
-          }
-          return quantifier;
-        }
-        function parseAtomAndExtendedAtom() {
-          var res;
-          switch (res = lookahead()) {
-            case ".":
-              incr();
-              return createDot();
-            case "\\": {
-              incr();
-              res = parseAtomEscape();
-              if (!res) {
-                if (!isUnicodeMode && lookahead() == "c") {
-                  return createValue("symbol", 92, pos - 1, pos);
-                }
-                bail("atomEscape");
-              }
-              return res;
-            }
-            case "[":
-              return parseCharacterClass();
-            case "(": {
-              if (features.lookbehind && (res = parseGroup("(?<=", "lookbehind", "(?<!", "negativeLookbehind"))) {
-                return res;
-              } else if (features.namedGroups && match("(?<")) {
-                var name = parseIdentifier();
-                skip(">");
-                var group = finishGroup("normal", name.range[0] - 3);
-                group.name = name;
-                return group;
-              } else if (features.modifiers && current("(?") && str2[pos + 2] != ":") {
-                return parseModifiersGroup();
-              } else {
-                return parseGroup("(?:", "ignore", "(", "normal");
-              }
-            }
-            case "]":
-            case "}":
-              if (!isUnicodeMode) {
-                incr();
-                return createCharacter(res);
-              }
-              break;
-            case "^":
-            case "$":
-            case "*":
-            case "+":
-            case "?":
-            case "{":
-            case ")":
-            case "|":
-              break;
-            default:
-              incr();
-              return createCharacter(res);
-          }
-        }
-        function parseModifiersGroup() {
-          function hasDupChar(str3) {
-            var i2 = 0;
-            while (i2 < str3.length) {
-              if (str3.indexOf(str3[i2], i2 + 1) != -1) {
-                return true;
-              }
-              i2++;
-            }
-            return false;
-          }
-          var from = pos;
-          incr(2);
-          var enablingFlags = matchReg(/^[sim]+/);
-          var disablingFlags;
-          if (matchOne("-") && lookahead() !== ":") {
-            disablingFlags = matchReg(/^[sim]+/);
-            if (!disablingFlags) {
-              bail("Invalid flags for modifiers group");
-            }
-          } else if (!enablingFlags) {
-            bail("Invalid flags for modifiers group");
-          }
-          enablingFlags = enablingFlags ? enablingFlags[0] : "";
-          disablingFlags = disablingFlags ? disablingFlags[0] : "";
-          var flags2 = enablingFlags + disablingFlags;
-          if (flags2.length > 3 || hasDupChar(flags2)) {
-            bail("flags cannot be duplicated for modifiers group");
-          }
-          if (!matchOne(":")) {
-            bail("Invalid flags for modifiers group");
-          }
-          var modifiersGroup = finishGroup("ignore", from);
-          modifiersGroup.modifierFlags = {
-            enabling: enablingFlags,
-            disabling: disablingFlags
-          };
-          return modifiersGroup;
-        }
-        function parseUnicodeSurrogatePairEscape(firstEscape, isUnicodeMode2) {
-          if (isUnicodeMode2) {
-            var first, second;
-            if (firstEscape.kind == "unicodeEscape" && (first = firstEscape.codePoint) >= 55296 && first <= 56319 && currentOne("\\") && next("u")) {
-              var prevPos = pos;
-              pos++;
-              var secondEscape = parseClassEscape();
-              if (secondEscape.kind == "unicodeEscape" && (second = secondEscape.codePoint) >= 56320 && second <= 57343) {
-                firstEscape.kind = "unicodeCodePointEscape";
-                firstEscape.codePoint = (first - 55296) * 1024 + second - 56320 + 65536;
-                firstEscape.range[1] = pos;
-                firstEscape.raw = str2.substring(firstEscape.range[0], pos);
-              } else {
-                pos = prevPos;
-              }
-            }
-          }
-          return firstEscape;
-        }
-        function parseClassEscape() {
-          return parseAtomEscape(true);
-        }
-        function parseAtomEscape(insideCharacterClass) {
-          var res, from = pos, ch;
-          switch (ch = lookahead()) {
-            case "0":
-            case "1":
-            case "2":
-            case "3":
-            case "4":
-            case "5":
-            case "6":
-            case "7":
-            case "8":
-            case "9":
-              return parseDecimalEscape(insideCharacterClass);
-            case "B": {
-              if (insideCharacterClass) {
-                bail("\\B not possible inside of CharacterClass", "", from);
-                break;
-              } else {
-                return parseIdentityEscape();
-              }
-            }
-            case "b": {
-              if (insideCharacterClass) {
-                incr();
-                return createEscaped("singleEscape", 8, "\\b");
-              } else {
-                return parseIdentityEscape();
-              }
-            }
-            case "c": {
-              if (insideCharacterClass) {
-                if (!isUnicodeMode && (res = matchReg(/^c(\d)/))) {
-                  return createEscaped("controlLetter", res[1] + 16, res[1], 2);
-                } else if (!isUnicodeMode && match("c_")) {
-                  return createEscaped("controlLetter", 31, "_", 2);
-                }
-              }
-              return parseCharacterEscape();
-            }
-            // CharacterClassEscape :: one of d D s S w W
-            case "d":
-            case "D":
-            case "w":
-            case "W":
-            case "s":
-            case "S":
-              incr();
-              return createCharacterClassEscape(ch);
-            case "k":
-              return parseNamedReference() || parseIdentityEscape();
-            case "p":
-            case "P":
-              return parseUnicodePropertyEscape() || parseIdentityEscape();
-            case "-": {
-              if (insideCharacterClass && isUnicodeMode) {
-                incr();
-                return createEscaped("singleEscape", 45, "\\-");
-              }
-              return parseIdentityEscape();
-            }
-            default:
-              return parseCharacterEscape();
-          }
-        }
-        function parseDecimalEscape(insideCharacterClass) {
-          var res, match2, from = pos;
-          if (res = matchReg(/^(?!0)\d+/)) {
-            match2 = res[0];
-            var refIdx = parseInt(res[0], 10);
-            if (refIdx <= closedCaptureCounter && !insideCharacterClass) {
-              return createReference(res[0]);
-            } else {
-              backrefDenied.push(refIdx);
-              if (firstIteration) {
-                shouldReparse = true;
-              } else {
-                bailOctalEscapeIfUnicode(from, pos);
-              }
-              incr(-res[0].length);
-              if (res = matchReg(/^[0-7]{1,3}/)) {
-                return createEscaped("octal", parseInt(res[0], 8), res[0], 1);
-              } else {
-                var start = pos;
-                res = createCharacter(matchReg(/^[89]/));
-                return updateRawStart(res, start - 1);
-              }
-            }
-          } else if (res = matchReg(/^[0-7]{1,3}/)) {
-            match2 = res[0];
-            if (match2 !== "0") {
-              bailOctalEscapeIfUnicode(from, pos);
-            }
-            if (/^0{1,3}$/.test(match2)) {
-              return createEscaped("null", 0, "0", match2.length);
-            } else {
-              return createEscaped("octal", parseInt(match2, 8), match2, 1);
-            }
-          }
-          return false;
-        }
-        function bailOctalEscapeIfUnicode(from, pos2) {
-          if (isUnicodeMode) {
-            bail("Invalid decimal escape in unicode mode", null, from, pos2);
-          }
-        }
-        function parseUnicodePropertyEscape() {
-          var res, from = pos;
-          if (features.unicodePropertyEscape && isUnicodeMode && (res = matchReg(/^([pP])\{([^}]+)\}/))) {
-            return {
-              type: "unicodePropertyEscape",
-              negative: res[1] === "P",
-              value: res[2],
-              range: [from - 1, pos],
-              raw: str2.substring(from - 1, pos)
-            };
-          }
-          return false;
-        }
-        function parseNamedReference() {
-          if (features.namedGroups && matchReg(/^k<(?=.*?>)/)) {
-            var name = parseIdentifier();
-            skip(">");
-            return createNamedReference(name);
-          }
-        }
-        function parseRegExpUnicodeEscapeSequence(isUnicodeMode2) {
-          var res;
-          if (res = matchReg(/^u([0-9a-fA-F]{4})/)) {
-            return parseUnicodeSurrogatePairEscape(
-              createEscaped("unicodeEscape", parseInt(res[1], 16), res[1], 2),
-              isUnicodeMode2
-            );
-          } else if (isUnicodeMode2 && (res = matchReg(/^u\{([0-9a-fA-F]+)\}/))) {
-            return createEscaped("unicodeCodePointEscape", parseInt(res[1], 16), res[1], 4);
-          }
-        }
-        function parseCharacterEscape() {
-          var res;
-          var from = pos;
-          switch (lookahead()) {
-            case "t":
-              incr();
-              return createEscaped("singleEscape", 9, "\\t");
-            case "n":
-              incr();
-              return createEscaped("singleEscape", 10, "\\n");
-            case "v":
-              incr();
-              return createEscaped("singleEscape", 11, "\\v");
-            case "f":
-              incr();
-              return createEscaped("singleEscape", 12, "\\f");
-            case "r":
-              incr();
-              return createEscaped("singleEscape", 13, "\\r");
-            case "c":
-              if (res = matchReg(/^c([a-zA-Z])/)) {
-                return createEscaped("controlLetter", res[1].charCodeAt(0) % 32, res[1], 2);
-              }
-              break;
-            case "x":
-              if (res = matchReg(/^x([0-9a-fA-F]{2})/)) {
-                return createEscaped("hexadecimalEscape", parseInt(res[1], 16), res[1], 2);
-              }
-              break;
-            case "u":
-              if (res = parseRegExpUnicodeEscapeSequence(isUnicodeMode)) {
-                if (!res || res.codePoint > 1114111) {
-                  bail("Invalid escape sequence", null, from, pos);
-                }
-                return res;
-              }
-              break;
-          }
-          return parseIdentityEscape();
-        }
-        function parseIdentifierAtom(check) {
-          var ch = lookahead();
-          var from = pos;
-          if (ch === "\\") {
-            incr();
-            var esc = parseRegExpUnicodeEscapeSequence(true);
-            if (!esc || !check(esc.codePoint)) {
-              bail("Invalid escape sequence", null, from, pos);
-            }
-            return fromCodePoint(esc.codePoint);
-          }
-          var code = ch.charCodeAt(0);
-          if (code >= 55296 && code <= 56319) {
-            ch += str2[pos + 1];
-            var second = ch.charCodeAt(1);
-            if (second >= 56320 && second <= 57343) {
-              code = (code - 55296) * 1024 + second - 56320 + 65536;
-            }
-          }
-          if (!check(code)) return;
-          incr();
-          if (code > 65535) incr();
-          return ch;
-        }
-        function parseIdentifier() {
-          var start = pos;
-          var res = parseIdentifierAtom(isIdentifierStart);
-          if (!res) {
-            bail("Invalid identifier");
-          }
-          var ch;
-          while (ch = parseIdentifierAtom(isIdentifierPart)) {
-            res += ch;
-          }
-          return {
-            type: "identifier",
-            value: res,
-            range: [start, pos],
-            raw: str2.substring(start, pos)
-          };
-        }
-        function isIdentifierStart(ch) {
-          var NonAsciiIdentifierStart = /[\xAA\xB5\xBA\xC0-\xD6\xD8-\xF6\xF8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0370-\u0374\u0376\u0377\u037A-\u037D\u037F\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u048A-\u052F\u0531-\u0556\u0559\u0560-\u0588\u05D0-\u05EA\u05EF-\u05F2\u0620-\u064A\u066E\u066F\u0671-\u06D3\u06D5\u06E5\u06E6\u06EE\u06EF\u06FA-\u06FC\u06FF\u0710\u0712-\u072F\u074D-\u07A5\u07B1\u07CA-\u07EA\u07F4\u07F5\u07FA\u0800-\u0815\u081A\u0824\u0828\u0840-\u0858\u0860-\u086A\u0870-\u0887\u0889-\u088F\u08A0-\u08C9\u0904-\u0939\u093D\u0950\u0958-\u0961\u0971-\u0980\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BD\u09CE\u09DC\u09DD\u09DF-\u09E1\u09F0\u09F1\u09FC\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A59-\u0A5C\u0A5E\u0A72-\u0A74\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABD\u0AD0\u0AE0\u0AE1\u0AF9\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3D\u0B5C\u0B5D\u0B5F-\u0B61\u0B71\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BD0\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C39\u0C3D\u0C58-\u0C5A\u0C5C\u0C5D\u0C60\u0C61\u0C80\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBD\u0CDC-\u0CDE\u0CE0\u0CE1\u0CF1\u0CF2\u0D04-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D\u0D4E\u0D54-\u0D56\u0D5F-\u0D61\u0D7A-\u0D7F\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0E01-\u0E30\u0E32\u0E33\u0E40-\u0E46\u0E81\u0E82\u0E84\u0E86-\u0E8A\u0E8C-\u0EA3\u0EA5\u0EA7-\u0EB0\u0EB2\u0EB3\u0EBD\u0EC0-\u0EC4\u0EC6\u0EDC-\u0EDF\u0F00\u0F40-\u0F47\u0F49-\u0F6C\u0F88-\u0F8C\u1000-\u102A\u103F\u1050-\u1055\u105A-\u105D\u1061\u1065\u1066\u106E-\u1070\u1075-\u1081\u108E\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u1380-\u138F\u13A0-\u13F5\u13F8-\u13FD\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u16EE-\u16F8\u1700-\u1711\u171F-\u1731\u1740-\u1751\u1760-\u176C\u176E-\u1770\u1780-\u17B3\u17D7\u17DC\u1820-\u1878\u1880-\u18A8\u18AA\u18B0-\u18F5\u1900-\u191E\u1950-\u196D\u1970-\u1974\u1980-\u19AB\u19B0-\u19C9\u1A00-\u1A16\u1A20-\u1A54\u1AA7\u1B05-\u1B33\u1B45-\u1B4C\u1B83-\u1BA0\u1BAE\u1BAF\u1BBA-\u1BE5\u1C00-\u1C23\u1C4D-\u1C4F\u1C5A-\u1C7D\u1C80-\u1C8A\u1C90-\u1CBA\u1CBD-\u1CBF\u1CE9-\u1CEC\u1CEE-\u1CF3\u1CF5\u1CF6\u1CFA\u1D00-\u1DBF\u1E00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u2071\u207F\u2090-\u209C\u2102\u2107\u210A-\u2113\u2115\u2118-\u211D\u2124\u2126\u2128\u212A-\u2139\u213C-\u213F\u2145-\u2149\u214E\u2160-\u2188\u2C00-\u2CE4\u2CEB-\u2CEE\u2CF2\u2CF3\u2D00-\u2D25\u2D27\u2D2D\u2D30-\u2D67\u2D6F\u2D80-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303C\u3041-\u3096\u309B-\u309F\u30A1-\u30FA\u30FC-\u30FF\u3105-\u312F\u3131-\u318E\u31A0-\u31BF\u31F0-\u31FF\u3400-\u4DBF\u4E00-\uA48C\uA4D0-\uA4FD\uA500-\uA60C\uA610-\uA61F\uA62A\uA62B\uA640-\uA66E\uA67F-\uA69D\uA6A0-\uA6EF\uA717-\uA71F\uA722-\uA788\uA78B-\uA7DC\uA7F1-\uA801\uA803-\uA805\uA807-\uA80A\uA80C-\uA822\uA840-\uA873\uA882-\uA8B3\uA8F2-\uA8F7\uA8FB\uA8FD\uA8FE\uA90A-\uA925\uA930-\uA946\uA960-\uA97C\uA984-\uA9B2\uA9CF\uA9E0-\uA9E4\uA9E6-\uA9EF\uA9FA-\uA9FE\uAA00-\uAA28\uAA40-\uAA42\uAA44-\uAA4B\uAA60-\uAA76\uAA7A\uAA7E-\uAAAF\uAAB1\uAAB5\uAAB6\uAAB9-\uAABD\uAAC0\uAAC2\uAADB-\uAADD\uAAE0-\uAAEA\uAAF2-\uAAF4\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uAB30-\uAB5A\uAB5C-\uAB69\uAB70-\uABE2\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB00-\uFB06\uFB13-\uFB17\uFB1D\uFB1F-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE70-\uFE74\uFE76-\uFEFC\uFF21-\uFF3A\uFF41-\uFF5A\uFF66-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC]|\uD800[\uDC00-\uDC0B\uDC0D-\uDC26\uDC28-\uDC3A\uDC3C\uDC3D\uDC3F-\uDC4D\uDC50-\uDC5D\uDC80-\uDCFA\uDD40-\uDD74\uDE80-\uDE9C\uDEA0-\uDED0\uDF00-\uDF1F\uDF2D-\uDF4A\uDF50-\uDF75\uDF80-\uDF9D\uDFA0-\uDFC3\uDFC8-\uDFCF\uDFD1-\uDFD5]|\uD801[\uDC00-\uDC9D\uDCB0-\uDCD3\uDCD8-\uDCFB\uDD00-\uDD27\uDD30-\uDD63\uDD70-\uDD7A\uDD7C-\uDD8A\uDD8C-\uDD92\uDD94\uDD95\uDD97-\uDDA1\uDDA3-\uDDB1\uDDB3-\uDDB9\uDDBB\uDDBC\uDDC0-\uDDF3\uDE00-\uDF36\uDF40-\uDF55\uDF60-\uDF67\uDF80-\uDF85\uDF87-\uDFB0\uDFB2-\uDFBA]|\uD802[\uDC00-\uDC05\uDC08\uDC0A-\uDC35\uDC37\uDC38\uDC3C\uDC3F-\uDC55\uDC60-\uDC76\uDC80-\uDC9E\uDCE0-\uDCF2\uDCF4\uDCF5\uDD00-\uDD15\uDD20-\uDD39\uDD40-\uDD59\uDD80-\uDDB7\uDDBE\uDDBF\uDE00\uDE10-\uDE13\uDE15-\uDE17\uDE19-\uDE35\uDE60-\uDE7C\uDE80-\uDE9C\uDEC0-\uDEC7\uDEC9-\uDEE4\uDF00-\uDF35\uDF40-\uDF55\uDF60-\uDF72\uDF80-\uDF91]|\uD803[\uDC00-\uDC48\uDC80-\uDCB2\uDCC0-\uDCF2\uDD00-\uDD23\uDD4A-\uDD65\uDD6F-\uDD85\uDE80-\uDEA9\uDEB0\uDEB1\uDEC2-\uDEC7\uDF00-\uDF1C\uDF27\uDF30-\uDF45\uDF70-\uDF81\uDFB0-\uDFC4\uDFE0-\uDFF6]|\uD804[\uDC03-\uDC37\uDC71\uDC72\uDC75\uDC83-\uDCAF\uDCD0-\uDCE8\uDD03-\uDD26\uDD44\uDD47\uDD50-\uDD72\uDD76\uDD83-\uDDB2\uDDC1-\uDDC4\uDDDA\uDDDC\uDE00-\uDE11\uDE13-\uDE2B\uDE3F\uDE40\uDE80-\uDE86\uDE88\uDE8A-\uDE8D\uDE8F-\uDE9D\uDE9F-\uDEA8\uDEB0-\uDEDE\uDF05-\uDF0C\uDF0F\uDF10\uDF13-\uDF28\uDF2A-\uDF30\uDF32\uDF33\uDF35-\uDF39\uDF3D\uDF50\uDF5D-\uDF61\uDF80-\uDF89\uDF8B\uDF8E\uDF90-\uDFB5\uDFB7\uDFD1\uDFD3]|\uD805[\uDC00-\uDC34\uDC47-\uDC4A\uDC5F-\uDC61\uDC80-\uDCAF\uDCC4\uDCC5\uDCC7\uDD80-\uDDAE\uDDD8-\uDDDB\uDE00-\uDE2F\uDE44\uDE80-\uDEAA\uDEB8\uDF00-\uDF1A\uDF40-\uDF46]|\uD806[\uDC00-\uDC2B\uDCA0-\uDCDF\uDCFF-\uDD06\uDD09\uDD0C-\uDD13\uDD15\uDD16\uDD18-\uDD2F\uDD3F\uDD41\uDDA0-\uDDA7\uDDAA-\uDDD0\uDDE1\uDDE3\uDE00\uDE0B-\uDE32\uDE3A\uDE50\uDE5C-\uDE89\uDE9D\uDEB0-\uDEF8\uDFC0-\uDFE0]|\uD807[\uDC00-\uDC08\uDC0A-\uDC2E\uDC40\uDC72-\uDC8F\uDD00-\uDD06\uDD08\uDD09\uDD0B-\uDD30\uDD46\uDD60-\uDD65\uDD67\uDD68\uDD6A-\uDD89\uDD98\uDDB0-\uDDDB\uDEE0-\uDEF2\uDF02\uDF04-\uDF10\uDF12-\uDF33\uDFB0]|\uD808[\uDC00-\uDF99]|\uD809[\uDC00-\uDC6E\uDC80-\uDD43]|\uD80B[\uDF90-\uDFF0]|[\uD80C\uD80E\uD80F\uD81C-\uD822\uD840-\uD868\uD86A-\uD86D\uD86F-\uD872\uD874-\uD879\uD880-\uD883\uD885-\uD88C][\uDC00-\uDFFF]|\uD80D[\uDC00-\uDC2F\uDC41-\uDC46\uDC60-\uDFFF]|\uD810[\uDC00-\uDFFA]|\uD811[\uDC00-\uDE46]|\uD818[\uDD00-\uDD1D]|\uD81A[\uDC00-\uDE38\uDE40-\uDE5E\uDE70-\uDEBE\uDED0-\uDEED\uDF00-\uDF2F\uDF40-\uDF43\uDF63-\uDF77\uDF7D-\uDF8F]|\uD81B[\uDD40-\uDD6C\uDE40-\uDE7F\uDEA0-\uDEB8\uDEBB-\uDED3\uDF00-\uDF4A\uDF50\uDF93-\uDF9F\uDFE0\uDFE1\uDFE3\uDFF2-\uDFF6]|\uD823[\uDC00-\uDCD5\uDCFF-\uDD1E\uDD80-\uDDF2]|\uD82B[\uDFF0-\uDFF3\uDFF5-\uDFFB\uDFFD\uDFFE]|\uD82C[\uDC00-\uDD22\uDD32\uDD50-\uDD52\uDD55\uDD64-\uDD67\uDD70-\uDEFB]|\uD82F[\uDC00-\uDC6A\uDC70-\uDC7C\uDC80-\uDC88\uDC90-\uDC99]|\uD835[\uDC00-\uDC54\uDC56-\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD1E-\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD52-\uDEA5\uDEA8-\uDEC0\uDEC2-\uDEDA\uDEDC-\uDEFA\uDEFC-\uDF14\uDF16-\uDF34\uDF36-\uDF4E\uDF50-\uDF6E\uDF70-\uDF88\uDF8A-\uDFA8\uDFAA-\uDFC2\uDFC4-\uDFCB]|\uD837[\uDF00-\uDF1E\uDF25-\uDF2A]|\uD838[\uDC30-\uDC6D\uDD00-\uDD2C\uDD37-\uDD3D\uDD4E\uDE90-\uDEAD\uDEC0-\uDEEB]|\uD839[\uDCD0-\uDCEB\uDDD0-\uDDED\uDDF0\uDEC0-\uDEDE\uDEE0-\uDEE2\uDEE4\uDEE5\uDEE7-\uDEED\uDEF0-\uDEF4\uDEFE\uDEFF\uDFE0-\uDFE6\uDFE8-\uDFEB\uDFED\uDFEE\uDFF0-\uDFFE]|\uD83A[\uDC00-\uDCC4\uDD00-\uDD43\uDD4B]|\uD83B[\uDE00-\uDE03\uDE05-\uDE1F\uDE21\uDE22\uDE24\uDE27\uDE29-\uDE32\uDE34-\uDE37\uDE39\uDE3B\uDE42\uDE47\uDE49\uDE4B\uDE4D-\uDE4F\uDE51\uDE52\uDE54\uDE57\uDE59\uDE5B\uDE5D\uDE5F\uDE61\uDE62\uDE64\uDE67-\uDE6A\uDE6C-\uDE72\uDE74-\uDE77\uDE79-\uDE7C\uDE7E\uDE80-\uDE89\uDE8B-\uDE9B\uDEA1-\uDEA3\uDEA5-\uDEA9\uDEAB-\uDEBB]|\uD869[\uDC00-\uDEDF\uDF00-\uDFFF]|\uD86E[\uDC00-\uDC1D\uDC20-\uDFFF]|\uD873[\uDC00-\uDEAD\uDEB0-\uDFFF]|\uD87A[\uDC00-\uDFE0\uDFF0-\uDFFF]|\uD87B[\uDC00-\uDE5D]|\uD87E[\uDC00-\uDE1D]|\uD884[\uDC00-\uDF4A\uDF50-\uDFFF]|\uD88D[\uDC00-\uDC79]/;
-          return ch === 36 || ch === 95 || // $ (dollar) and _ (underscore)
-          ch >= 65 && ch <= 90 || // A..Z
-          ch >= 97 && ch <= 122 || // a..z
-          ch >= 128 && NonAsciiIdentifierStart.test(fromCodePoint(ch));
-        }
-        function isIdentifierPart(ch) {
-          var NonAsciiIdentifierPartOnly = /[\xB7\u0300-\u036F\u0387\u0483-\u0487\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0610-\u061A\u064B-\u0669\u0670\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED\u06F0-\u06F9\u0711\u0730-\u074A\u07A6-\u07B0\u07C0-\u07C9\u07EB-\u07F3\u07FD\u0816-\u0819\u081B-\u0823\u0825-\u0827\u0829-\u082D\u0859-\u085B\u0897-\u089F\u08CA-\u08E1\u08E3-\u0903\u093A-\u093C\u093E-\u094F\u0951-\u0957\u0962\u0963\u0966-\u096F\u0981-\u0983\u09BC\u09BE-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u09E6-\u09EF\u09FE\u0A01-\u0A03\u0A3C\u0A3E-\u0A42\u0A47\u0A48\u0A4B-\u0A4D\u0A51\u0A66-\u0A71\u0A75\u0A81-\u0A83\u0ABC\u0ABE-\u0AC5\u0AC7-\u0AC9\u0ACB-\u0ACD\u0AE2\u0AE3\u0AE6-\u0AEF\u0AFA-\u0AFF\u0B01-\u0B03\u0B3C\u0B3E-\u0B44\u0B47\u0B48\u0B4B-\u0B4D\u0B55-\u0B57\u0B62\u0B63\u0B66-\u0B6F\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0BD7\u0BE6-\u0BEF\u0C00-\u0C04\u0C3C\u0C3E-\u0C44\u0C46-\u0C48\u0C4A-\u0C4D\u0C55\u0C56\u0C62\u0C63\u0C66-\u0C6F\u0C81-\u0C83\u0CBC\u0CBE-\u0CC4\u0CC6-\u0CC8\u0CCA-\u0CCD\u0CD5\u0CD6\u0CE2\u0CE3\u0CE6-\u0CEF\u0CF3\u0D00-\u0D03\u0D3B\u0D3C\u0D3E-\u0D44\u0D46-\u0D48\u0D4A-\u0D4D\u0D57\u0D62\u0D63\u0D66-\u0D6F\u0D81-\u0D83\u0DCA\u0DCF-\u0DD4\u0DD6\u0DD8-\u0DDF\u0DE6-\u0DEF\u0DF2\u0DF3\u0E31\u0E34-\u0E3A\u0E47-\u0E4E\u0E50-\u0E59\u0EB1\u0EB4-\u0EBC\u0EC8-\u0ECE\u0ED0-\u0ED9\u0F18\u0F19\u0F20-\u0F29\u0F35\u0F37\u0F39\u0F3E\u0F3F\u0F71-\u0F84\u0F86\u0F87\u0F8D-\u0F97\u0F99-\u0FBC\u0FC6\u102B-\u103E\u1040-\u1049\u1056-\u1059\u105E-\u1060\u1062-\u1064\u1067-\u106D\u1071-\u1074\u1082-\u108D\u108F-\u109D\u135D-\u135F\u1369-\u1371\u1712-\u1715\u1732-\u1734\u1752\u1753\u1772\u1773\u17B4-\u17D3\u17DD\u17E0-\u17E9\u180B-\u180D\u180F-\u1819\u18A9\u1920-\u192B\u1930-\u193B\u1946-\u194F\u19D0-\u19DA\u1A17-\u1A1B\u1A55-\u1A5E\u1A60-\u1A7C\u1A7F-\u1A89\u1A90-\u1A99\u1AB0-\u1ABD\u1ABF-\u1ADD\u1AE0-\u1AEB\u1B00-\u1B04\u1B34-\u1B44\u1B50-\u1B59\u1B6B-\u1B73\u1B80-\u1B82\u1BA1-\u1BAD\u1BB0-\u1BB9\u1BE6-\u1BF3\u1C24-\u1C37\u1C40-\u1C49\u1C50-\u1C59\u1CD0-\u1CD2\u1CD4-\u1CE8\u1CED\u1CF4\u1CF7-\u1CF9\u1DC0-\u1DFF\u200C\u200D\u203F\u2040\u2054\u20D0-\u20DC\u20E1\u20E5-\u20F0\u2CEF-\u2CF1\u2D7F\u2DE0-\u2DFF\u302A-\u302F\u3099\u309A\u30FB\uA620-\uA629\uA66F\uA674-\uA67D\uA69E\uA69F\uA6F0\uA6F1\uA802\uA806\uA80B\uA823-\uA827\uA82C\uA880\uA881\uA8B4-\uA8C5\uA8D0-\uA8D9\uA8E0-\uA8F1\uA8FF-\uA909\uA926-\uA92D\uA947-\uA953\uA980-\uA983\uA9B3-\uA9C0\uA9D0-\uA9D9\uA9E5\uA9F0-\uA9F9\uAA29-\uAA36\uAA43\uAA4C\uAA4D\uAA50-\uAA59\uAA7B-\uAA7D\uAAB0\uAAB2-\uAAB4\uAAB7\uAAB8\uAABE\uAABF\uAAC1\uAAEB-\uAAEF\uAAF5\uAAF6\uABE3-\uABEA\uABEC\uABED\uABF0-\uABF9\uFB1E\uFE00-\uFE0F\uFE20-\uFE2F\uFE33\uFE34\uFE4D-\uFE4F\uFF10-\uFF19\uFF3F\uFF65]|\uD800[\uDDFD\uDEE0\uDF76-\uDF7A]|\uD801[\uDCA0-\uDCA9]|\uD802[\uDE01-\uDE03\uDE05\uDE06\uDE0C-\uDE0F\uDE38-\uDE3A\uDE3F\uDEE5\uDEE6]|\uD803[\uDD24-\uDD27\uDD30-\uDD39\uDD40-\uDD49\uDD69-\uDD6D\uDEAB\uDEAC\uDEFA-\uDEFF\uDF46-\uDF50\uDF82-\uDF85]|\uD804[\uDC00-\uDC02\uDC38-\uDC46\uDC66-\uDC70\uDC73\uDC74\uDC7F-\uDC82\uDCB0-\uDCBA\uDCC2\uDCF0-\uDCF9\uDD00-\uDD02\uDD27-\uDD34\uDD36-\uDD3F\uDD45\uDD46\uDD73\uDD80-\uDD82\uDDB3-\uDDC0\uDDC9-\uDDCC\uDDCE-\uDDD9\uDE2C-\uDE37\uDE3E\uDE41\uDEDF-\uDEEA\uDEF0-\uDEF9\uDF00-\uDF03\uDF3B\uDF3C\uDF3E-\uDF44\uDF47\uDF48\uDF4B-\uDF4D\uDF57\uDF62\uDF63\uDF66-\uDF6C\uDF70-\uDF74\uDFB8-\uDFC0\uDFC2\uDFC5\uDFC7-\uDFCA\uDFCC-\uDFD0\uDFD2\uDFE1\uDFE2]|\uD805[\uDC35-\uDC46\uDC50-\uDC59\uDC5E\uDCB0-\uDCC3\uDCD0-\uDCD9\uDDAF-\uDDB5\uDDB8-\uDDC0\uDDDC\uDDDD\uDE30-\uDE40\uDE50-\uDE59\uDEAB-\uDEB7\uDEC0-\uDEC9\uDED0-\uDEE3\uDF1D-\uDF2B\uDF30-\uDF39]|\uD806[\uDC2C-\uDC3A\uDCE0-\uDCE9\uDD30-\uDD35\uDD37\uDD38\uDD3B-\uDD3E\uDD40\uDD42\uDD43\uDD50-\uDD59\uDDD1-\uDDD7\uDDDA-\uDDE0\uDDE4\uDE01-\uDE0A\uDE33-\uDE39\uDE3B-\uDE3E\uDE47\uDE51-\uDE5B\uDE8A-\uDE99\uDF60-\uDF67\uDFF0-\uDFF9]|\uD807[\uDC2F-\uDC36\uDC38-\uDC3F\uDC50-\uDC59\uDC92-\uDCA7\uDCA9-\uDCB6\uDD31-\uDD36\uDD3A\uDD3C\uDD3D\uDD3F-\uDD45\uDD47\uDD50-\uDD59\uDD8A-\uDD8E\uDD90\uDD91\uDD93-\uDD97\uDDA0-\uDDA9\uDDE0-\uDDE9\uDEF3-\uDEF6\uDF00\uDF01\uDF03\uDF34-\uDF3A\uDF3E-\uDF42\uDF50-\uDF5A]|\uD80D[\uDC40\uDC47-\uDC55]|\uD818[\uDD1E-\uDD39]|\uD81A[\uDE60-\uDE69\uDEC0-\uDEC9\uDEF0-\uDEF4\uDF30-\uDF36\uDF50-\uDF59]|\uD81B[\uDD70-\uDD79\uDF4F\uDF51-\uDF87\uDF8F-\uDF92\uDFE4\uDFF0\uDFF1]|\uD82F[\uDC9D\uDC9E]|\uD833[\uDCF0-\uDCF9\uDF00-\uDF2D\uDF30-\uDF46]|\uD834[\uDD65-\uDD69\uDD6D-\uDD72\uDD7B-\uDD82\uDD85-\uDD8B\uDDAA-\uDDAD\uDE42-\uDE44]|\uD835[\uDFCE-\uDFFF]|\uD836[\uDE00-\uDE36\uDE3B-\uDE6C\uDE75\uDE84\uDE9B-\uDE9F\uDEA1-\uDEAF]|\uD838[\uDC00-\uDC06\uDC08-\uDC18\uDC1B-\uDC21\uDC23\uDC24\uDC26-\uDC2A\uDC8F\uDD30-\uDD36\uDD40-\uDD49\uDEAE\uDEEC-\uDEF9]|\uD839[\uDCEC-\uDCF9\uDDEE\uDDEF\uDDF1-\uDDFA\uDEE3\uDEE6\uDEEE\uDEEF\uDEF5]|\uD83A[\uDCD0-\uDCD6\uDD44-\uDD4A\uDD50-\uDD59]|\uD83E[\uDFF0-\uDFF9]|\uDB40[\uDD00-\uDDEF]/;
-          return isIdentifierStart(ch) || ch >= 48 && ch <= 57 || // 0..9
-          ch >= 128 && NonAsciiIdentifierPartOnly.test(fromCodePoint(ch));
-        }
-        function parseIdentityEscape() {
-          var tmp;
-          var l2 = lookahead();
-          if (isUnicodeMode && /[\^$.*+?()\\[\]{}|/]/.test(l2) || !isUnicodeMode && l2 !== "c") {
-            if (l2 === "k" && features.lookbehind) {
-              return null;
-            }
-            tmp = consume(1);
-            return createEscaped("identifier", tmp.charCodeAt(0), tmp, 1);
-          }
-          return null;
-        }
-        function parseCharacterClass() {
-          var res, from = pos;
-          if (res = match("[^")) {
-            res = parseClassContents();
-            skip("]");
-            return createCharacterClass(res, true, from, pos);
-          } else if (matchOne("[")) {
-            res = parseClassContents();
-            skip("]");
-            return createCharacterClass(res, false, from, pos);
-          }
-          return null;
-        }
-        function parseClassContents() {
-          var res;
-          if (currentOne("]")) {
-            return { kind: "union", body: [] };
-          } else if (hasUnicodeSetFlag) {
-            return parseClassSetExpression();
-          } else {
-            res = parseNonemptyClassRanges();
-            if (!res) {
-              bail("nonEmptyClassRanges");
-            }
-            return { kind: "union", body: res };
-          }
-        }
-        function parseHelperClassContents(atom) {
-          var from, to, res, atomTo, dash;
-          if (currentOne("-") && !next("]")) {
-            from = atom.range[0];
-            incr();
-            dash = createCharacter("-");
-            atomTo = parseClassAtom();
-            if (!atomTo) {
-              bail("classAtom");
-            }
-            to = pos;
-            var classContents = parseClassContents();
-            if (!classContents) {
-              bail("classContents");
-            }
-            if (!("codePoint" in atom) || !("codePoint" in atomTo)) {
-              if (!isUnicodeMode) {
-                res = [atom, dash, atomTo];
-              } else {
-                bail("invalid character class");
-              }
-            } else {
-              res = [createClassRange(atom, atomTo, from, to)];
-            }
-            if (classContents.type === "empty") {
-              return res;
-            }
-            return res.concat(classContents.body);
-          }
-          res = parseNonemptyClassRangesNoDash();
-          if (!res) {
-            bail("nonEmptyClassRangesNoDash");
-          }
-          return [atom].concat(res);
-        }
-        function parseNonemptyClassRanges() {
-          var atom = parseClassAtom();
-          if (!atom) {
-            bail("classAtom");
-          }
-          if (currentOne("]")) {
-            return [atom];
-          }
-          return parseHelperClassContents(atom);
-        }
-        function parseNonemptyClassRangesNoDash() {
-          var res = parseClassAtom();
-          if (!res) {
-            bail("classAtom");
-          }
-          if (currentOne("]")) {
-            return res;
-          }
-          return parseHelperClassContents(res);
-        }
-        function parseClassAtom() {
-          if (matchOne("-")) {
-            return createCharacter("-");
-          } else {
-            return parseClassAtomNoDash();
-          }
-        }
-        function parseClassAtomNoDash() {
-          var res;
-          switch (res = lookahead()) {
-            case "\\": {
-              incr();
-              res = parseClassEscape();
-              if (!res) {
-                if (!isUnicodeMode && lookahead() == "c") {
-                  return createCharacter("\\");
-                }
-                bail("classEscape");
-              }
-              return parseUnicodeSurrogatePairEscape(res, isUnicodeMode);
-            }
-            case "]":
-            case "-":
-              break;
-            default:
-              incr();
-              return createCharacter(res);
-          }
-        }
-        function parseClassSetExpression() {
-          var body = [];
-          var kind;
-          var operand = parseClassSetOperand(
-            /* allowRanges*/
-            true
-          );
-          body.push(operand);
-          if (operand.type === "classRange") {
-            kind = "union";
-          } else if (currentOne("&")) {
-            kind = "intersection";
-          } else if (currentOne("-")) {
-            kind = "subtraction";
-          } else {
-            kind = "union";
-          }
-          while (!currentOne("]")) {
-            if (kind === "intersection") {
-              skip("&");
-              skip("&");
-              if (currentOne("&")) {
-                bail("&& cannot be followed by &. Wrap it in brackets: &&[&].");
-              }
-            } else if (kind === "subtraction") {
-              skip("-");
-              skip("-");
-            }
-            operand = parseClassSetOperand(
-              /* allowRanges*/
-              kind === "union"
-            );
-            body.push(operand);
-          }
-          return { kind, body };
-        }
-        function parseClassSetOperand(allowRanges) {
-          var from = pos;
-          var start, res;
-          if (matchOne("\\")) {
-            if (match("q{")) {
-              return parseClassStringDisjunction();
-            } else if (res = parseClassEscape()) {
-              start = res;
-            } else if (res = parseClassSetCharacterEscapedHelper()) {
-              return res;
-            } else {
-              bail("Invalid escape", "\\" + lookahead(), from);
-            }
-          } else if (res = parseClassSetCharacterUnescapedHelper()) {
-            start = res;
-          } else if (res = parseCharacterClass()) {
-            return res;
-          } else {
-            bail("Invalid character", lookahead());
-          }
-          if (allowRanges && currentOne("-") && !next("-")) {
-            incr();
-            if (res = parseClassSetCharacter()) {
-              return createClassRange(start, res, from, pos);
-            }
-            bail("Invalid range end", lookahead());
-          }
-          return start;
-        }
-        function parseClassSetCharacter() {
-          if (matchOne("\\")) {
-            var res, from = pos;
-            if (res = parseClassSetCharacterEscapedHelper()) {
-              return res;
-            } else {
-              bail("Invalid escape", "\\" + lookahead(), from);
-            }
-          }
-          return parseClassSetCharacterUnescapedHelper();
-        }
-        function parseClassSetCharacterUnescapedHelper() {
-          var res;
-          if (matchReg(/^(?:&&|!!|##|\$\$|%%|\*\*|\+\+|,,|\.\.|::|;;|<<|==|>>|\?\?|@@|\^\^|``|~~)/)) {
-            bail("Invalid set operation in character class");
-          }
-          if (res = matchReg(/^[^()[\]{}/\-\\|]/)) {
-            return createCharacter(res);
-          }
-        }
-        function parseClassSetCharacterEscapedHelper() {
-          var res;
-          if (matchOne("b")) {
-            return createEscaped("singleEscape", 8, "\\b");
-          } else if (matchOne("B")) {
-            bail("\\B not possible inside of ClassContents", "", pos - 2);
-          } else if (res = matchReg(/^[&\-!#%,:;<=>@`~]/)) {
-            return createEscaped("identifier", res[0].codePointAt(0), res[0]);
-          } else if (res = parseCharacterEscape()) {
-            return res;
-          } else {
-            return null;
-          }
-        }
-        function parseClassStringDisjunction() {
-          var from = pos - 3;
-          var res = [];
-          do {
-            res.push(parseClassString());
-          } while (matchOne("|"));
-          skip("}");
-          return createClassStrings(res, from, pos);
-        }
-        function parseClassString() {
-          var res = [], from = pos;
-          var char;
-          while (char = parseClassSetCharacter()) {
-            res.push(char);
-          }
-          return createClassString(res, from, pos);
-        }
-        function bail(message, details, from, to) {
-          from = from == null ? pos : from;
-          to = to == null ? from : to;
-          var contextStart = Math.max(0, from - 10);
-          var contextEnd = Math.min(to + 10, str2.length);
-          var context = "    " + str2.substring(contextStart, contextEnd);
-          var pointer = "    " + new Array(from - contextStart + 1).join(" ") + "^";
-          throw SyntaxError(message + " at position " + from + (details ? ": " + details : "") + "\n" + context + "\n" + pointer);
-        }
-        var backrefDenied = [];
-        var closedCaptureCounter = 0;
-        var firstIteration = true;
-        var shouldReparse = false;
-        var hasUnicodeFlag = (flags || "").indexOf("u") !== -1;
-        var hasUnicodeSetFlag = (flags || "").indexOf("v") !== -1;
-        var isUnicodeMode = hasUnicodeFlag || hasUnicodeSetFlag;
-        var pos = 0;
-        if (hasUnicodeSetFlag && !features.unicodeSet) {
-          throw new Error('The "v" flag is only supported when the .unicodeSet option is enabled.');
-        }
-        if (hasUnicodeFlag && hasUnicodeSetFlag) {
-          throw new Error('The "u" and "v" flags are mutually exclusive.');
-        }
-        str2 = String(str2);
-        if (str2 === "") {
-          str2 = "(?:)";
-        }
-        var result = parseDisjunction();
-        if (result.range[1] !== str2.length) {
-          bail("Could not parse entire input - got stuck", "", result.range[1]);
-        }
-        shouldReparse = shouldReparse || backrefDenied.some(function(ref) {
-          return ref <= closedCaptureCounter;
-        });
-        if (shouldReparse) {
-          pos = 0;
-          firstIteration = false;
-          return parseDisjunction();
-        }
-        return result;
-      }
-      var regjsparser = {
-        parse: parse2
-      };
-      if (module2.exports) {
-        module2.exports = regjsparser;
-      } else {
-        window.regjsparser = regjsparser;
-      }
-    })();
-  })(parser);
-  var parserExports = parser.exports;
-  function parse(pattern, unicode) {
-    var ast = parserExports.parse(pattern, unicode ? "u" : "", {
-      lookbehind: true,
-      unicodePropertyEscape: true
-    });
-    return ast;
-  }
-  function last(input) {
-    var length = input.length;
-    return length ? input[length - 1] : null;
-  }
-  function dropCommon(a2, b2) {
-    var commonLevels;
-    for (commonLevels = 0; commonLevels < a2.length && commonLevels < b2.length && a2[commonLevels] === b2[commonLevels]; commonLevels++)
-      ;
-    return {
-      a: a2.slice(commonLevels),
-      b: b2.slice(commonLevels)
-    };
-  }
-  var lookaheadBehaviours$1 = [
-    "lookahead",
-    "lookbehind",
-    "negativeLookahead",
-    "negativeLookbehind"
+  var SURROGATE_RANGE = { start: 55296, end: 57343 };
+  var MAX_CODE_POINT = 1114111;
+  var MAX_QUANTIFIER_BOUND = 65535;
+  var DIGIT_RANGES = [{ start: 48, end: 57 }];
+  var WORD_RANGES = [
+    { start: 48, end: 57 },
+    { start: 65, end: 90 },
+    { start: 95, end: 95 },
+    { start: 97, end: 122 }
   ];
-  function replace(input, replacement, start, end) {
-    return "".concat(input.slice(0, start)).concat(replacement).concat(input.slice(end));
-  }
-  function shiftOffsets(_a) {
-    var after = _a.after, offsets = _a.offsets, shiftAmount = _a.shiftAmount;
-    return new Set(__spreadArray([], __read(offsets), false).map(function(offset) {
-      return offset > after ? offset + shiftAmount : offset;
-    }));
-  }
-  function quantifierIterationsToString(quantifier) {
-    if (quantifier.symbol) {
-      return "".concat(quantifier.symbol).concat(quantifier.greedy ? "" : "?");
-    }
-    if (quantifier.min === quantifier.max) {
-      return "{".concat(quantifier.min, "}");
-    }
-    return "{".concat(quantifier.min, ",").concat(quantifier.max || "", "}").concat(quantifier.greedy ? "" : "?");
-  }
-  function alreadyHasStartAnchorReplacement(node) {
-    if (node.type !== "alternative")
-      return false;
-    var body = node.body;
-    if (body.length < 1)
-      return false;
-    var _a = __read(body, 1), maybeQuantifier = _a[0];
-    if (maybeQuantifier.type !== "quantifier")
-      return false;
-    if (maybeQuantifier.min !== 0)
-      return false;
-    if (maybeQuantifier.max !== void 0)
-      return false;
-    if (maybeQuantifier.greedy)
-      return false;
-    var maybeCharacterClass = maybeQuantifier.body[0];
-    if (maybeCharacterClass.type !== "characterClass")
-      return false;
-    maybeCharacterClass.kind;
-    if (maybeCharacterClass.body.length !== 0)
-      return false;
-    if (!maybeCharacterClass.negative)
-      return false;
-    return true;
-  }
-  function isMissingStartAnchor(rootNode) {
-    if (alreadyHasStartAnchorReplacement(rootNode))
-      return false;
-    var check = function(node) {
-      var e_1, _a;
-      if (node.type === "anchor") {
-        if (node.kind === "start")
-          return "anchor";
-        return null;
-      }
-      if (node.type === "quantifier" && node.max === 0)
-        return null;
-      if (node.type === "alternative" || node.type === "group" || node.type === "quantifier") {
-        var mayBeSkipped = node.type === "quantifier" && node.min === 0;
-        try {
-          for (var _b = __values(node.body), _c = _b.next(); !_c.done; _c = _b.next()) {
-            var child = _c.value;
-            var res = check(child);
-            if (res === "consumingNode")
-              return "consumingNode";
-            if (res === "anchor") {
-              if (!mayBeSkipped)
-                return "anchor";
-              return null;
-            }
-          }
-        } catch (e_1_1) {
-          e_1 = { error: e_1_1 };
-        } finally {
-          try {
-            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-          } finally {
-            if (e_1) throw e_1.error;
-          }
-        }
-        return null;
-      }
-      if (node.type === "disjunction") {
-        var res = node.body.map(function(child2) {
-          return check(child2);
-        });
-        if (res.some(function(a2) {
-          return a2 === "consumingNode";
-        }))
-          return "consumingNode";
-        if (res.every(function(a2) {
-          return a2 === "anchor";
-        }))
-          return "anchor";
-        return null;
-      }
-      return "consumingNode";
-    };
-    return check(rootNode) === "consumingNode";
-  }
-  function getRawWithoutCapturingGroupsOrLookaheads(rootNode) {
-    var referencesWithOffset = /* @__PURE__ */ new Map();
-    var walk = function(node, offset) {
-      var walkAll = function(nodes, startOffset) {
-        var result2 = "";
-        nodes.forEach(function(a2) {
-          result2 += walk(a2, startOffset + result2.length);
-        });
-        return result2;
-      };
-      switch (node.type) {
-        case "anchor":
-        case "characterClass":
-        case "characterClassEscape":
-        case "unicodePropertyEscape":
-        case "value":
-        case "dot":
-          return node.raw;
-        case "reference": {
-          referencesWithOffset.set(node, offset);
-          return node.raw;
-        }
-        case "group": {
-          switch (node.behavior) {
-            case "normal":
-              return "(?:".concat(walkAll(node.body, offset + 3), ")");
-            case "ignore":
-              return "(?:".concat(walkAll(node.body, offset + 3), ")");
-            case "lookahead":
-            case "lookbehind":
-            case "negativeLookahead":
-            case "negativeLookbehind":
-              return "";
-          }
-        }
-        // eslint-disable-next-line no-fallthrough
-        case "disjunction": {
-          var res_1 = "";
-          node.body.forEach(function(a2, i2) {
-            if (i2 > 0)
-              res_1 += "|";
-            res_1 += walk(a2, offset + res_1.length);
-          });
-          return res_1;
-        }
-        case "alternative":
-          return walkAll(node.body, offset);
-        case "quantifier": {
-          return "".concat(walk(node.body[0], offset)).concat(quantifierIterationsToString(node));
-        }
-      }
-    };
-    var result = walk(rootNode, 0);
-    return {
-      referencesWithOffset,
-      result
-    };
-  }
-  function downgradePattern(_a) {
-    var pattern = _a.pattern, unicode = _a.unicode;
-    var run = function(lastResult2) {
-      var ast = parse(lastResult2.pattern, unicode);
-      var actions = [];
-      var needsStartAnchorReplacement = false;
-      var needsWrappingInGroup = ast.type === "disjunction";
-      var groups = /* @__PURE__ */ new Map();
-      var infiniteGroups = /* @__PURE__ */ new Set();
-      var nextGroupIndex = 1;
-      var lookaheadOnlyContainsGroup = function(lookahead, group) {
-        if (lookahead.body.length !== 1)
-          return false;
-        var node = lookahead.body[0];
-        return node === group;
-      };
-      var walkAll = function(_a2) {
-        var nodeStack = _a2.nodeStack, nodes = _a2.nodes, passedStartAnchor = _a2.passedStartAnchor, serial = _a2.serial;
-        var justHadLookahead = null;
-        nodes.forEach(function(expression) {
-          if (serial) {
-            walk({
-              immediatelyPrecedingLookahead: justHadLookahead,
-              node: expression,
-              nodeStack,
-              passedStartAnchor
-            });
-            justHadLookahead = expression.type === "group" && expression.behavior === "lookahead" ? expression : null;
-          } else {
-            walk({
-              immediatelyPrecedingLookahead: justHadLookahead,
-              node: expression,
-              nodeStack,
-              passedStartAnchor: __assign({}, passedStartAnchor)
-            });
-          }
-        });
-      };
-      var walk = function(_a2) {
-        var immediatelyPrecedingLookahead = _a2.immediatelyPrecedingLookahead, node = _a2.node, nodeStack = _a2.nodeStack, passedStartAnchor = _a2.passedStartAnchor;
-        var onConsumingNode = function() {
-          if (!passedStartAnchor.value) {
-            needsStartAnchorReplacement = true;
-          }
-        };
-        switch (node.type) {
-          case "characterClass":
-          case "characterClassEscape":
-          case "unicodePropertyEscape":
-          case "value":
-          case "dot":
-            onConsumingNode();
-            return;
-          case "anchor": {
-            if (node.kind === "start") {
-              passedStartAnchor.value = true;
-            }
-            return;
-          }
-          case "group": {
-            var groupIndex = null;
-            if (node.behavior === "normal") {
-              groupIndex = nextGroupIndex;
-              nextGroupIndex++;
-            }
-            walkAll({
-              nodeStack: __spreadArray(__spreadArray([], __read(nodeStack), false), [node], false),
-              nodes: node.body,
-              passedStartAnchor,
-              serial: true
-            });
-            if (groupIndex !== null && node.behavior === "normal") {
-              groups.set(groupIndex, { group: node, stack: __spreadArray([], __read(nodeStack), false) });
-            }
-            return;
-          }
-          case "disjunction": {
-            walkAll({
-              nodeStack: __spreadArray(__spreadArray([], __read(nodeStack), false), [node], false),
-              nodes: node.body,
-              passedStartAnchor,
-              serial: false
-            });
-            return;
-          }
-          case "alternative": {
-            walkAll({
-              nodeStack: __spreadArray(__spreadArray([], __read(nodeStack), false), [node], false),
-              nodes: node.body,
-              passedStartAnchor,
-              serial: true
-            });
-            return;
-          }
-          case "quantifier": {
-            if (node.max !== 0) {
-              if (node.max === void 0) {
-                __spreadArray([], __read(nodeStack), false).reverse().some(function(stackNode) {
-                  if (stackNode.type === "group") {
-                    if (lookaheadBehaviours$1.indexOf(stackNode.behavior) >= 0) {
-                      return true;
-                    }
-                    infiniteGroups.add(stackNode);
-                  }
-                  return false;
-                });
-              }
-              walkAll({
-                nodeStack: __spreadArray(__spreadArray([], __read(nodeStack), false), [node], false),
-                nodes: node.body,
-                passedStartAnchor: node.min === 0 ? __assign({}, passedStartAnchor) : passedStartAnchor,
-                serial: true
-              });
-            }
-            return;
-          }
-          case "reference": {
-            onConsumingNode();
-            var entry = groups.get(node.matchIndex);
-            if (entry) {
-              var group = entry.group, stack = entry.stack;
-              var localStack = dropCommon(stack, nodeStack).a;
-              var lookaheadStack = localStack.flatMap(function(stackNode) {
-                return stackNode.type === "group" && lookaheadBehaviours$1.indexOf(stackNode.behavior) >= 0 ? [stackNode] : [];
-              });
-              var groupMayNotBeReached = localStack.some(function(stackNode) {
-                return stackNode.type === "disjunction" || stackNode.type === "quantifier" && stackNode.min === 0;
-              });
-              var groupInLookahead = lookaheadStack.length > 0;
-              var groupCouldBeSet = lookaheadStack.every(function(value) {
-                return value.behavior !== "negativeLookahead" && value.behavior !== "negativeLookbehind";
-              });
-              if (groupCouldBeSet && (groupInLookahead || infiniteGroups.has(group))) {
-                var atomic = !!immediatelyPrecedingLookahead && lookaheadOnlyContainsGroup(immediatelyPrecedingLookahead, group);
-                var optional = groupInLookahead && groupMayNotBeReached;
-                actions.push({
-                  atomicOrOptional: atomic ? "atomic" : optional ? "optional" : null,
-                  group,
-                  reference: node
-                });
-              }
-            }
-            return;
-          }
-        }
-      };
-      walk({
-        immediatelyPrecedingLookahead: null,
-        node: ast,
-        nodeStack: [],
-        passedStartAnchor: { value: false }
-      });
-      var newPattern = lastResult2.pattern;
-      var atomicGroupOffsets = new Set(lastResult2.atomicGroupOffsets);
-      var needToRerun2 = false;
-      __spreadArray([], __read(actions), false).sort(function(a2, b2) {
-        return b2.reference.range[0] - a2.reference.range[0];
-      }).forEach(function(action) {
-        var atomicOrOptional = action.atomicOrOptional, group = action.group, _a2 = __read(action.reference.range, 2), referenceStart = _a2[0], referenceEnd = _a2[1];
-        var _b2 = getRawWithoutCapturingGroupsOrLookaheads(group), result2 = _b2.result, referencesWithOffset = _b2.referencesWithOffset;
-        if (referencesWithOffset.size > 0) {
-          needToRerun2 = true;
-        }
-        var replacement = atomicOrOptional === "optional" ? "(?:".concat(result2, "?)") : result2;
-        newPattern = replace(newPattern, replacement, referenceStart, referenceEnd);
-        var shiftAmount = replacement.length - (referenceEnd - referenceStart);
-        atomicGroupOffsets = shiftOffsets({
-          after: referenceStart,
-          offsets: atomicGroupOffsets,
-          shiftAmount
-        });
-        if (atomicOrOptional === "atomic") {
-          atomicGroupOffsets.add(referenceStart);
-        }
-        actions.forEach(function(_a3) {
-          var innerAtomicOrOptional = _a3.atomicOrOptional, innerReference = _a3.reference;
-          if (innerAtomicOrOptional === "atomic") {
-            var offset = referencesWithOffset.get(innerReference);
-            if (offset !== void 0) {
-              atomicGroupOffsets.add(referenceStart + offset);
-            }
-          }
-        });
-      });
-      if (needsStartAnchorReplacement && !alreadyHasStartAnchorReplacement(ast)) {
-        if (needsWrappingInGroup) {
-          newPattern = "(?:".concat(newPattern, ")");
-        }
-        newPattern = "[^]*?".concat(newPattern);
-        atomicGroupOffsets = shiftOffsets({
-          after: -1,
-          offsets: atomicGroupOffsets,
-          shiftAmount: needsWrappingInGroup ? 8 : 5
-        });
-      }
-      return { needToRerun: needToRerun2, result: { atomicGroupOffsets, pattern: newPattern } };
-    };
-    var lastResult = {
-      atomicGroupOffsets: /* @__PURE__ */ new Set(),
-      pattern
-    };
-    for (; ; ) {
-      var _b = run(lastResult), result = _b.result, needToRerun = _b.needToRerun;
-      lastResult = result;
-      if (!needToRerun) {
-        break;
-      }
-    }
-    return lastResult;
-  }
-  function buildFinalizationRegistry(cleanupCallback) {
-    return new FinalizationRegistry(cleanupCallback);
-  }
-  var forkSymbol = /* @__PURE__ */ Symbol("fork");
-  var pendingResultsSymbol = /* @__PURE__ */ Symbol("pendingResults");
-  function buildForkableIterator(source) {
-    var onResult = /* @__PURE__ */ new Set();
-    var registry = buildFinalizationRegistry(function(onResultCallback) {
-      onResult.delete(onResultCallback);
-    });
-    var readSource = function() {
-      var result = source.next();
-      onResult.forEach(function(fn) {
-        return fn(result);
-      });
-    };
-    var makeFork = function(initialPendingResults) {
-      var _a;
-      var iterator = (_a = {}, _a[forkSymbol] = function() {
-        return makeFork(this[pendingResultsSymbol]);
-      }, _a[pendingResultsSymbol] = initialPendingResults.slice(0), _a.next = function(value) {
-        if (value !== void 0) {
-          throw new Error("`ForkableIterator` `next()` cannot take a value");
-        }
-        var pendingResults = this[pendingResultsSymbol];
-        if (!pendingResults.length) {
-          readSource();
-        }
-        return pendingResults.shift();
-      }, _a);
-      var ref = new WeakRef(iterator);
-      var callback = function(result) {
-        var maybeIterator = ref.deref();
-        maybeIterator === null || maybeIterator === void 0 ? void 0 : maybeIterator[pendingResultsSymbol].push(result);
-      };
-      registry.register(iterator, callback);
-      onResult.add(callback);
-      return iterator;
-    };
-    return makeFork([]);
-  }
-  function fork(forkableIterator) {
-    if (!forkableIterator || !forkableIterator[forkSymbol]) {
-      throw new Error("The provided value was not a `ForkableIterator` from `buildForkableIterator()`");
-    }
-    return forkableIterator[forkSymbol]();
-  }
-  function emptyReader() {
-    return __generator(this, function(_a) {
-      return [
-        2
-        /*return*/
-      ];
-    });
-  }
-  function buildForkableReader(sourceReader) {
-    return buildForkableIterator(sourceReader);
-  }
-  function chainReaders(readers) {
-    var readers_1, readers_1_1, reader, next, e_1_1;
-    var e_1, _a;
-    return __generator(this, function(_b) {
-      switch (_b.label) {
-        case 0:
-          _b.trys.push([0, 6, 7, 8]);
-          readers_1 = __values(readers), readers_1_1 = readers_1.next();
-          _b.label = 1;
-        case 1:
-          if (!!readers_1_1.done) return [3, 5];
-          reader = readers_1_1.value;
-          next = void 0;
-          _b.label = 2;
-        case 2:
-          if (!!(next = reader.next()).done) return [3, 4];
-          return [4, next.value];
-        case 3:
-          _b.sent();
-          return [3, 2];
-        case 4:
-          readers_1_1 = readers_1.next();
-          return [3, 1];
-        case 5:
-          return [3, 8];
-        case 6:
-          e_1_1 = _b.sent();
-          e_1 = { error: e_1_1 };
-          return [3, 8];
-        case 7:
-          try {
-            if (readers_1_1 && !readers_1_1.done && (_a = readers_1.return)) _a.call(readers_1);
-          } finally {
-            if (e_1) throw e_1.error;
-          }
-          return [
-            7
-            /*endfinally*/
-          ];
-        case 8:
-          return [
-            2
-            /*return*/
-          ];
-      }
-    });
-  }
-  function buildArrayReader(input) {
-    return __generator(this, function(_a) {
-      switch (_a.label) {
-        case 0:
-          return [5, __values(input)];
-        case 1:
-          _a.sent();
-          return [
-            2
-            /*return*/
-          ];
-      }
-    });
-  }
-  function subtractRanges(source, toSubtract) {
-    var res = [];
-    if (source[0] < toSubtract[0]) {
-      res.push([source[0], Math.min(toSubtract[0] - 1, source[1])]);
-    }
-    if (source[1] > toSubtract[1]) {
-      res.push([Math.max(toSubtract[1] + 1, source[0]), source[1]]);
-    }
-    return res;
-  }
-  function intersectRanges(a2, b2) {
-    var startShared = Math.max(a2[0], b2[0]);
-    var endShared = Math.min(a2[1], b2[1]);
-    if (startShared > endShared) {
-      return null;
-    }
-    return [startShared, endShared];
-  }
-  function createRanges(set) {
-    var ascending = __spreadArray([], __read(set), false).sort(function(a2, b2) {
-      return a2 - b2;
-    });
-    var ranges = [];
-    var startIndex = 0;
-    for (var i2 = 0; i2 < ascending.length; i2++) {
-      var startValue = ascending[startIndex];
-      var currentValue = ascending[i2];
-      var nextValue = i2 + 1 < ascending.length ? ascending[i2 + 1] : null;
-      if (nextValue === null || nextValue - startValue !== i2 - startIndex + 1) {
-        ranges.push([startValue, currentValue]);
-        startIndex = i2 + 1;
-      }
-    }
-    return ranges;
-  }
-  function invertRanges(ranges) {
-    var result = [];
-    for (var i2 = 0; i2 < ranges.length + 1; i2++) {
-      var prev = i2 - 1 >= 0 ? ranges[i2 - 1] : null;
-      var current = i2 < ranges.length ? ranges[i2] : null;
-      var start = prev ? prev[1] + 1 : -Infinity;
-      var end = current ? current[0] - 1 : Infinity;
-      if (start - end === 1)
-        continue;
-      if (start > end)
-        throw new Error("Internal error: invalid ranges input");
-      result.push([start, end]);
-    }
-    return result;
-  }
-  function isEmptyCharacterGroups(group) {
-    return !group.rangesNegated && !group.ranges.length && !group.unicodePropertyEscapes.size;
-  }
-  function intersectCharacterGroups(a2, b2) {
-    var e_1, _a;
-    var _b, _c;
-    var newRanges;
-    var newNegated;
-    if (!a2.rangesNegated) {
-      if (!b2.rangesNegated) {
-        newNegated = false;
-        newRanges = [];
-        a2.ranges.forEach(function(aRange) {
-          b2.ranges.forEach(function(bRange) {
-            var intersection = intersectRanges(aRange, bRange);
-            if (intersection)
-              newRanges.push(intersection);
-          });
-        });
-      } else {
-        newNegated = false;
-        newRanges = __spreadArray([], __read(a2.ranges), false);
-        b2.ranges.forEach(function(bRange) {
-          var narrowed = [];
-          newRanges.forEach(function(aRange) {
-            narrowed.push.apply(narrowed, __spreadArray([], __read(subtractRanges(aRange, bRange)), false));
-          });
-          newRanges = narrowed;
-        });
-      }
-    } else {
-      if (!b2.rangesNegated) {
-        newNegated = false;
-        newRanges = __spreadArray([], __read(b2.ranges), false);
-        a2.ranges.forEach(function(aRange) {
-          var narrowed = [];
-          newRanges.forEach(function(bRange) {
-            narrowed.push.apply(narrowed, __spreadArray([], __read(subtractRanges(bRange, aRange)), false));
-          });
-          newRanges = narrowed;
-        });
-      } else {
-        newNegated = true;
-        newRanges = __spreadArray(__spreadArray([], __read(a2.ranges), false), __read(b2.ranges), false);
-      }
-    }
-    var allUnicodePropertyEscapes = new Set(__spreadArray(__spreadArray([], __read(a2.unicodePropertyEscapes.keys()), false), __read(b2.unicodePropertyEscapes.keys()), false));
-    var newUnicodePropertyEscapes = /* @__PURE__ */ new Map();
-    try {
-      for (var allUnicodePropertyEscapes_1 = __values(allUnicodePropertyEscapes), allUnicodePropertyEscapes_1_1 = allUnicodePropertyEscapes_1.next(); !allUnicodePropertyEscapes_1_1.done; allUnicodePropertyEscapes_1_1 = allUnicodePropertyEscapes_1.next()) {
-        var unicodePropertyEscape = allUnicodePropertyEscapes_1_1.value;
-        var aEscape = (_b = a2.unicodePropertyEscapes.get(unicodePropertyEscape)) !== null && _b !== void 0 ? _b : null;
-        var bEscape = (_c = b2.unicodePropertyEscapes.get(unicodePropertyEscape)) !== null && _c !== void 0 ? _c : null;
-        if (aEscape !== null && bEscape === null) {
-          newUnicodePropertyEscapes.set(unicodePropertyEscape, aEscape);
-        } else if (aEscape === null && bEscape !== null) {
-          newUnicodePropertyEscapes.set(unicodePropertyEscape, bEscape);
-        } else if (aEscape !== null && bEscape !== null && aEscape === bEscape) {
-          newUnicodePropertyEscapes.set(unicodePropertyEscape, aEscape);
-        }
-      }
-    } catch (e_1_1) {
-      e_1 = { error: e_1_1 };
-    } finally {
-      try {
-        if (allUnicodePropertyEscapes_1_1 && !allUnicodePropertyEscapes_1_1.done && (_a = allUnicodePropertyEscapes_1.return)) _a.call(allUnicodePropertyEscapes_1);
-      } finally {
-        if (e_1) throw e_1.error;
-      }
-    }
-    return {
-      ranges: newRanges,
-      rangesNegated: newNegated,
-      unicodePropertyEscapes: newUnicodePropertyEscapes
-    };
-  }
-  function buildEndReader(offset) {
-    return __generator(this, function(_a) {
-      switch (_a.label) {
-        case 0:
-          return [4, {
-            bounded: false,
-            offset,
-            stack: [],
-            subType: "end",
-            type: characterReaderTypeCharacterEntry
-          }];
-        case 1:
-          _a.sent();
-          throw new Error("Internal error: should not be reading after end");
-      }
-    });
-  }
-  function join(getAction, getReader) {
-    var _join = function(_getAction, _getReader, timeSinceEmitSomething) {
-      var i2, action, emittedSomething, reader, next, _loop_1;
-      if (timeSinceEmitSomething === void 0) {
-        timeSinceEmitSomething = 0;
-      }
-      return __generator(this, function(_a) {
-        switch (_a.label) {
-          case 0:
-            i2 = 0;
-            _a.label = 1;
-          case 1:
-            action = _getAction(i2, timeSinceEmitSomething);
-            if (!(action === "stop")) return [3, 2];
-            return [
-              2
-              /*return*/
-            ];
-          case 2:
-            if (!(action === "fork")) return [3, 4];
-            return [4, {
-              reader: function() {
-                return emptyReader();
-              },
-              subType: null,
-              type: characterReaderTypeSplit
-            }];
-          case 3:
-            _a.sent();
-            _a.label = 4;
-          case 4:
-            emittedSomething = false;
-            reader = _getReader(i2);
-            next = void 0;
-            _loop_1 = function() {
-              var value, _b, _i_1, _timeSinceEmittedSomething_1;
-              return __generator(this, function(_c) {
-                switch (_c.label) {
-                  case 0:
-                    value = next.value;
-                    _b = value.type;
-                    switch (_b) {
-                      case characterReaderTypeSplit:
-                        return [3, 1];
-                      case characterReaderTypeCharacterEntry:
-                        return [3, 3];
-                    }
-                    return [3, 5];
-                  case 1:
-                    _i_1 = i2;
-                    _timeSinceEmittedSomething_1 = timeSinceEmitSomething;
-                    return [4, {
-                      reader: function() {
-                        return _join(function(innerIndex, innerTimeSinceEmittedSomething) {
-                          return innerIndex === 0 ? "continue" : _getAction(innerIndex + _i_1, innerTimeSinceEmittedSomething);
-                        }, function(innerIndex) {
-                          return innerIndex === 0 ? value.reader() : _getReader(innerIndex + _i_1);
-                        }, _timeSinceEmittedSomething_1);
-                      },
-                      subType: value.subType,
-                      type: characterReaderTypeSplit
-                    }];
-                  case 2:
-                    _c.sent();
-                    return [3, 5];
-                  case 3:
-                    if (value.subType !== "null" && value.subType !== "start" && value.subType !== "end") {
-                      emittedSomething = true;
-                    }
-                    return [4, value];
-                  case 4:
-                    _c.sent();
-                    return [3, 5];
-                  case 5:
-                    return [
-                      2
-                      /*return*/
-                    ];
-                }
-              });
-            };
-            _a.label = 5;
-          case 5:
-            if (!!(next = reader.next()).done) return [3, 7];
-            return [5, _loop_1()];
-          case 6:
-            _a.sent();
-            return [3, 5];
-          case 7:
-            timeSinceEmitSomething = emittedSomething ? 0 : timeSinceEmitSomething + 1;
-            _a.label = 8;
-          case 8:
-            i2++;
-            return [3, 1];
-          case 9:
-            return [
-              2
-              /*return*/
-            ];
-        }
-      });
-    };
-    return _join(getAction, getReader);
-  }
-  function joinArray(input) {
-    var length = input.length;
-    return join(function(i2) {
-      return i2 < length ? "continue" : "stop";
-    }, function(i2) {
-      return input[i2]();
-    });
-  }
-  function buildSequenceCharacterReader(_a) {
-    var caseInsensitive = _a.caseInsensitive, dotAll = _a.dotAll, nodes = _a.nodes;
-    return joinArray(nodes.map(function(node) {
-      return function() {
-        return buildCharacterReader({ caseInsensitive, dotAll, node });
-      };
-    }));
-  }
-  function map(reader, handle) {
-    var startThread = function(innerReader) {
-      var next, _loop_1;
-      return __generator(this, function(_a) {
-        switch (_a.label) {
-          case 0:
-            _loop_1 = function() {
-              var value, _b;
-              return __generator(this, function(_c) {
-                switch (_c.label) {
-                  case 0:
-                    value = next.value;
-                    _b = value.type;
-                    switch (_b) {
-                      case characterReaderTypeSplit:
-                        return [3, 1];
-                      case characterReaderTypeCharacterEntry:
-                        return [3, 3];
-                    }
-                    return [3, 5];
-                  case 1:
-                    return [4, {
-                      reader: function() {
-                        return startThread(value.reader());
-                      },
-                      subType: value.subType,
-                      type: characterReaderTypeSplit
-                    }];
-                  case 2:
-                    _c.sent();
-                    return [3, 5];
-                  case 3:
-                    return [4, handle(value)];
-                  case 4:
-                    _c.sent();
-                    return [3, 5];
-                  case 5:
-                    return [
-                      2
-                      /*return*/
-                    ];
-                }
-              });
-            };
-            _a.label = 1;
-          case 1:
-            if (!!(next = innerReader.next()).done) return [3, 3];
-            return [5, _loop_1()];
-          case 2:
-            _a.sent();
-            return [3, 1];
-          case 3:
-            return [
-              2
-              /*return*/
-            ];
-        }
-      });
-    };
-    return startThread(reader);
-  }
-  function getGroups(stack) {
-    return new Set(stack.flatMap(function(entry) {
-      return entry.type === "group" ? [entry.group] : [];
-    }));
-  }
-  function getLookaheadStack(stack) {
-    var e_1, _a;
-    var lookaheadStack = [];
-    try {
-      for (var stack_1 = __values(stack), stack_1_1 = stack_1.next(); !stack_1_1.done; stack_1_1 = stack_1.next()) {
-        var entry = stack_1_1.value;
-        if (entry.type === "group") {
-          var group = entry.group;
-          var behavior = group.behavior;
-          if (behavior === "lookbehind" || behavior === "negativeLookbehind" || behavior === "negativeLookahead" || behavior === "lookahead") {
-            lookaheadStack.push(group);
-          }
-        }
-      }
-    } catch (e_1_1) {
-      e_1 = { error: e_1_1 };
-    } finally {
-      try {
-        if (stack_1_1 && !stack_1_1.done && (_a = stack_1.return)) _a.call(stack_1);
-      } finally {
-        if (e_1) throw e_1.error;
-      }
-    }
-    return lookaheadStack;
-  }
-  function buildGroupCharacterReader(_a) {
-    var caseInsensitive = _a.caseInsensitive, dotAll = _a.dotAll, node = _a.node;
-    switch (node.behavior) {
-      case "lookbehind":
-      case "negativeLookbehind":
-      case "lookahead":
-      case "negativeLookahead": {
-        return buildArrayReader([
-          {
-            reader: function() {
-              return joinArray([
-                function() {
-                  return map(buildSequenceCharacterReader({
-                    caseInsensitive,
-                    dotAll,
-                    nodes: node.body
-                  }), function(value) {
-                    return __assign(__assign({}, value), { stack: __spreadArray([{ group: node, type: "group" }], __read(value.stack), false) });
-                  });
-                },
-                function() {
-                  return buildEndReader(node.range[1]);
-                }
-              ]);
-            },
-            subType: node.behavior,
-            type: characterReaderTypeSplit
-          }
-        ]);
-      }
-      case "ignore":
-      case "normal": {
-        return map(buildSequenceCharacterReader({
-          caseInsensitive,
-          dotAll,
-          nodes: node.body
-        }), function(value) {
-          return __assign(__assign({}, value), { stack: __spreadArray([{ group: node, type: "group" }], __read(value.stack), false) });
-        });
-      }
-    }
-  }
-  function buildNullCharacterReader(offset) {
-    return __generator(this, function(_a) {
-      switch (_a.label) {
-        case 0:
-          return [4, {
-            offset,
-            stack: [],
-            subType: "null",
-            type: characterReaderTypeCharacterEntry
-          }];
-        case 1:
-          _a.sent();
-          return [
-            2
-            /*return*/
-          ];
-      }
-    });
-  }
-  function mustGet(map2, key) {
-    if (!map2.has(key)) {
-      throw new Error("Internal error: map missing key");
-    }
-    return map2.get(key);
-  }
-  function buildQuantifiersInInfinitePortion(stack, nodeExtra) {
-    var exhaustive = stack.some(function(entry) {
-      if (entry.type !== "group" || entry.group.behavior !== "normal") {
-        return false;
-      }
-      var index = mustGet(nodeExtra.capturingGroupToIndex, entry.group);
-      var hasReference = nodeExtra.reachableReferences.some(function(reference) {
-        return reference.matchIndex === index;
-      });
-      return hasReference;
-    });
-    if (exhaustive)
-      return /* @__PURE__ */ new Set();
-    return new Set(stack.flatMap(function(entry) {
-      return entry.type === "quantifier" ? [entry] : [];
-    }).filter(function(_a) {
-      var iteration = _a.iteration, quantifier = _a.quantifier;
-      return iteration >= 1 && iteration >= quantifier.min;
-    }).map(function(_a) {
-      var quantifier = _a.quantifier;
-      return quantifier;
-    }));
-  }
-  function buildQuantifierIterations(stack) {
-    var res = /* @__PURE__ */ new Map();
-    stack.flatMap(function(entry) {
-      return entry.type === "quantifier" ? [entry] : [];
-    }).forEach(function(_a) {
-      var iteration = _a.iteration, quantifier = _a.quantifier;
-      return res.set(quantifier, iteration);
-    });
-    return res;
-  }
-  function buildQuantifierCharacterReader(_a) {
-    var caseInsensitive = _a.caseInsensitive, dotAll = _a.dotAll, node = _a.node;
-    var min = node.min, _b = node.max, max = _b === void 0 ? Infinity : _b;
-    return joinArray([
-      // always emit the null first so that we always emit something in cases where the loop is empty
-      function() {
-        return buildNullCharacterReader(node.body[0].range[0]);
-      },
-      function() {
-        return join(function(i2, timeSinceEmit) {
-          if (timeSinceEmit > 1)
-            return "stop";
-          if (i2 >= max)
-            return "stop";
-          if (i2 >= min)
-            return "fork";
-          return "continue";
-        }, function(i2) {
-          return map(joinArray(__spreadArray(__spreadArray([], __read(i2 > 0 ? [
-            function() {
-              return buildNullCharacterReader(node.body[0].range[0]);
-            }
-          ] : []), false), [
-            function() {
-              return buildCharacterReader({
-                caseInsensitive,
-                dotAll,
-                node: node.body[0]
-              });
-            }
-          ], false)), function(value) {
-            return __assign(__assign({}, value), { stack: __spreadArray([
-              {
-                iteration: i2,
-                quantifier: node,
-                type: "quantifier"
-              }
-            ], __read(value.stack), false) });
-          });
-        });
-      }
-    ]);
-  }
-  function buildAnchorReader(node) {
-    var _a;
-    return __generator(this, function(_b) {
-      switch (_b.label) {
-        case 0:
-          _a = node.kind;
-          switch (_a) {
-            case "end":
-              return [3, 1];
-            case "start":
-              return [3, 3];
-            case "boundary":
-              return [3, 5];
-            case "not-boundary":
-              return [3, 5];
-          }
-          return [3, 6];
-        case 1:
-          return [4, {
-            bounded: true,
-            offset: node.range[0],
-            stack: [],
-            subType: "end",
-            type: characterReaderTypeCharacterEntry
-          }];
-        case 2:
-          _b.sent();
-          throw new Error("Internal error: should not be reading after end");
-        case 3:
-          return [4, {
-            offset: node.range[0],
-            stack: [],
-            subType: "start",
-            type: characterReaderTypeCharacterEntry
-          }];
-        case 4:
-          _b.sent();
-          return [3, 6];
-        case 5: {
-          return [3, 6];
-        }
-        case 6:
-          return [
-            2
-            /*return*/
-          ];
-      }
-    });
-  }
-  var dRanges = [[48, 57]];
-  var inverseDRanges = invertRanges(dRanges);
-  var wRanges = [
-    [48, 57],
-    [65, 90],
-    [95, 95],
-    [97, 122]
+  var SPACE_RANGES = [
+    { start: 9, end: 13 },
+    { start: 32, end: 32 },
+    { start: 160, end: 160 },
+    { start: 5760, end: 5760 },
+    { start: 8192, end: 8202 },
+    { start: 8232, end: 8233 },
+    { start: 8239, end: 8239 },
+    { start: 8287, end: 8287 },
+    { start: 12288, end: 12288 },
+    { start: 65279, end: 65279 }
   ];
-  var inverseWRanges = invertRanges(wRanges);
-  var sRanges = [
-    [9, 9],
-    [10, 10],
-    [11, 11],
-    [12, 12],
-    [13, 13],
-    [32, 32],
-    [160, 160],
-    [5760, 5760],
-    [8192, 8202],
-    [8232, 8233],
-    [8239, 8239],
-    [8287, 8287],
-    [12288, 12288],
-    [65279, 65279]
+  var LINE_TERMINATOR_RANGES = [
+    { start: 10, end: 10 },
+    { start: 13, end: 13 },
+    { start: 8232, end: 8233 }
   ];
-  var inverseSRanges = invertRanges(sRanges);
-  function characterClassEscapeToRange(value) {
-    switch (value) {
-      case "d":
-      case "D": {
-        return value === "d" ? dRanges : inverseDRanges;
-      }
-      case "w":
-      case "W": {
-        return value === "w" ? wRanges : inverseWRanges;
-      }
-      case "s":
-      case "S": {
-        return value === "s" ? sRanges : inverseSRanges;
+  var SYNTAX_CHARS = /* @__PURE__ */ new Set([
+    94,
+    // ^
+    36,
+    // $
+    92,
+    // \
+    46,
+    // .
+    42,
+    // *
+    43,
+    // +
+    63,
+    // ?
+    40,
+    // (
+    41,
+    // )
+    91,
+    // [
+    93,
+    // ]
+    123,
+    // {
+    125,
+    // }
+    124,
+    // |
+    47
+    // /
+  ]);
+  var CONTROL_ESCAPES = /* @__PURE__ */ new Map([
+    [116, 9],
+    // \t
+    [110, 10],
+    // \n
+    [118, 11],
+    // \v
+    [102, 12],
+    // \f
+    [114, 13]
+    // \r
+  ]);
+  function excludeSurrogates(r2) {
+    if (r2.start > r2.end)
+      return [];
+    if (r2.end < SURROGATE_RANGE.start || r2.start > SURROGATE_RANGE.end)
+      return [r2];
+    const out = [];
+    if (r2.start < SURROGATE_RANGE.start) {
+      out.push({ start: r2.start, end: SURROGATE_RANGE.start - 1 });
+    }
+    if (r2.end > SURROGATE_RANGE.end) {
+      out.push({ start: SURROGATE_RANGE.end + 1, end: r2.end });
+    }
+    return out;
+  }
+  function normalizeRanges(ranges) {
+    const split = ranges.flatMap(excludeSurrogates);
+    if (split.length <= 1)
+      return split;
+    split.sort((a2, b2) => a2.start - b2.start || a2.end - b2.end);
+    const merged = [split[0]];
+    for (let i2 = 1; i2 < split.length; i2++) {
+      const prev = merged[merged.length - 1];
+      const curr = split[i2];
+      if (curr.start <= prev.end + 1) {
+        merged[merged.length - 1] = { start: prev.start, end: Math.max(prev.end, curr.end) };
+      } else {
+        merged.push(curr);
       }
     }
+    return merged;
   }
-  function buildCharacterClassEscapeReader(node) {
-    var value, ranges;
-    return __generator(this, function(_a) {
-      switch (_a.label) {
-        case 0:
-          value = node.value;
-          ranges = characterClassEscapeToRange(value);
-          return [4, {
-            characterGroups: {
-              ranges,
-              rangesNegated: false,
-              unicodePropertyEscapes: /* @__PURE__ */ new Map()
-            },
-            node,
-            stack: [],
-            subType: "groups",
-            type: characterReaderTypeCharacterEntry
-          }];
-        case 1:
-          _a.sent();
-          return [
-            2
-            /*return*/
-          ];
+  function complementRanges(ranges) {
+    const excluded = normalizeRanges([...ranges, SURROGATE_RANGE]);
+    const result = [];
+    let cursor = 0;
+    for (const r2 of excluded) {
+      if (r2.start > cursor) {
+        result.push({ start: cursor, end: r2.start - 1 });
       }
-    });
-  }
-  function toCodePoint(input) {
-    if (input.length > 1)
-      return null;
-    var codePoint = input.codePointAt(0);
-    if (!codePoint)
-      throw new Error("Internal error: expected codepoint");
-    return codePoint;
-  }
-  function toUpperCaseCodePoint(codePoint) {
-    var upperCase = String.fromCodePoint(codePoint).toUpperCase();
-    var upperCodePoint = toCodePoint(upperCase);
-    return upperCodePoint !== null ? upperCodePoint : codePoint;
-  }
-  function buildCodePointRanges(_a) {
-    var caseInsensitive = _a.caseInsensitive, highCodePoint = _a.highCodePoint, lowCodePoint = _a.lowCodePoint;
-    if (!caseInsensitive) {
-      return [[lowCodePoint, highCodePoint]];
+      cursor = r2.end + 1;
     }
-    var codePoints = /* @__PURE__ */ new Set();
-    for (var codePoint = lowCodePoint; codePoint <= highCodePoint; codePoint++) {
-      codePoints.add(toUpperCaseCodePoint(codePoint));
+    if (cursor <= MAX_CODE_POINT) {
+      result.push({ start: cursor, end: MAX_CODE_POINT });
     }
-    return createRanges(codePoints);
+    return result.flatMap(excludeSurrogates);
   }
-  function codePointFromValue(_a) {
-    var caseInsensitive = _a.caseInsensitive, value = _a.value;
-    var codePoint = value.codePoint;
-    return caseInsensitive ? toUpperCaseCodePoint(codePoint) : codePoint;
-  }
-  function buildValueCharacterReader(_a) {
-    var caseInsensitive = _a.caseInsensitive, node = _a.node;
-    var codePoint = codePointFromValue({ caseInsensitive, value: node });
-    return buildArrayReader([
-      {
-        characterGroups: {
-          ranges: [[codePoint, codePoint]],
-          rangesNegated: false,
-          unicodePropertyEscapes: /* @__PURE__ */ new Map()
-        },
-        node,
-        stack: [],
-        subType: "groups",
-        type: characterReaderTypeCharacterEntry
-      }
-    ]);
-  }
-  function buildCharacterClassCharacterReader(_a) {
-    var e_1, _b;
-    var caseInsensitive = _a.caseInsensitive, node = _a.node;
-    var ranges = [];
-    var unicodePropertyEscapes = /* @__PURE__ */ new Map();
-    var matchesEverything = false;
-    try {
-      outer: for (var _c = __values(node.body), _d = _c.next(); !_d.done; _d = _c.next()) {
-        var expression = _d.value;
-        switch (expression.type) {
-          case "value": {
-            var codePoint = codePointFromValue({
-              caseInsensitive,
-              value: expression
-            });
-            ranges.push([codePoint, codePoint]);
-            break;
-          }
-          case "characterClassRange": {
-            ranges.push.apply(ranges, __spreadArray([], __read(buildCodePointRanges({
-              caseInsensitive,
-              highCodePoint: expression.max.codePoint,
-              lowCodePoint: expression.min.codePoint
-            })), false));
-            break;
-          }
-          case "characterClassEscape": {
-            var value = expression.value;
-            ranges.push.apply(ranges, __spreadArray([], __read(characterClassEscapeToRange(value)), false));
-            break;
-          }
-          case "unicodePropertyEscape": {
-            var resolvedNegative = expression.negative !== node.negative;
-            if (unicodePropertyEscapes.get(expression.value) === !resolvedNegative) {
-              matchesEverything = true;
-              break outer;
-            }
-            unicodePropertyEscapes.set(expression.value, resolvedNegative);
-            break;
-          }
-        }
-      }
-    } catch (e_1_1) {
-      e_1 = { error: e_1_1 };
-    } finally {
-      try {
-        if (_d && !_d.done && (_b = _c.return)) _b.call(_c);
-      } finally {
-        if (e_1) throw e_1.error;
-      }
-    }
-    return buildArrayReader([
-      {
-        characterGroups: matchesEverything ? { ranges: [], rangesNegated: true, unicodePropertyEscapes: /* @__PURE__ */ new Map() } : {
-          ranges,
-          rangesNegated: node.negative,
-          unicodePropertyEscapes
-        },
-        node,
-        stack: [],
-        subType: "groups",
-        type: characterReaderTypeCharacterEntry
-      }
-    ]);
-  }
-  function buildDisjunctionCharacterReader(_a) {
-    var caseInsensitive = _a.caseInsensitive, dotAll = _a.dotAll, node = _a.node;
-    return chainReaders([
-      buildArrayReader(node.body.slice(0, -1).map(function(part) {
-        return {
-          reader: function() {
-            return buildCharacterReader({ caseInsensitive, dotAll, node: part });
-          },
-          subType: null,
-          type: characterReaderTypeSplit
-        };
-      })),
-      buildCharacterReader({
-        caseInsensitive,
-        dotAll,
-        node: node.body[node.body.length - 1]
-      })
-    ]);
-  }
-  function buildDotCharacterReader(_a) {
-    var dotAll = _a.dotAll, node = _a.node;
-    return __generator(this, function(_b) {
-      switch (_b.label) {
-        case 0:
-          return [4, {
-            characterGroups: {
-              ranges: dotAll ? [] : (
-                // [\n\r\u2028-\u2029]
-                [
-                  [10, 10],
-                  [13, 13],
-                  [8232, 8233]
-                ]
-              ),
-              rangesNegated: true,
-              unicodePropertyEscapes: /* @__PURE__ */ new Map()
-            },
-            node,
-            stack: [],
-            subType: "groups",
-            type: characterReaderTypeCharacterEntry
-          }];
-        case 1:
-          _b.sent();
-          return [
-            2
-            /*return*/
-          ];
-      }
-    });
-  }
-  function buildReferenceCharacterReader(node) {
-    return __generator(this, function(_a) {
-      switch (_a.label) {
-        case 0:
-          return [4, {
-            node,
-            referenceIndex: node.matchIndex,
-            stack: [],
-            subType: "reference",
-            type: characterReaderTypeCharacterEntry
-          }];
-        case 1:
-          _a.sent();
-          return [
-            2
-            /*return*/
-          ];
-      }
-    });
-  }
-  function buildUnicodePropertyEscapeCharacterReader(node) {
-    return buildArrayReader([
-      {
-        characterGroups: {
-          ranges: [],
-          rangesNegated: false,
-          unicodePropertyEscapes: /* @__PURE__ */ new Map([[node.value, node.negative]])
-        },
-        node,
-        stack: [],
-        subType: "groups",
-        type: characterReaderTypeCharacterEntry
-      }
-    ]);
-  }
-  var characterReaderTypeCharacterEntry = /* @__PURE__ */ Symbol("characterReaderTypeCharacterEntry");
-  var characterReaderTypeSplit = /* @__PURE__ */ Symbol("characterReaderTypeSplit");
-  function buildCharacterReader(_a) {
-    var caseInsensitive = _a.caseInsensitive, dotAll = _a.dotAll, node = _a.node;
-    switch (node.type) {
-      case "anchor":
-        return buildAnchorReader(node);
-      case "characterClass":
-        return buildCharacterClassCharacterReader({ caseInsensitive, node });
-      case "characterClassEscape":
-        return buildCharacterClassEscapeReader(node);
-      case "unicodePropertyEscape":
-        return buildUnicodePropertyEscapeCharacterReader(node);
-      case "reference":
-        return buildReferenceCharacterReader(node);
-      case "value":
-        return buildValueCharacterReader({ caseInsensitive, node });
-      case "dot":
-        return buildDotCharacterReader({ dotAll, node });
-      case "alternative":
-        return buildSequenceCharacterReader({
-          caseInsensitive,
-          dotAll,
-          nodes: node.body
-        });
-      case "disjunction":
-        return buildDisjunctionCharacterReader({ caseInsensitive, dotAll, node });
-      case "group":
-        return buildGroupCharacterReader({ caseInsensitive, dotAll, node });
-      case "quantifier":
-        return buildQuantifierCharacterReader({ caseInsensitive, dotAll, node });
-    }
-  }
-  var characterReaderLevel1TypeSplit = /* @__PURE__ */ Symbol("characterReaderLevel2TypeSplit");
-  var characterReaderLevel1TypeEntry = /* @__PURE__ */ Symbol("characterReaderLevel1TypeEntry");
-  function buildCharacterReaderLevel1(_a) {
-    var caseInsensitive = _a.caseInsensitive, dotAll = _a.dotAll, node = _a.node;
-    var startThread = function(reader, precedingZeroWidthEntries) {
-      var next, _loop_1, state_1;
-      return __generator(this, function(_a2) {
-        switch (_a2.label) {
-          case 0:
-            _loop_1 = function() {
-              var _b, _c, value_1, _precedingZeroWidthEntries_1;
-              return __generator(this, function(_d) {
-                switch (_d.label) {
-                  case 0:
-                    _b = next.value.type;
-                    switch (_b) {
-                      case characterReaderTypeCharacterEntry:
-                        return [3, 1];
-                      case characterReaderTypeSplit:
-                        return [3, 10];
-                    }
-                    return [3, 12];
-                  case 1:
-                    _c = next.value.subType;
-                    switch (_c) {
-                      case "groups":
-                        return [3, 2];
-                      case "reference":
-                        return [3, 4];
-                      case "end":
-                        return [3, 6];
-                      case "null":
-                        return [3, 7];
-                      case "start":
-                        return [3, 8];
-                    }
-                    return [3, 9];
-                  case 2:
-                    return [4, {
-                      characterGroups: next.value.characterGroups,
-                      node: next.value.node,
-                      precedingZeroWidthEntries,
-                      stack: next.value.stack,
-                      subType: "groups",
-                      type: characterReaderLevel1TypeEntry
-                    }];
-                  case 3:
-                    _d.sent();
-                    precedingZeroWidthEntries = [];
-                    return [3, 9];
-                  case 4:
-                    return [4, {
-                      node: next.value.node,
-                      precedingZeroWidthEntries,
-                      referenceIndex: next.value.referenceIndex,
-                      stack: next.value.stack,
-                      subType: next.value.subType,
-                      type: characterReaderLevel1TypeEntry
-                    }];
-                  case 5:
-                    _d.sent();
-                    precedingZeroWidthEntries = [];
-                    return [3, 9];
-                  case 6: {
-                    return [2, { value: {
-                      bounded: next.value.bounded,
-                      precedingZeroWidthEntries
-                    } }];
-                  }
-                  case 7: {
-                    precedingZeroWidthEntries = __spreadArray(__spreadArray([], __read(precedingZeroWidthEntries), false), [
-                      {
-                        offset: next.value.offset,
-                        stack: next.value.stack,
-                        type: "null"
-                      }
-                    ], false);
-                    return [3, 9];
-                  }
-                  case 8: {
-                    precedingZeroWidthEntries = __spreadArray(__spreadArray([], __read(precedingZeroWidthEntries), false), [
-                      {
-                        offset: next.value.offset,
-                        stack: next.value.stack,
-                        type: "start"
-                      }
-                    ], false);
-                    return [3, 9];
-                  }
-                  case 9:
-                    return [3, 12];
-                  case 10:
-                    value_1 = next.value;
-                    _precedingZeroWidthEntries_1 = precedingZeroWidthEntries;
-                    return [4, {
-                      reader: function() {
-                        return startThread(value_1.reader(), _precedingZeroWidthEntries_1);
-                      },
-                      subType: value_1.subType,
-                      type: characterReaderLevel1TypeSplit
-                    }];
-                  case 11:
-                    _d.sent();
-                    return [3, 12];
-                  case 12:
-                    return [
-                      2
-                      /*return*/
-                    ];
-                }
-              });
-            };
-            _a2.label = 1;
-          case 1:
-            if (!!(next = reader.next()).done) return [3, 3];
-            return [5, _loop_1()];
-          case 2:
-            state_1 = _a2.sent();
-            if (typeof state_1 === "object")
-              return [2, state_1.value];
-            return [3, 1];
-          case 3:
-            return [2, { bounded: false, precedingZeroWidthEntries }];
-        }
-      });
-    };
-    return startThread(buildCharacterReader({ caseInsensitive, dotAll, node }), []);
-  }
-  var characterReaderLevel2TypeSplit = /* @__PURE__ */ Symbol("characterReaderLevel2TypeSplit");
-  var characterReaderLevel2TypeEntry = /* @__PURE__ */ Symbol("characterReaderLevel2TypeEntry");
-  var internalReaderTypeSplit = /* @__PURE__ */ Symbol("internalReaderTypeSplit");
-  var internalReaderTypeEntry = /* @__PURE__ */ Symbol("internalReaderTypeEntry");
-  function characterReaderLevel1ToInternalReader(characterReaderLevel1) {
-    var next, _loop_1;
-    return __generator(this, function(_a) {
-      switch (_a.label) {
-        case 0:
-          _loop_1 = function() {
-            var value, _b;
-            return __generator(this, function(_c) {
-              switch (_c.label) {
-                case 0:
-                  value = next.value;
-                  _b = value.type;
-                  switch (_b) {
-                    case characterReaderLevel1TypeSplit:
-                      return [3, 1];
-                    case characterReaderLevel1TypeEntry:
-                      return [3, 3];
-                  }
-                  return [3, 5];
-                case 1:
-                  return [4, {
-                    reader: function() {
-                      return characterReaderLevel1ToInternalReader(value.reader());
-                    },
-                    subType: value.subType,
-                    type: internalReaderTypeSplit
-                  }];
-                case 2:
-                  _c.sent();
-                  return [3, 5];
-                case 3:
-                  return [4, __assign(__assign({}, value), { type: internalReaderTypeEntry })];
-                case 4:
-                  _c.sent();
-                  return [3, 5];
-                case 5:
-                  return [
-                    2
-                    /*return*/
-                  ];
-              }
-            });
-          };
-          _a.label = 1;
-        case 1:
-          if (!!(next = characterReaderLevel1.next()).done) return [3, 3];
-          return [5, _loop_1()];
-        case 2:
-          _a.sent();
-          return [3, 1];
-        case 3:
-          return [2, next.value];
-      }
-    });
-  }
-  function haveHadCompleteIteration(before, now) {
-    var e_1, _a;
-    try {
-      for (var now_1 = __values(now), now_1_1 = now_1.next(); !now_1_1.done; now_1_1 = now_1.next()) {
-        var _b = __read(now_1_1.value, 2), quantifier = _b[0], iterationsNow = _b[1];
-        var iterationsBefore = before.get(quantifier) || 0;
-        if (iterationsNow - iterationsBefore > 1) {
-          return true;
-        }
-      }
-    } catch (e_1_1) {
-      e_1 = { error: e_1_1 };
-    } finally {
-      try {
-        if (now_1_1 && !now_1_1.done && (_a = now_1.return)) _a.call(now_1);
-      } finally {
-        if (e_1) throw e_1.error;
+  var NOT_DIGIT_RANGES = complementRanges(DIGIT_RANGES);
+  var NOT_WORD_RANGES = complementRanges(WORD_RANGES);
+  var NOT_SPACE_RANGES = complementRanges(SPACE_RANGES);
+  var DOT_RANGES = complementRanges(LINE_TERMINATOR_RANGES);
+  var CLASS_ESCAPES = /* @__PURE__ */ new Map([
+    [100, DIGIT_RANGES],
+    // \d
+    [68, NOT_DIGIT_RANGES],
+    // \D
+    [119, WORD_RANGES],
+    // \w
+    [87, NOT_WORD_RANGES],
+    // \W
+    [115, SPACE_RANGES],
+    // \s
+    [83, NOT_SPACE_RANGES]
+    // \S
+  ]);
+  function rangesOverlap(a2, b2) {
+    let i2 = 0;
+    let j2 = 0;
+    while (i2 < a2.length && j2 < b2.length) {
+      if (a2[i2].end < b2[j2].start) {
+        i2++;
+      } else if (b2[j2].end < a2[i2].start) {
+        j2++;
+      } else {
+        return true;
       }
     }
     return false;
   }
-  function getGroupContentsReader(_a) {
-    var group, groupContents, groupLookaheadStack, _b, _c, groupEntry, e_2_1;
-    var e_2, _d;
-    var groupContentsStore = _a.groupContentsStore, groups = _a.groups, groupsWithInfiniteSize = _a.groupsWithInfiniteSize, nodeExtra = _a.nodeExtra, value = _a.value;
-    return __generator(this, function(_e) {
-      switch (_e.label) {
-        case 0:
-          group = mustGet(nodeExtra.indexToCapturingGroup, value.referenceIndex);
-          groupContents = groupContentsStore.get(value.referenceIndex) || {
-            contents: [],
-            group
-          };
-          groupLookaheadStack = dropCommon(mustGet(nodeExtra.nodeToLookaheadStack, groupContents.group), mustGet(nodeExtra.nodeToLookaheadStack, value.node)).a;
-          if (groupLookaheadStack.length) {
-            if (groupLookaheadStack.some(function(_a2) {
-              var behavior = _a2.behavior;
-              return behavior === "negativeLookahead" || behavior === "negativeLookbehind";
-            })) {
-              return [2, { bounded: false, precedingZeroWidthEntries: [] }];
-            }
-            throw new Error("Unsupported reference (".concat(value.referenceIndex, " at position ").concat(value.node.range[0], "). Pattern needs downgrading. See the `downgradePattern` option."));
-          }
-          if (groups.has(groupContents.group)) {
-            return [2, { bounded: false, precedingZeroWidthEntries: [] }];
-          }
-          if (groupsWithInfiniteSize.has(value.referenceIndex)) {
-            throw new Error("Unsupported reference to group ".concat(value.referenceIndex, " as group is not a finite size. Pattern needs downgrading. See the `downgradePattern` option."));
-          }
-          _e.label = 1;
-        case 1:
-          _e.trys.push([1, 6, 7, 8]);
-          _b = __values(groupContents.contents), _c = _b.next();
-          _e.label = 2;
-        case 2:
-          if (!!_c.done) return [3, 5];
-          groupEntry = _c.value;
-          return [4, {
-            characterGroups: groupEntry.characterGroups,
-            node: groupEntry.node,
-            precedingZeroWidthEntries: groupEntry.precedingZeroWidthEntries,
-            stack: __spreadArray(__spreadArray(__spreadArray([], __read(groupEntry.stack), false), [
-              {
-                reference: value.node,
-                type: "reference"
-              }
-            ], false), __read(value.stack), false),
-            subType: "groups",
-            type: internalReaderTypeEntry
-          }];
-        case 3:
-          _e.sent();
-          _e.label = 4;
-        case 4:
-          _c = _b.next();
-          return [3, 2];
-        case 5:
-          return [3, 8];
-        case 6:
-          e_2_1 = _e.sent();
-          e_2 = { error: e_2_1 };
-          return [3, 8];
-        case 7:
-          try {
-            if (_c && !_c.done && (_d = _b.return)) _d.call(_b);
-          } finally {
-            if (e_2) throw e_2.error;
-          }
-          return [
-            7
-            /*endfinally*/
-          ];
-        case 8:
-          return [2, { bounded: false, precedingZeroWidthEntries: [] }];
+  function countCodePoints(input) {
+    let count = 0;
+    for (let i2 = 0; i2 < input.length; i2++) {
+      const cu = input.charCodeAt(i2);
+      if (cu >= 55296 && cu <= 56319 && i2 + 1 < input.length) {
+        const low = input.charCodeAt(i2 + 1);
+        if (low >= 56320 && low <= 57343)
+          i2++;
       }
-    });
+      count++;
+    }
+    return count;
   }
-  function buildCharacterReaderLevel2(_a) {
-    var caseInsensitive = _a.caseInsensitive, dotAll = _a.dotAll, node = _a.node, nodeExtra = _a.nodeExtra;
-    var startThread = function(state) {
-      var _loop_2, state_1;
-      return __generator(this, function(_a2) {
-        switch (_a2.label) {
-          case 0:
-            _loop_2 = function() {
-              var precedingZeroWidthEntries, groupsWithInfiniteSize, groupContentsStore, quantifierIterationsAtLastGroup, characterReader, referenceCharacterReaderWithReference, activeCharacterReader, result, value, _b, _groupContentsStore_1, _quantifierIterationsAtLastGroup_1, _groupsWithInfiniteSize_1, _precedingZeroWidthEntries_1, quantifierIterations, lookaheadStack, groups, _c, groupContentsReader, newGroupContentsStore, groupContentsStore_1, groupContentsStore_1_1, _d, index, group, offsets, offsets_1, offsets_1_1, offset, groupInfiniteSize, reversedStack, referenceStackIndex, noneReferenceStackPortion, _loop_3, noneReferenceStackPortion_1, noneReferenceStackPortion_1_1, stackEntry;
-              var e_3, _e, e_4, _f, e_5, _g;
-              return __generator(this, function(_h) {
-                switch (_h.label) {
-                  case 0:
-                    precedingZeroWidthEntries = state.precedingZeroWidthEntries, groupsWithInfiniteSize = state.groupsWithInfiniteSize, groupContentsStore = state.groupContentsStore, quantifierIterationsAtLastGroup = state.quantifierIterationsAtLastGroup;
-                    characterReader = state.characterReader, referenceCharacterReaderWithReference = state.referenceCharacterReaderWithReference;
-                    activeCharacterReader = (referenceCharacterReaderWithReference === null || referenceCharacterReaderWithReference === void 0 ? void 0 : referenceCharacterReaderWithReference.reader) || characterReader;
-                    result = activeCharacterReader.next();
-                    if (result.done) {
-                      if (referenceCharacterReaderWithReference) {
-                        if (result.value.bounded) {
-                          throw new Error("Internal error: end of reference reader cannot be bounded");
-                        }
-                        state = {
-                          characterReader,
-                          groupContentsStore,
-                          groupsWithInfiniteSize,
-                          precedingZeroWidthEntries: __spreadArray(__spreadArray([], __read(precedingZeroWidthEntries), false), __read(result.value.precedingZeroWidthEntries), false),
-                          quantifierIterationsAtLastGroup,
-                          referenceCharacterReaderWithReference: null
-                        };
-                        return [2, "continue-outer"];
-                      }
-                      return [2, { value: {
-                        bounded: result.value.bounded,
-                        precedingZeroWidthEntries: __spreadArray(__spreadArray([], __read(precedingZeroWidthEntries), false), __read(result.value.precedingZeroWidthEntries), false),
-                        type: "end"
-                      } }];
-                    }
-                    value = result.value;
-                    _b = value.type;
-                    switch (_b) {
-                      case internalReaderTypeSplit:
-                        return [3, 1];
-                      case internalReaderTypeEntry:
-                        return [3, 3];
-                    }
-                    return [3, 7];
-                  case 1:
-                    if (referenceCharacterReaderWithReference) {
-                      throw new Error("Internal error: should not be seeing a split from a reference reader");
-                    }
-                    _groupContentsStore_1 = groupContentsStore;
-                    _quantifierIterationsAtLastGroup_1 = quantifierIterationsAtLastGroup;
-                    _groupsWithInfiniteSize_1 = groupsWithInfiniteSize;
-                    _precedingZeroWidthEntries_1 = precedingZeroWidthEntries;
-                    return [4, {
-                      reader: function() {
-                        return startThread({
-                          characterReader: buildForkableReader(value.reader()),
-                          groupContentsStore: _groupContentsStore_1,
-                          groupsWithInfiniteSize: _groupsWithInfiniteSize_1,
-                          precedingZeroWidthEntries: _precedingZeroWidthEntries_1,
-                          quantifierIterationsAtLastGroup: _quantifierIterationsAtLastGroup_1,
-                          referenceCharacterReaderWithReference
-                        });
-                      },
-                      subType: value.subType,
-                      type: characterReaderLevel2TypeSplit
-                    }];
-                  case 2:
-                    _h.sent();
-                    return [3, 7];
-                  case 3:
-                    precedingZeroWidthEntries = __spreadArray(__spreadArray([], __read(precedingZeroWidthEntries), false), __read(value.precedingZeroWidthEntries), false);
-                    quantifierIterations = buildQuantifierIterations(value.stack);
-                    lookaheadStack = getLookaheadStack(value.stack);
-                    groups = getGroups(value.stack);
-                    _c = value.subType;
-                    switch (_c) {
-                      case "reference":
-                        return [3, 4];
-                      case "groups":
-                        return [3, 5];
-                    }
-                    return [3, 7];
-                  case 4: {
-                    if (referenceCharacterReaderWithReference) {
-                      throw new Error("Internal error: should not be seeing a reference from a reference reader");
-                    }
-                    if (haveHadCompleteIteration(quantifierIterationsAtLastGroup, quantifierIterations)) {
-                      return [2, { value: {
-                        type: "abort"
-                      } }];
-                    }
-                    groupContentsReader = buildForkableReader(getGroupContentsReader({
-                      groupContentsStore,
-                      groups,
-                      groupsWithInfiniteSize,
-                      nodeExtra,
-                      value
-                    }));
-                    state = {
-                      characterReader,
-                      groupContentsStore,
-                      groupsWithInfiniteSize,
-                      precedingZeroWidthEntries,
-                      quantifierIterationsAtLastGroup,
-                      referenceCharacterReaderWithReference: {
-                        reader: groupContentsReader,
-                        reference: value.node
-                      }
-                    };
-                    return [3, 7];
-                  }
-                  case 5:
-                    newGroupContentsStore = new Map(groupContentsStore);
-                    if (!referenceCharacterReaderWithReference) {
-                      try {
-                        for (groupContentsStore_1 = (e_3 = void 0, __values(groupContentsStore)), groupContentsStore_1_1 = groupContentsStore_1.next(); !groupContentsStore_1_1.done; groupContentsStore_1_1 = groupContentsStore_1.next()) {
-                          _d = __read(groupContentsStore_1_1.value, 2), index = _d[0], group = _d[1].group;
-                          offsets = __spreadArray(__spreadArray([], __read(precedingZeroWidthEntries.map(function(_a3) {
-                            var offset2 = _a3.offset;
-                            return offset2;
-                          })), false), [
-                            value.node.range[0]
-                          ], false);
-                          try {
-                            for (offsets_1 = (e_4 = void 0, __values(offsets)), offsets_1_1 = offsets_1.next(); !offsets_1_1.done; offsets_1_1 = offsets_1.next()) {
-                              offset = offsets_1_1.value;
-                              if (group.range[0] >= offset) {
-                                newGroupContentsStore.delete(index);
-                                break;
-                              }
-                            }
-                          } catch (e_4_1) {
-                            e_4 = { error: e_4_1 };
-                          } finally {
-                            try {
-                              if (offsets_1_1 && !offsets_1_1.done && (_f = offsets_1.return)) _f.call(offsets_1);
-                            } finally {
-                              if (e_4) throw e_4.error;
-                            }
-                          }
-                        }
-                      } catch (e_3_1) {
-                        e_3 = { error: e_3_1 };
-                      } finally {
-                        try {
-                          if (groupContentsStore_1_1 && !groupContentsStore_1_1.done && (_e = groupContentsStore_1.return)) _e.call(groupContentsStore_1);
-                        } finally {
-                          if (e_3) throw e_3.error;
-                        }
-                      }
-                    }
-                    groupInfiniteSize = false;
-                    reversedStack = __spreadArray([], __read(value.stack), false).reverse();
-                    referenceStackIndex = reversedStack.findIndex(function(_a3) {
-                      var type = _a3.type;
-                      return type === "reference";
-                    });
-                    noneReferenceStackPortion = reversedStack.slice(0, referenceStackIndex >= 0 ? referenceStackIndex : value.stack.length);
-                    _loop_3 = function(stackEntry2) {
-                      if (stackEntry2.type === "quantifier" && stackEntry2.quantifier.max === void 0) {
-                        groupInfiniteSize = true;
-                        return "continue";
-                      } else if (stackEntry2.type !== "group") {
-                        return "continue";
-                      }
-                      var group2 = stackEntry2.group;
-                      if (group2.behavior === "lookbehind" || group2.behavior === "negativeLookbehind" || group2.behavior === "negativeLookahead" || group2.behavior === "lookahead") {
-                        groupInfiniteSize = false;
-                        return "continue";
-                      }
-                      if (group2.behavior !== "normal") {
-                        return "continue";
-                      }
-                      var index2 = mustGet(nodeExtra.capturingGroupToIndex, group2);
-                      if (groupInfiniteSize) {
-                        var newGroupsWithInfiniteSize = new Set(groupsWithInfiniteSize);
-                        newGroupsWithInfiniteSize.add(index2);
-                        groupsWithInfiniteSize = newGroupsWithInfiniteSize;
-                      }
-                      var contents = newGroupContentsStore.get(index2) || {
-                        contents: [],
-                        group: group2
-                      };
-                      newGroupContentsStore.set(index2, __assign(__assign({}, contents), { contents: __spreadArray(__spreadArray([], __read(contents.contents), false), [
-                        __assign(__assign({}, value), { precedingZeroWidthEntries: precedingZeroWidthEntries.filter(function(_a3) {
-                          var offset2 = _a3.offset;
-                          return offset2 >= group2.range[0] && offset2 <= group2.range[1];
-                        }) })
-                      ], false) }));
-                    };
-                    try {
-                      for (noneReferenceStackPortion_1 = (e_5 = void 0, __values(noneReferenceStackPortion)), noneReferenceStackPortion_1_1 = noneReferenceStackPortion_1.next(); !noneReferenceStackPortion_1_1.done; noneReferenceStackPortion_1_1 = noneReferenceStackPortion_1.next()) {
-                        stackEntry = noneReferenceStackPortion_1_1.value;
-                        _loop_3(stackEntry);
-                      }
-                    } catch (e_5_1) {
-                      e_5 = { error: e_5_1 };
-                    } finally {
-                      try {
-                        if (noneReferenceStackPortion_1_1 && !noneReferenceStackPortion_1_1.done && (_g = noneReferenceStackPortion_1.return)) _g.call(noneReferenceStackPortion_1);
-                      } finally {
-                        if (e_5) throw e_5.error;
-                      }
-                    }
-                    groupContentsStore = newGroupContentsStore;
-                    quantifierIterationsAtLastGroup = quantifierIterations;
-                    return [4, {
-                      characterGroups: value.characterGroups,
-                      groups,
-                      lookaheadStack,
-                      node: value.node,
-                      precedingZeroWidthEntries,
-                      stack: value.stack,
-                      type: characterReaderLevel2TypeEntry
-                    }];
-                  case 6:
-                    _h.sent();
-                    precedingZeroWidthEntries = [];
-                    state = {
-                      characterReader,
-                      groupContentsStore,
-                      groupsWithInfiniteSize,
-                      precedingZeroWidthEntries,
-                      quantifierIterationsAtLastGroup,
-                      referenceCharacterReaderWithReference
-                    };
-                    return [3, 7];
-                  case 7:
-                    return [
-                      2
-                      /*return*/
-                    ];
-                }
-              });
-            };
-            _a2.label = 1;
-          case 1:
-            return [5, _loop_2()];
-          case 2:
-            state_1 = _a2.sent();
-            if (typeof state_1 === "object")
-              return [2, state_1.value];
-            switch (state_1) {
-              case "continue-outer":
-                return [3, 3];
-            }
-            _a2.label = 3;
-          case 3:
-            return [3, 1];
-          case 4:
-            return [
-              2
-              /*return*/
-            ];
+  function toCodePoints(pattern) {
+    const cps = [];
+    for (let i2 = 0; i2 < pattern.length; i2++) {
+      const cu = pattern.charCodeAt(i2);
+      if (cu >= 55296 && cu <= 56319) {
+        const low = i2 + 1 < pattern.length ? pattern.charCodeAt(i2 + 1) : 0;
+        if (low < 56320 || low > 57343) {
+          throw new RegexSyntaxError("Lone high surrogate in pattern", true);
         }
-      });
-    };
-    return startThread({
-      characterReader: buildForkableReader(characterReaderLevel1ToInternalReader(buildCharacterReaderLevel1({ caseInsensitive, dotAll, node }))),
-      groupContentsStore: /* @__PURE__ */ new Map(),
-      groupsWithInfiniteSize: /* @__PURE__ */ new Set(),
-      precedingZeroWidthEntries: [],
-      quantifierIterationsAtLastGroup: /* @__PURE__ */ new Map(),
-      referenceCharacterReaderWithReference: null
-    });
-  }
-  var InfiniteLoopTracker = (
-    /** @class */
-    (function() {
-      function InfiniteLoopTracker2(isEqual, source) {
-        this._history = [];
-        this._isEqual = isEqual;
-        if (source) {
-          this._history = __spreadArray([], __read(source.getHistory()), false);
-        }
+        cps.push(65536 + (cu - 55296 << 10) + (low - 56320));
+        i2++;
+      } else if (cu >= 56320 && cu <= 57343) {
+        throw new RegexSyntaxError("Lone low surrogate in pattern", true);
+      } else {
+        cps.push(cu);
       }
-      InfiniteLoopTracker2.prototype._isEntryEqual = function(a2, b2) {
-        return this._isEqual(a2.left, b2.left) && this._isEqual(a2.right, b2.right);
-      };
-      InfiniteLoopTracker2.prototype.append = function(entry) {
-        this._history.push(entry);
-      };
-      InfiniteLoopTracker2.prototype.clone = function() {
-        return new InfiniteLoopTracker2(this._isEqual, this);
-      };
-      InfiniteLoopTracker2.prototype.getHistory = function() {
-        return __spreadArray([], __read(this._history), false);
-      };
-      InfiniteLoopTracker2.prototype.getRepeatingEntries = function() {
-        var length = this._history.length;
-        outer: for (var candidateSize = 1; candidateSize <= length / 2; candidateSize++) {
-          var candidateStart = length - candidateSize * 2;
-          for (var i2 = 0; i2 < candidateSize; i2++) {
-            if (!this._isEntryEqual(this._history[candidateStart + i2], this._history[candidateStart + candidateSize + i2])) {
-              continue outer;
-            }
-          }
-          return this._history.slice(candidateStart, candidateStart + candidateSize);
-        }
-        return null;
-      };
-      return InfiniteLoopTracker2;
-    })()
-  );
-  function once(fn) {
-    var done = false;
-    var res;
-    return function() {
-      if (!done) {
-        done = true;
-        res = fn();
-      }
-      return res;
-    };
+    }
+    return cps;
   }
-  var isUnboundedReaderTypeStep = /* @__PURE__ */ Symbol("isUnboundedReaderTypeStep");
-  var notNewLine = {
-    ranges: (
-      // [\n\r\u2028-\u2029]
-      [
-        [10, 10],
-        [13, 13],
-        [8232, 8233]
-      ]
-    ),
-    rangesNegated: true,
-    unicodePropertyEscapes: /* @__PURE__ */ new Map()
+  var Scanner2 = class {
+    constructor(cps) {
+      this.cps = cps;
+      this.pos = 0;
+    }
+    eof() {
+      return this.pos >= this.cps.length;
+    }
+    peek(offset = 0) {
+      return this.cps[this.pos + offset];
+    }
+    next() {
+      if (this.pos >= this.cps.length) {
+        throw new RegexSyntaxError("Unexpected end of pattern", false);
+      }
+      return this.cps[this.pos++];
+    }
+    eat(cp) {
+      if (this.cps[this.pos] === cp) {
+        this.pos++;
+        return true;
+      }
+      return false;
+    }
   };
-  function isUnboundedReader(_a) {
-    var reader, stack, _loop_1, state_1;
-    var multiLine = _a.multiLine, inputReader = _a.reader;
-    return __generator(this, function(_b) {
-      switch (_b.label) {
-        case 0:
-          reader = fork(inputReader);
-          stack = [{ get: once(function() {
-            return reader.next();
-          }), reader }];
-          _loop_1 = function() {
-            var frame, next, value, splitReader_1, isNewLine;
-            return __generator(this, function(_c) {
-              switch (_c.label) {
-                case 0:
-                  frame = stack.pop();
-                  if (!frame)
-                    return [2, "break"];
-                  return [4, {
-                    type: isUnboundedReaderTypeStep
-                  }];
-                case 1:
-                  _c.sent();
-                  next = frame.get();
-                  if (next.done) {
-                    if (next.value.type === "end" && !next.value.bounded) {
-                      return [2, { value: true }];
-                    }
-                  } else {
-                    switch (next.value.type) {
-                      case characterReaderLevel2TypeSplit: {
-                        value = next.value;
-                        stack.push({
-                          get: once(function() {
-                            return frame.reader.next();
-                          }),
-                          reader: frame.reader
-                        });
-                        if (value.subType === null) {
-                          splitReader_1 = value.reader();
-                          stack.push({
-                            get: once(function() {
-                              return splitReader_1.next();
-                            }),
-                            reader: splitReader_1
-                          });
-                        }
-                        break;
-                      }
-                      case characterReaderLevel2TypeEntry: {
-                        if (multiLine) {
-                          isNewLine = isEmptyCharacterGroups(intersectCharacterGroups(notNewLine, next.value.characterGroups));
-                          if (isNewLine) {
-                            stack.push({
-                              get: once(function() {
-                                return frame.reader.next();
-                              }),
-                              reader: frame.reader
-                            });
-                          }
-                        }
-                        break;
-                      }
-                    }
-                  }
-                  return [
-                    2
-                    /*return*/
-                  ];
-              }
-            });
-          };
-          _b.label = 1;
-        case 1:
-          return [5, _loop_1()];
-        case 2:
-          state_1 = _b.sent();
-          if (typeof state_1 === "object")
-            return [2, state_1.value];
-          if (state_1 === "break")
-            return [3, 4];
-          _b.label = 3;
-        case 3:
-          return [3, 1];
-        case 4:
-          return [2, false];
+  function isAsciiDigit(cp) {
+    return cp !== void 0 && cp >= 48 && cp <= 57;
+  }
+  function hexValue(cp) {
+    if (cp === void 0)
+      return -1;
+    if (cp >= 48 && cp <= 57)
+      return cp - 48;
+    if (cp >= 65 && cp <= 70)
+      return cp - 65 + 10;
+    if (cp >= 97 && cp <= 102)
+      return cp - 97 + 10;
+    return -1;
+  }
+  function parseFixedHex(s2, digits) {
+    let value = 0;
+    for (let i2 = 0; i2 < digits; i2++) {
+      const hv = hexValue(s2.peek());
+      if (hv < 0) {
+        throw new RegexSyntaxError("Invalid hexadecimal escape", false);
       }
-    });
+      s2.next();
+      value = value << 4 | hv;
+    }
+    return value;
   }
-  function mergeSets(a2, b2) {
-    return new Set(__spreadArray(__spreadArray([], __read(a2), false), __read(b2), false));
-  }
-  function areSetsEqual(a2, b2) {
-    return a2.size === b2.size && mergeSets(a2, b2).size === a2.size;
-  }
-  var checkerReaderTypeTrail = /* @__PURE__ */ Symbol("checkerReaderTypeTrail");
-  function areInfiniteLoopTrackerEntriesEqual(left, right) {
-    return left === right;
-  }
-  function buildContextTrail(stack, asteriskInfinite) {
-    return stack.map(function(entry) {
-      switch (entry.type) {
-        case "quantifier": {
-          return "q:".concat(entry.quantifier.range[0], ":").concat(asteriskInfinite && entry.quantifier.max === void 0 && entry.iteration >= entry.quantifier.min ? "*" : "".concat(entry.iteration));
-        }
-        case "reference": {
-          return "r:".concat(entry.reference.range[0]);
-        }
-        case "group": {
-          return "g:".concat(entry.group.range[0]);
-        }
+  function parseUnicodeEscape(s2) {
+    if (!s2.eat(123)) {
+      const cp = parseFixedHex(s2, 4);
+      if (cp >= SURROGATE_RANGE.start && cp <= SURROGATE_RANGE.end) {
+        throw new RegexSyntaxError("Surrogate code point escape is not supported", true);
       }
-    }).filter(Boolean).join(",");
-  }
-  function atomicGroupHashesFromStack(stack, atomicGroupOffsets) {
-    var res = /* @__PURE__ */ new Set();
-    for (var i2 = 0; i2 < stack.length; i2++) {
-      var stackEntry = stack[i2];
-      if (stackEntry.type === "group" && atomicGroupOffsets.has(stackEntry.group.range[0])) {
-        res.add(buildContextTrail(stack.slice(0, i2 + 1), false));
+      return cp;
+    }
+    let value = 0;
+    let count = 0;
+    while (!s2.eof() && s2.peek() !== 125) {
+      const hv = hexValue(s2.peek());
+      if (hv < 0) {
+        throw new RegexSyntaxError("Invalid braced Unicode escape", false);
+      }
+      s2.next();
+      value = value * 16 + hv;
+      count++;
+      if (value > MAX_CODE_POINT) {
+        throw new RegexSyntaxError("Unicode escape exceeds U+10FFFF", false);
       }
     }
-    return res;
+    if (count === 0 || !s2.eat(125)) {
+      throw new RegexSyntaxError("Malformed braced Unicode escape", false);
+    }
+    if (value >= SURROGATE_RANGE.start && value <= SURROGATE_RANGE.end) {
+      throw new RegexSyntaxError("Surrogate code point escape is not supported", true);
+    }
+    return value;
   }
-  function buildZeroWidthHash(zeroWidthEntry) {
-    return [
-      zeroWidthEntry.type,
-      zeroWidthEntry.offset,
-      buildContextTrail(zeroWidthEntry.stack, false)
-    ].join(":");
-  }
-  function getStackSequence(value, hash) {
-    return __spreadArray(__spreadArray([], __read(value.precedingZeroWidthEntries.map(function(a2) {
-      return {
-        hash: ["zw", buildZeroWidthHash(a2)].join(":"),
-        stack: a2.stack
-      };
-    })), false), [
-      { hash: ["s", hash].join(":"), stack: value.stack }
-    ], false);
-  }
-  function areSidesEqual(a2, b2) {
-    return a2.hash === b2.hash;
-  }
-  function buildCheckerReader(input) {
-    var trails, trailEntriesAtStartOfLoop, infiniteLoopTrackerEntryToTrailEntry, stepCount, latestEndTime, timedOut, infinite, initialLeftStreamReader, initialRightStreamReader, stack, _loop_1, state_1, trails_1, trails_1_1, trail, error;
-    var e_1, _a;
-    return __generator(this, function(_b) {
-      switch (_b.label) {
-        case 0:
-          trails = /* @__PURE__ */ new Set();
-          trailEntriesAtStartOfLoop = /* @__PURE__ */ new Set();
-          infiniteLoopTrackerEntryToTrailEntry = /* @__PURE__ */ new Map();
-          stepCount = 0;
-          latestEndTime = Date.now() + input.timeout;
-          timedOut = false;
-          infinite = false;
-          initialLeftStreamReader = buildForkableReader(input.leftStreamReader);
-          initialRightStreamReader = buildForkableReader(input.rightStreamReader);
-          stack = [
-            {
-              infiniteLoopTracker: new InfiniteLoopTracker(areInfiniteLoopTrackerEntriesEqual),
-              streamReadersWithGetters: [
-                {
-                  get: once(function() {
-                    return initialLeftStreamReader.next();
-                  }),
-                  reader: initialLeftStreamReader
-                },
-                {
-                  get: once(function() {
-                    return initialRightStreamReader.next();
-                  }),
-                  reader: initialRightStreamReader
-                }
-              ],
-              trail: []
-            }
-          ];
-          _loop_1 = function() {
-            var entry, streamReadersWithGetters, infiniteLoopTracker, trail2, nextValues, _loop_2, i2, state_2, _c, leftNextValue, rightNextValue, leftValue, rightValue, leftPassedStartAnchor, rightPassedStartAnchor, somethingPassedStartAnchor, leftLookahead, rightLookahead, intersection, leftContextTrail, rightContextTrail, newEntryLeftHash, newEntryRightHash, lastTrailEntry, atomicGroupsEnteredTogetherLeft, atomicGroupsEnteredTogetherRight, diverged, leftStackSequence, rightStackSequence, i2, leftStack, rightStack, atomicGroupsNow, atomicGroupsNow_1, atomicGroupsNow_1_1, group, atomicGroupsNowLeft, atomicGroupsEnteredTogetherLeft_1, atomicGroupsEnteredTogetherLeft_1_1, group, atomicGroupsNowRight, atomicGroupsEnteredTogetherRight_1, atomicGroupsEnteredTogetherRight_1_1, group, newEntryLeft, newEntryRight, newEntry, leftQuantifiersInInfiniteProportion, leftAndRightIdentical, infiniteLoopTrackerEntry, repeatingEntries, entryAtStartOfLoop, sidesEqual, leftUnboundedReader, leftUnboundedCheckReaderNext, leftUnbounded, rightUnboundedReader, rightUnboundedCheckReaderNext, rightUnbounded, shouldEmitTrail;
-            var e_2, _d, e_3, _e, e_4, _f;
-            return __generator(this, function(_g) {
-              switch (_g.label) {
-                case 0:
-                  timedOut = Date.now() > latestEndTime;
-                  if (timedOut || stepCount > input.maxSteps) {
-                    return [2, "break"];
-                  }
-                  entry = stack.pop();
-                  if (!entry)
-                    return [2, "break"];
-                  streamReadersWithGetters = entry.streamReadersWithGetters;
-                  infiniteLoopTracker = entry.infiniteLoopTracker;
-                  trail2 = entry.trail;
-                  nextValues = [];
-                  _loop_2 = function(i3) {
-                    stepCount += 0.5;
-                    var result = streamReadersWithGetters[i3].get();
-                    if (!result.done && result.value.type === characterReaderLevel2TypeSplit) {
-                      var value_1 = result.value;
-                      stack.push({
-                        infiniteLoopTracker,
-                        streamReadersWithGetters: streamReadersWithGetters.map(function(_a2, j2) {
-                          var reader = _a2.reader, get = _a2.get;
-                          return {
-                            get: j2 === i3 ? once(function() {
-                              return reader.next();
-                            }) : get,
-                            reader
-                          };
-                        }),
-                        trail: trail2
-                      });
-                      var newStreamReadersWithGetters = streamReadersWithGetters.map(function(_a2, j2) {
-                        var reader = _a2.reader, get = _a2.get;
-                        var newReader = j2 === i3 ? buildForkableReader(value_1.reader()) : fork(reader);
-                        return {
-                          get: j2 < i3 ? get : once(function() {
-                            return newReader.next();
-                          }),
-                          reader: newReader
-                        };
-                      });
-                      stack.push({
-                        infiniteLoopTracker: infiniteLoopTracker.clone(),
-                        streamReadersWithGetters: newStreamReadersWithGetters,
-                        trail: trail2
-                      });
-                      return "continue-outer";
-                    } else {
-                      nextValues.push(result);
-                    }
-                  };
-                  for (i2 = 0; i2 < streamReadersWithGetters.length; i2++) {
-                    state_2 = _loop_2(i2);
-                    switch (state_2) {
-                      case "continue-outer":
-                        return [2, state_2];
-                    }
-                  }
-                  _c = __read(nextValues, 2), leftNextValue = _c[0], rightNextValue = _c[1];
-                  if (stepCount > input.maxSteps || leftNextValue.done || rightNextValue.done) {
-                    return [2, "continue"];
-                  }
-                  if (leftNextValue.value.type !== characterReaderLevel2TypeEntry || rightNextValue.value.type !== characterReaderLevel2TypeEntry) {
-                    throw new Error("Internal error: impossible leftValue/rightValue type");
-                  }
-                  leftValue = leftNextValue.value;
-                  rightValue = rightNextValue.value;
-                  leftPassedStartAnchor = leftValue.precedingZeroWidthEntries.some(function(_a2) {
-                    var type = _a2.type;
-                    return type === "start";
-                  });
-                  rightPassedStartAnchor = rightValue.precedingZeroWidthEntries.some(function(_a2) {
-                    var type = _a2.type;
-                    return type === "start";
-                  });
-                  somethingPassedStartAnchor = leftPassedStartAnchor || rightPassedStartAnchor;
-                  if (trail2.length > 0 && somethingPassedStartAnchor) {
-                    return [2, "continue"];
-                  }
-                  leftLookahead = last(leftValue.lookaheadStack);
-                  rightLookahead = last(rightValue.lookaheadStack);
-                  if (leftLookahead !== rightLookahead) {
-                    return [2, "continue"];
-                  }
-                  intersection = intersectCharacterGroups(leftValue.characterGroups, rightValue.characterGroups);
-                  if (isEmptyCharacterGroups(intersection)) {
-                    return [2, "continue"];
-                  }
-                  leftContextTrail = buildContextTrail(leftValue.stack, false);
-                  rightContextTrail = buildContextTrail(rightValue.stack, false);
-                  newEntryLeftHash = [leftValue.node.range[0], leftContextTrail].join(":");
-                  newEntryRightHash = [
-                    rightValue.node.range[0],
-                    rightContextTrail
-                  ].join(":");
-                  lastTrailEntry = last(trail2);
-                  atomicGroupsEnteredTogetherLeft = new Set(lastTrailEntry === null || lastTrailEntry === void 0 ? void 0 : lastTrailEntry.left.atomicGroupsEnteredTogether);
-                  atomicGroupsEnteredTogetherRight = new Set(lastTrailEntry === null || lastTrailEntry === void 0 ? void 0 : lastTrailEntry.right.atomicGroupsEnteredTogether);
-                  diverged = !!(lastTrailEntry === null || lastTrailEntry === void 0 ? void 0 : lastTrailEntry.diverged);
-                  if (!diverged) {
-                    leftStackSequence = getStackSequence(leftValue, newEntryLeftHash);
-                    rightStackSequence = getStackSequence(rightValue, newEntryRightHash);
-                    for (
-                      i2 = 0;
-                      // if they are different lengths the last hashes should never match because will be comparing a zero width with normal entry
-                      i2 < Math.min(leftStackSequence.length, rightStackSequence.length);
-                      i2++
-                    ) {
-                      leftStack = leftStackSequence[i2];
-                      rightStack = rightStackSequence[i2];
-                      if (leftStack.hash !== rightStack.hash) {
-                        diverged = true;
-                        break;
-                      }
-                      atomicGroupsNow = atomicGroupHashesFromStack(leftStack.stack, input.atomicGroupOffsets);
-                      try {
-                        for (atomicGroupsNow_1 = (e_2 = void 0, __values(atomicGroupsNow)), atomicGroupsNow_1_1 = atomicGroupsNow_1.next(); !atomicGroupsNow_1_1.done; atomicGroupsNow_1_1 = atomicGroupsNow_1.next()) {
-                          group = atomicGroupsNow_1_1.value;
-                          atomicGroupsEnteredTogetherLeft.add(group);
-                          atomicGroupsEnteredTogetherRight.add(group);
-                        }
-                      } catch (e_2_1) {
-                        e_2 = { error: e_2_1 };
-                      } finally {
-                        try {
-                          if (atomicGroupsNow_1_1 && !atomicGroupsNow_1_1.done && (_d = atomicGroupsNow_1.return)) _d.call(atomicGroupsNow_1);
-                        } finally {
-                          if (e_2) throw e_2.error;
-                        }
-                      }
-                    }
-                  }
-                  atomicGroupsNowLeft = atomicGroupHashesFromStack(leftValue.stack, input.atomicGroupOffsets);
-                  try {
-                    for (atomicGroupsEnteredTogetherLeft_1 = (e_3 = void 0, __values(atomicGroupsEnteredTogetherLeft)), atomicGroupsEnteredTogetherLeft_1_1 = atomicGroupsEnteredTogetherLeft_1.next(); !atomicGroupsEnteredTogetherLeft_1_1.done; atomicGroupsEnteredTogetherLeft_1_1 = atomicGroupsEnteredTogetherLeft_1.next()) {
-                      group = atomicGroupsEnteredTogetherLeft_1_1.value;
-                      if (!atomicGroupsNowLeft.has(group)) {
-                        atomicGroupsEnteredTogetherLeft.delete(group);
-                      }
-                    }
-                  } catch (e_3_1) {
-                    e_3 = { error: e_3_1 };
-                  } finally {
-                    try {
-                      if (atomicGroupsEnteredTogetherLeft_1_1 && !atomicGroupsEnteredTogetherLeft_1_1.done && (_e = atomicGroupsEnteredTogetherLeft_1.return)) _e.call(atomicGroupsEnteredTogetherLeft_1);
-                    } finally {
-                      if (e_3) throw e_3.error;
-                    }
-                  }
-                  atomicGroupsNowRight = atomicGroupHashesFromStack(rightValue.stack, input.atomicGroupOffsets);
-                  try {
-                    for (atomicGroupsEnteredTogetherRight_1 = (e_4 = void 0, __values(atomicGroupsEnteredTogetherRight)), atomicGroupsEnteredTogetherRight_1_1 = atomicGroupsEnteredTogetherRight_1.next(); !atomicGroupsEnteredTogetherRight_1_1.done; atomicGroupsEnteredTogetherRight_1_1 = atomicGroupsEnteredTogetherRight_1.next()) {
-                      group = atomicGroupsEnteredTogetherRight_1_1.value;
-                      if (!atomicGroupsNowRight.has(group)) {
-                        atomicGroupsEnteredTogetherRight.delete(group);
-                      }
-                    }
-                  } catch (e_4_1) {
-                    e_4 = { error: e_4_1 };
-                  } finally {
-                    try {
-                      if (atomicGroupsEnteredTogetherRight_1_1 && !atomicGroupsEnteredTogetherRight_1_1.done && (_f = atomicGroupsEnteredTogetherRight_1.return)) _f.call(atomicGroupsEnteredTogetherRight_1);
-                    } finally {
-                      if (e_4) throw e_4.error;
-                    }
-                  }
-                  newEntryLeft = {
-                    atomicGroupsEnteredTogether: atomicGroupsEnteredTogetherLeft,
-                    characterGroups: leftValue.characterGroups,
-                    contextTrail: leftContextTrail,
-                    hash: newEntryLeftHash,
-                    node: leftValue.node,
-                    stack: leftValue.stack
-                  };
-                  newEntryRight = {
-                    atomicGroupsEnteredTogether: atomicGroupsEnteredTogetherRight,
-                    characterGroups: rightValue.characterGroups,
-                    contextTrail: rightContextTrail,
-                    hash: newEntryRightHash,
-                    node: rightValue.node,
-                    stack: rightValue.stack
-                  };
-                  newEntry = {
-                    diverged,
-                    intersection,
-                    left: newEntryLeft,
-                    right: newEntryRight
-                  };
-                  trail2 = __spreadArray(__spreadArray([], __read(trail2), false), [newEntry], false);
-                  leftQuantifiersInInfiniteProportion = buildQuantifiersInInfinitePortion(leftValue.stack, input.nodeExtra);
-                  if (leftQuantifiersInInfiniteProportion.size > 0) {
-                    leftAndRightIdentical = trail2.every(function(_a2) {
-                      var left = _a2.left, right = _a2.right;
-                      return areSidesEqual(left, right);
-                    });
-                    if (leftAndRightIdentical) {
-                      return [2, "continue"];
-                    }
-                  }
-                  infiniteLoopTrackerEntry = {
-                    left: [
-                      leftValue.node.range[0],
-                      buildContextTrail(leftValue.stack, true)
-                    ].join(":"),
-                    right: [
-                      rightValue.node.range[0],
-                      buildContextTrail(leftValue.stack, true)
-                    ].join(":")
-                  };
-                  infiniteLoopTrackerEntryToTrailEntry.set(infiniteLoopTrackerEntry, newEntry);
-                  infiniteLoopTracker.append(infiniteLoopTrackerEntry);
-                  repeatingEntries = infiniteLoopTracker.getRepeatingEntries();
-                  if (repeatingEntries) {
-                    entryAtStartOfLoop = infiniteLoopTrackerEntryToTrailEntry.get(repeatingEntries[0]);
-                    if (!entryAtStartOfLoop) {
-                      throw new Error("Internal error: missing entry at start of loop");
-                    }
-                    trailEntriesAtStartOfLoop.add(entryAtStartOfLoop);
-                    return [2, "continue"];
-                  }
-                  if (!areSetsEqual(newEntry.left.atomicGroupsEnteredTogether, newEntry.right.atomicGroupsEnteredTogether)) {
-                    return [2, "continue-outer"];
-                  }
-                  sidesEqual = areSidesEqual(newEntry.left, newEntry.right);
-                  if (!!sidesEqual) return [3, 2];
-                  {
-                    leftUnboundedReader = isUnboundedReader({
-                      multiLine: input.multiLine,
-                      reader: fork(streamReadersWithGetters[0].reader)
-                    });
-                    leftUnboundedCheckReaderNext = void 0;
-                    while (!(leftUnboundedCheckReaderNext = leftUnboundedReader.next()).done) {
-                      switch (leftUnboundedCheckReaderNext.value.type) {
-                        case isUnboundedReaderTypeStep: {
-                          stepCount += 0.5;
-                          if (stepCount > input.maxSteps) {
-                            return [2, "break-outer"];
-                          }
-                          break;
-                        }
-                      }
-                    }
-                    leftUnbounded = leftUnboundedCheckReaderNext.value;
-                    if (leftUnbounded)
-                      return [2, "continue"];
-                  }
-                  {
-                    rightUnboundedReader = isUnboundedReader({
-                      multiLine: input.multiLine,
-                      reader: fork(streamReadersWithGetters[1].reader)
-                    });
-                    rightUnboundedCheckReaderNext = void 0;
-                    while (!(rightUnboundedCheckReaderNext = rightUnboundedReader.next()).done) {
-                      switch (rightUnboundedCheckReaderNext.value.type) {
-                        case isUnboundedReaderTypeStep: {
-                          stepCount += 0.5;
-                          if (stepCount > input.maxSteps) {
-                            return [2, "break-outer"];
-                          }
-                          break;
-                        }
-                      }
-                    }
-                    rightUnbounded = rightUnboundedCheckReaderNext.value;
-                    if (rightUnbounded)
-                      return [2, "continue"];
-                  }
-                  shouldEmitTrail = function() {
-                    var alreadyExists = __spreadArray([], __read(trails), false).some(function(existingTrail) {
-                      if (existingTrail.length !== trail2.length)
-                        return false;
-                      return existingTrail.every(function(existingEntry, i3) {
-                        return areSidesEqual(existingEntry.left, trail2[i3].left) && areSidesEqual(existingEntry.right, trail2[i3].right);
-                      }) || existingTrail.every(function(existingEntry, i3) {
-                        return areSidesEqual(existingEntry.left, trail2[i3].right) && areSidesEqual(existingEntry.right, trail2[i3].left);
-                      });
-                    });
-                    return !alreadyExists;
-                  };
-                  if (!shouldEmitTrail()) return [3, 2];
-                  trails.add(trail2);
-                  return [4, { trail: trail2, type: checkerReaderTypeTrail }];
-                case 1:
-                  _g.sent();
-                  _g.label = 2;
-                case 2:
-                  stack.push({
-                    infiniteLoopTracker,
-                    streamReadersWithGetters: streamReadersWithGetters.map(function(_a2) {
-                      var reader = _a2.reader;
-                      return {
-                        get: once(function() {
-                          return reader.next();
-                        }),
-                        reader
-                      };
-                    }),
-                    trail: trail2
-                  });
-                  return [
-                    2
-                    /*return*/
-                  ];
-              }
-            });
-          };
-          _b.label = 1;
-        case 1:
-          return [5, _loop_1()];
-        case 2:
-          state_1 = _b.sent();
-          if (state_1 === "break")
-            return [3, 4];
-          switch (state_1) {
-            case "break-outer":
-              return [3, 4];
-            case "continue-outer":
-              return [3, 3];
-          }
-          _b.label = 3;
-        case 3:
-          return [3, 1];
-        case 4:
-          if (trailEntriesAtStartOfLoop.size > 0) {
-            try {
-              for (trails_1 = __values(trails), trails_1_1 = trails_1.next(); !trails_1_1.done; trails_1_1 = trails_1.next()) {
-                trail = trails_1_1.value;
-                if (trail.some(function(entry) {
-                  return trailEntriesAtStartOfLoop.has(entry);
-                })) {
-                  infinite = true;
-                  break;
-                }
-              }
-            } catch (e_1_1) {
-              e_1 = { error: e_1_1 };
-            } finally {
-              try {
-                if (trails_1_1 && !trails_1_1.done && (_a = trails_1.return)) _a.call(trails_1);
-              } finally {
-                if (e_1) throw e_1.error;
-              }
-            }
-          }
-          error = stepCount > input.maxSteps ? "hitMaxSteps" : timedOut ? "timedOut" : null;
-          return [2, error ? { error } : { error: null, infinite }];
+  function parseNumericOrHexEscape(s2, cp) {
+    if (cp === 48) {
+      if (isAsciiDigit(s2.peek())) {
+        throw new RegexSyntaxError("Octal escape is not supported", true);
       }
-    });
+      return 0;
+    }
+    if (cp >= 49 && cp <= 57) {
+      throw new RegexSyntaxError("Backreference or octal escape is not supported", true);
+    }
+    if (cp === 120)
+      return parseFixedHex(s2, 2);
+    if (cp === 117)
+      return parseUnicodeEscape(s2);
+    return null;
   }
-  var lookaheadBehaviours = [
-    "lookahead",
-    "lookbehind",
-    "negativeLookahead",
-    "negativeLookbehind"
-  ];
-  function buildNodeExtra(regexp) {
-    var capturingGroupToIndex = /* @__PURE__ */ new Map();
-    var indexToCapturingGroup = /* @__PURE__ */ new Map();
-    var nodeToLookaheadStack = /* @__PURE__ */ new Map();
-    var reachableReferences = [];
-    var visit = function(node, lookaheadStack, reachable) {
-      switch (node.type) {
-        case "anchor":
-        case "characterClass":
-        case "characterClassEscape":
-        case "characterClassRange":
-        case "unicodePropertyEscape":
-        case "value":
-        case "dot":
-          return;
-        case "reference": {
-          nodeToLookaheadStack.set(node, lookaheadStack);
-          if (reachable)
-            reachableReferences.push(node);
-          break;
-        }
-        case "alternative":
-        case "disjunction": {
-          node.body.forEach(function(expression) {
-            return visit(expression, lookaheadStack, reachable);
-          });
-          return;
-        }
-        case "group": {
-          if (node.behavior === "normal") {
-            var index = capturingGroupToIndex.size + 1;
-            capturingGroupToIndex.set(node, index);
-            indexToCapturingGroup.set(index, node);
-            nodeToLookaheadStack.set(node, lookaheadStack);
-          }
-          var newLookaheadStack_1 = __spreadArray([], __read(lookaheadStack), false);
-          if (node.behavior !== "normal" && lookaheadBehaviours.indexOf(node.behavior) >= 0) {
-            newLookaheadStack_1.push(node);
-          }
-          node.body.forEach(function(expression) {
-            return visit(expression, newLookaheadStack_1, reachable);
-          });
-          return;
-        }
-        case "quantifier": {
-          node.body.forEach(function(expression) {
-            return visit(expression, lookaheadStack, reachable && node.max !== 0);
-          });
-          return;
-        }
+  function parseEscape(s2, inClass) {
+    if (s2.eof()) {
+      throw new RegexSyntaxError("Trailing backslash in pattern", false);
+    }
+    const cp = s2.next();
+    if (cp === 98) {
+      return inClass ? { kind: "single", cp: 8 } : { kind: "anchor", anchor: "wordBoundary" };
+    }
+    if (cp === 66) {
+      if (inClass) {
+        throw new RegexSyntaxError("\\B is not supported inside a character class", true);
       }
-    };
-    visit(regexp, [], true);
+      return { kind: "anchor", anchor: "notWordBoundary" };
+    }
+    const classRanges = CLASS_ESCAPES.get(cp);
+    if (classRanges !== void 0)
+      return { kind: "ranges", ranges: classRanges };
+    const controlCp = CONTROL_ESCAPES.get(cp);
+    if (controlCp !== void 0)
+      return { kind: "single", cp: controlCp };
+    const numOrHex = parseNumericOrHexEscape(s2, cp);
+    if (numOrHex !== null)
+      return { kind: "single", cp: numOrHex };
+    if (SYNTAX_CHARS.has(cp) || inClass && cp === 45)
+      return { kind: "single", cp };
+    throw new RegexSyntaxError("Unsupported escape sequence", true);
+  }
+  function parseClassAtom(s2) {
+    const cp = s2.peek();
+    if (cp === 92) {
+      s2.next();
+      const esc = parseEscape(s2, true);
+      if (esc.kind === "single") {
+        return { single: esc.cp, ranges: [{ start: esc.cp, end: esc.cp }] };
+      }
+      if (esc.kind === "ranges") {
+        return { ranges: esc.ranges };
+      }
+      throw new RegexSyntaxError("Assertions are not valid in a character class", true);
+    }
+    if (cp === 91) {
+      throw new RegexSyntaxError("Nested character class is not supported", true);
+    }
+    if (cp === 38 && s2.peek(1) === 38) {
+      throw new RegexSyntaxError("Character class intersection is not supported", true);
+    }
+    const lit = s2.next();
+    return { single: lit, ranges: [{ start: lit, end: lit }] };
+  }
+  function parseClassItem(s2) {
+    const firstAtom = parseClassAtom(s2);
+    if (s2.peek() !== 45 || s2.peek(1) === 93) {
+      return firstAtom.ranges;
+    }
+    s2.next();
+    if (s2.peek() === 45) {
+      throw new RegexSyntaxError("Character class subtraction is not supported", true);
+    }
+    const secondAtom = parseClassAtom(s2);
+    if (firstAtom.single === void 0 || secondAtom.single === void 0) {
+      throw new RegexSyntaxError("Character class escape cannot form a range", false);
+    }
+    if (firstAtom.single > secondAtom.single) {
+      throw new RegexSyntaxError("Character class range out of order", false);
+    }
+    return [{ start: firstAtom.single, end: secondAtom.single }];
+  }
+  function parseClass(s2) {
+    const negated = s2.eat(94);
+    const ranges = [];
+    while (!s2.eof() && s2.peek() !== 93) {
+      ranges.push(...parseClassItem(s2));
+    }
+    if (!s2.eat(93)) {
+      throw new RegexSyntaxError("Unclosed character class", false);
+    }
+    if (ranges.length === 0) {
+      throw new RegexSyntaxError("Empty character class", false);
+    }
+    const normalized = normalizeRanges(ranges);
     return {
-      capturingGroupToIndex,
-      indexToCapturingGroup,
-      nodeToLookaheadStack,
-      reachableReferences
+      kind: "charSet",
+      ranges: negated ? complementRanges(normalized) : normalized
     };
   }
-  var ResultCache = (
-    /** @class */
-    (function() {
-      function ResultCache2() {
-        this._cache = /* @__PURE__ */ new Map();
-      }
-      ResultCache2.prototype.addResult = function(a2, b2, result) {
-        var mapA = this._cache.get(a2) || /* @__PURE__ */ new Map();
-        mapA.set(b2, result);
-        this._cache.set(a2, mapA);
-        var mapB = this._cache.get(b2) || /* @__PURE__ */ new Map();
-        mapB.set(a2, result);
-        this._cache.set(b2, mapB);
-      };
-      ResultCache2.prototype.getResult = function(a2, b2) {
-        var _a;
-        return (_a = this._cache.get(a2)) === null || _a === void 0 ? void 0 : _a.get(b2);
-      };
-      return ResultCache2;
-    })()
-  );
-  var Tree = (
-    /** @class */
-    (function() {
-      function Tree2(decode) {
-        this.decode = decode;
-        this.root = /* @__PURE__ */ new Map();
-        this.results = /* @__PURE__ */ new Map();
-        this._items = function() {
-          return [];
-        };
-      }
-      Tree2.prototype.add = function(input) {
-        var values = this.decode(input);
-        if (values.length === 0)
-          return;
-        var results = this.results;
-        var current = {
-          children: this.root
-        };
-        var numValues = values.length;
-        for (var i2 = 0; i2 < numValues; i2++) {
-          var value = values[i2];
-          var last2 = i2 === numValues - 1;
-          var existing = current.children.get(value);
-          if (existing) {
-            current = existing;
-            if (!last2) {
-              results.delete(existing);
-            }
-          } else {
-            var newChild = { children: /* @__PURE__ */ new Map(), value };
-            current.children.set(value, newChild);
-            current = newChild;
-            if (last2) {
-              results.set(newChild, input);
-            }
-          }
-        }
-        this._items = once(function() {
-          return Array.from(results.values());
-        });
-      };
-      Object.defineProperty(Tree2.prototype, "items", {
-        get: function() {
-          return this._items();
-        },
-        enumerable: false,
-        configurable: true
-      });
-      return Tree2;
-    })()
-  );
-  var workLimit = 25e3;
-  var EnhancedTrail = (
-    /** @class */
-    (function() {
-      function EnhancedTrail2(trail, isEmptyCache) {
-        this.trail = trail;
-        this.isEmptyCache = isEmptyCache;
-        this.tree = new Tree(function(trail2) {
-          return trail2.map(function(_a) {
-            var hash = _a.hash;
-            return hash;
-          });
-        });
-        this.inputStringSchema = trail.map(function(_a) {
-          var intersection = _a.intersection;
-          return intersection;
-        });
-        this.length = trail.length;
-        this.onNewTrail(this);
-      }
-      Object.defineProperty(EnhancedTrail2.prototype, "matches", {
-        get: function() {
-          return this.tree.items;
-        },
-        enumerable: false,
-        configurable: true
-      });
-      EnhancedTrail2.prototype.getLongestMatch = function(inputStringSchema, trailSides) {
-        var _this = this;
-        if (trailSides.length > inputStringSchema.length) {
-          throw new Error("Internal error: trail should be <= than input string schema");
-        }
-        var noMatchOffset = trailSides.findIndex(function(side, i2) {
-          var res = _this.isEmptyCache.getResult(side.characterGroups, inputStringSchema[i2]);
-          if (res !== void 0)
-            return res;
-          var isEmpty = isEmptyCharacterGroups(intersectCharacterGroups(side.characterGroups, inputStringSchema[i2]));
-          _this.isEmptyCache.addResult(side.characterGroups, inputStringSchema[i2], isEmpty);
-          return isEmpty;
-        });
-        return noMatchOffset === -1 ? trailSides : trailSides.slice(0, noMatchOffset);
-      };
-      EnhancedTrail2.prototype.onNewTrail = function(otherTrail) {
-        var e_1, _a;
-        var leftSide = [];
-        var rightSide = [];
-        try {
-          for (var _b = __values(otherTrail.trail), _c = _b.next(); !_c.done; _c = _b.next()) {
-            var entry = _c.value;
-            leftSide.push(entry.left);
-            rightSide.push(entry.right);
-          }
-        } catch (e_1_1) {
-          e_1 = { error: e_1_1 };
-        } finally {
-          try {
-            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-          } finally {
-            if (e_1) throw e_1.error;
-          }
-        }
-        var leftMatch = this.getLongestMatch(this.inputStringSchema, leftSide);
-        if (leftMatch.length === this.length)
-          this.tree.add(leftMatch);
-        var rightMatch = this.getLongestMatch(this.inputStringSchema, rightSide);
-        if (rightMatch.length === this.length)
-          this.tree.add(rightMatch);
-      };
-      return EnhancedTrail2;
-    })()
-  );
-  function collectResults(_a) {
-    var e_2, _b;
-    var atomicGroupOffsets = _a.atomicGroupOffsets, node = _a.node, maxScore = _a.maxScore, maxSteps = _a.maxSteps, multiLine = _a.multiLine, timeout = _a.timeout, caseInsensitive = _a.caseInsensitive, dotAll = _a.dotAll;
-    var isEmptyCache = new ResultCache();
-    var nodeExtra = buildNodeExtra(node);
-    var input = {
-      caseInsensitive,
-      dotAll,
-      node,
-      nodeExtra
-    };
-    var leftStreamReader = buildCharacterReaderLevel2(input);
-    var rightStreamReader = buildCharacterReaderLevel2(input);
-    var reader = buildCheckerReader({
-      atomicGroupOffsets,
-      leftStreamReader,
-      maxSteps,
-      multiLine,
-      nodeExtra,
-      rightStreamReader,
-      timeout
-    });
-    var trailsTree = new Tree(function(_a2) {
-      var trail2 = _a2.trail;
-      return trail2;
-    });
-    var score = 1;
-    var work = 0;
-    var next;
-    outer: while (!(next = reader.next()).done) {
-      switch (next.value.type) {
-        case checkerReaderTypeTrail: {
-          var trail = new EnhancedTrail(next.value.trail, isEmptyCache);
-          var updateScore = function(_a2) {
-            var matches = _a2.matches;
-            var length = matches.length;
-            if (length > score) {
-              score = length;
-            }
-          };
-          if (work < workLimit) {
-            try {
-              for (var _c = (e_2 = void 0, __values(trailsTree.items)), _d = _c.next(); !_d.done; _d = _c.next()) {
-                var existingTrail = _d.value;
-                if (existingTrail.length === trail.length) {
-                  work += trail.length;
-                  if (work >= workLimit)
-                    break;
-                  trail.onNewTrail(existingTrail);
-                  existingTrail.onNewTrail(trail);
-                  updateScore(existingTrail);
-                }
-              }
-            } catch (e_2_1) {
-              e_2 = { error: e_2_1 };
-            } finally {
-              try {
-                if (_d && !_d.done && (_b = _c.return)) _b.call(_c);
-              } finally {
-                if (e_2) throw e_2.error;
-              }
-            }
-            updateScore(trail);
-          }
-          if (work >= workLimit) {
-            score += 1;
-          }
-          trailsTree.add(trail);
-          if (score > maxScore) {
-            break outer;
-          }
-          break;
-        }
-      }
+  function parseDecimalInt(s2) {
+    if (!isAsciiDigit(s2.peek()))
+      return null;
+    let value = 0;
+    while (isAsciiDigit(s2.peek())) {
+      value = value * 10 + (s2.next() - 48);
     }
-    var error = null;
-    if (next.done) {
-      if (next.value.error) {
-        score = Infinity;
-        error = next.value.error;
-      } else if (next.value.infinite) {
-        score = Infinity;
-        error = "hitMaxScore";
-      }
+    return value;
+  }
+  function parseBracedBounds(s2) {
+    const min = parseDecimalInt(s2);
+    if (min === null) {
+      throw new RegexSyntaxError("Malformed brace quantifier", true);
+    }
+    if (min > MAX_QUANTIFIER_BOUND) {
+      throw new RegexSyntaxError(`Quantifier lower bound ${min} exceeds ${MAX_QUANTIFIER_BOUND}`, false);
+    }
+    if (s2.eat(125)) {
+      return { min, max: min };
+    }
+    if (!s2.eat(44)) {
+      throw new RegexSyntaxError("Malformed brace quantifier", true);
+    }
+    if (s2.eat(125)) {
+      return { min, max: null };
+    }
+    const max = parseDecimalInt(s2);
+    if (max === null || !s2.eat(125)) {
+      throw new RegexSyntaxError("Malformed brace quantifier", true);
+    }
+    if (max > MAX_QUANTIFIER_BOUND) {
+      throw new RegexSyntaxError(`Quantifier upper bound ${max} exceeds ${MAX_QUANTIFIER_BOUND}`, false);
+    }
+    if (max < min) {
+      throw new RegexSyntaxError("Quantifier minimum exceeds maximum", false);
+    }
+    return { min, max };
+  }
+  function isQuantifierStart(cp) {
+    return cp === 42 || cp === 43 || cp === 63 || cp === 123;
+  }
+  function parseQuantifier(s2, child) {
+    const q = s2.next();
+    let min = 0;
+    let max = null;
+    if (q === 42) {
+      min = 0;
+      max = null;
+    } else if (q === 43) {
+      min = 1;
+      max = null;
+    } else if (q === 63) {
+      min = 0;
+      max = 1;
     } else {
-      score = Infinity;
-      error = "hitMaxScore";
+      const bounds = parseBracedBounds(s2);
+      min = bounds.min;
+      max = bounds.max;
     }
-    return {
-      error,
-      score,
-      trails: trailsTree.items.map(function(_a2) {
-        var trail2 = _a2.trail;
-        return trail2;
-      })
-    };
+    const lazy = s2.eat(63);
+    if (isQuantifierStart(s2.peek())) {
+      throw new RegexSyntaxError("Possessive or chained quantifiers are not supported", true);
+    }
+    return { kind: "repeat", child, min, max, lazy };
   }
-  var defaultTimeout = Infinity;
-  var defaultMaxScore = 200;
-  var defaultMaxSteps = 2e4;
-  var defaultMultiLine = false;
-  var defaultUnicode = false;
-  var defaultCaseInsensitive = false;
-  var defaultDotAll = false;
-  function toRedosDetectorNode(node) {
-    return {
-      end: { offset: node.range[1] },
-      source: node.raw,
-      start: { offset: node.range[0] }
-    };
+  function parseGroup(s2) {
+    if (!s2.eat(63)) {
+      const body2 = parseDisjunction(s2);
+      if (!s2.eat(41)) {
+        throw new RegexSyntaxError("Unclosed group", false);
+      }
+      return { kind: "group", capturing: true, child: body2 };
+    }
+    const modifier = s2.peek();
+    if (modifier !== 58 && modifier !== 61 && modifier !== 33) {
+      throw new RegexSyntaxError("Unsupported group extension", true);
+    }
+    s2.next();
+    const body = parseDisjunction(s2);
+    if (!s2.eat(41)) {
+      throw new RegexSyntaxError("Unclosed group", false);
+    }
+    if (modifier === 58) {
+      return { kind: "group", capturing: false, child: body };
+    }
+    return { kind: "lookahead", negated: modifier === 33, child: body };
   }
-  function toRedosDetectorBackReferenceStack(stack) {
-    return stack.flatMap(function(stackEntry) {
-      return stackEntry.type === "reference" ? [stackEntry.reference] : [];
-    }).reverse().map(function(reference) {
+  function parseAtom(s2) {
+    const cp = s2.next();
+    if (cp === 94)
+      return { kind: "anchor", anchor: "start" };
+    if (cp === 36)
+      return { kind: "anchor", anchor: "end" };
+    if (cp === 46)
+      return { kind: "charSet", ranges: DOT_RANGES };
+    if (cp === 91)
+      return parseClass(s2);
+    if (cp === 40)
+      return parseGroup(s2);
+    if (cp === 92) {
+      const esc = parseEscape(s2, false);
+      if (esc.kind === "anchor")
+        return { kind: "anchor", anchor: esc.anchor };
+      if (esc.kind === "ranges")
+        return { kind: "charSet", ranges: esc.ranges };
+      return { kind: "charSet", ranges: [{ start: esc.cp, end: esc.cp }] };
+    }
+    if (cp === 123 || cp === 125 || cp === 93) {
+      throw new RegexSyntaxError("Unescaped brace or bracket is not supported", true);
+    }
+    if (cp === 42 || cp === 43 || cp === 63) {
+      throw new RegexSyntaxError("Nothing to repeat", false);
+    }
+    return { kind: "charSet", ranges: [{ start: cp, end: cp }] };
+  }
+  function parseTerm(s2) {
+    const atom = parseAtom(s2);
+    if (!isQuantifierStart(s2.peek())) {
+      return atom;
+    }
+    if (atom.kind === "anchor" || atom.kind === "lookahead") {
+      throw new RegexSyntaxError("Quantifier on an assertion is not supported", true);
+    }
+    return parseQuantifier(s2, atom);
+  }
+  function parseAlternative(s2) {
+    const items = [];
+    while (!s2.eof() && s2.peek() !== 124 && s2.peek() !== 41) {
+      items.push(parseTerm(s2));
+    }
+    if (items.length === 0)
+      return { kind: "empty" };
+    if (items.length === 1)
+      return items[0];
+    return { kind: "concat", items };
+  }
+  function parseDisjunction(s2) {
+    const branches = [parseAlternative(s2)];
+    while (s2.eat(124)) {
+      branches.push(parseAlternative(s2));
+    }
+    if (branches.length === 1)
+      return branches[0];
+    return { kind: "alt", branches };
+  }
+  function parseRegexSubset(pattern) {
+    const s2 = new Scanner2(toCodePoints(pattern));
+    const tree = parseDisjunction(s2);
+    if (!s2.eof()) {
+      throw new RegexSyntaxError("Unmatched closing parenthesis", false);
+    }
+    return tree;
+  }
+  function unwrap2(node) {
+    let curr = node;
+    while (curr.kind === "group") {
+      curr = curr.child;
+    }
+    return curr;
+  }
+  function nullable(node) {
+    switch (node.kind) {
+      case "empty":
+      case "anchor":
+      case "lookahead":
+        return true;
+      case "charSet":
+        return false;
+      case "group":
+        return nullable(node.child);
+      case "repeat":
+        return node.min === 0 || nullable(node.child);
+      case "concat":
+        return node.items.every(nullable);
+      case "alt":
+        return node.branches.some(nullable);
+    }
+  }
+  function first(node) {
+    switch (node.kind) {
+      case "empty":
+      case "anchor":
+      case "lookahead":
+        return [];
+      case "charSet":
+        return node.ranges;
+      case "group":
+        return first(node.child);
+      case "repeat":
+        return node.max === 0 ? [] : first(node.child);
+      case "alt":
+        return normalizeRanges(node.branches.flatMap(first));
+      case "concat": {
+        const acc = [];
+        for (const item of node.items) {
+          acc.push(...first(item));
+          if (!nullable(item))
+            break;
+        }
+        return normalizeRanges(acc);
+      }
+    }
+  }
+  function chars(node) {
+    switch (node.kind) {
+      case "empty":
+      case "anchor":
+      case "lookahead":
+        return [];
+      case "charSet":
+        return node.ranges;
+      case "group":
+        return chars(node.child);
+      case "repeat":
+        return node.max === 0 ? [] : chars(node.child);
+      case "concat":
+        return normalizeRanges(node.items.flatMap(chars));
+      case "alt":
+        return normalizeRanges(node.branches.flatMap(chars));
+    }
+  }
+  function hasUnbounded(node) {
+    switch (node.kind) {
+      case "empty":
+      case "charSet":
+      case "anchor":
+        return false;
+      case "group":
+      case "lookahead":
+        return hasUnbounded(node.child);
+      case "repeat":
+        return node.max === null || hasUnbounded(node.child);
+      case "concat":
+        return node.items.some(hasUnbounded);
+      case "alt":
+        return node.branches.some(hasUnbounded);
+    }
+  }
+  function hasNestedQuantifier(node) {
+    switch (node.kind) {
+      case "empty":
+      case "charSet":
+      case "anchor":
+        return false;
+      case "group":
+      case "lookahead":
+        return hasNestedQuantifier(node.child);
+      case "repeat":
+        if ((node.max === null || node.max > 1) && hasUnbounded(node.child)) {
+          return true;
+        }
+        return hasNestedQuantifier(node.child);
+      case "concat":
+        return node.items.some(hasNestedQuantifier);
+      case "alt":
+        return node.branches.some(hasNestedQuantifier);
+    }
+  }
+  function branchesOverlap(branches) {
+    const firstSets = branches.map((b2) => first(unwrap2(b2)));
+    for (let i2 = 0; i2 < firstSets.length; i2++) {
+      for (let j2 = i2 + 1; j2 < firstSets.length; j2++) {
+        if (rangesOverlap(firstSets[i2], firstSets[j2]))
+          return true;
+      }
+    }
+    return false;
+  }
+  function hasOverlappingAlternation(node) {
+    switch (node.kind) {
+      case "empty":
+      case "charSet":
+      case "anchor":
+        return false;
+      case "group":
+      case "lookahead":
+        return hasOverlappingAlternation(node.child);
+      case "repeat": {
+        const inner = unwrap2(node.child);
+        if (node.max === null && inner.kind === "alt" && branchesOverlap(inner.branches)) {
+          return true;
+        }
+        return hasOverlappingAlternation(node.child);
+      }
+      case "concat":
+        return node.items.some(hasOverlappingAlternation);
+      case "alt":
+        return node.branches.some(hasOverlappingAlternation);
+    }
+  }
+  function concatHasAdjacentOverlap(items) {
+    for (let i2 = 0; i2 < items.length; i2++) {
+      const ux = unwrap2(items[i2]);
+      if (ux.kind !== "repeat" || ux.max !== null)
+        continue;
+      const xChars = chars(ux.child);
+      for (let j2 = i2 + 1; j2 < items.length; j2++) {
+        const uy = unwrap2(items[j2]);
+        if (uy.kind === "repeat" && uy.max === null && rangesOverlap(xChars, chars(uy.child))) {
+          return true;
+        }
+        if (!nullable(items[j2]))
+          break;
+      }
+    }
+    return false;
+  }
+  function hasAdjacentOverlap(node) {
+    switch (node.kind) {
+      case "empty":
+      case "charSet":
+      case "anchor":
+        return false;
+      case "group":
+      case "lookahead":
+      case "repeat":
+        return hasAdjacentOverlap(node.child);
+      case "concat":
+        return concatHasAdjacentOverlap(node.items) || node.items.some(hasAdjacentOverlap);
+      case "alt":
+        return node.branches.some(hasAdjacentOverlap);
+    }
+  }
+  function checkRegexSafety(pattern, tree) {
+    if (countCodePoints(pattern) > MAX_REGEX_PATTERN_CODE_POINTS) {
+      return "PATTERN_TOO_LONG";
+    }
+    if (hasNestedQuantifier(tree)) {
+      return "NESTED_QUANTIFIER";
+    }
+    if (hasOverlappingAlternation(tree)) {
+      return "OVERLAPPING_ALTERNATION";
+    }
+    if (hasAdjacentOverlap(tree)) {
+      return "ADJACENT_OVERLAP";
+    }
+    return null;
+  }
+  function analyzeRegex(pattern) {
+    if (countCodePoints(pattern) > MAX_REGEX_PATTERN_CODE_POINTS) {
       return {
-        index: reference.matchIndex,
-        node: toRedosDetectorNode(reference)
+        ok: false,
+        reason: "PATTERN_TOO_LONG",
+        detail: `Pattern exceeds maximum length of ${MAX_REGEX_PATTERN_CODE_POINTS} code points`
       };
-    });
-  }
-  function toRedosDetectorQuantifierIterations(stack) {
-    var reversedStack = __spreadArray([], __read(stack), false).reverse();
-    var referenceStackIndex = reversedStack.findIndex(function(_a) {
-      var type = _a.type;
-      return type === "reference";
-    });
-    var noneReferenceStackPortion = reversedStack.slice(0, referenceStackIndex >= 0 ? referenceStackIndex : stack.length).reverse();
-    return noneReferenceStackPortion.flatMap(function(entry) {
-      return entry.type === "quantifier" ? [entry] : [];
-    }).map(function(_a) {
-      var quantifier = _a.quantifier, iteration = _a.iteration;
-      return {
-        iteration,
-        node: toRedosDetectorNode(quantifier)
-      };
-    });
-  }
-  function isSafePattern(inputPattern, _a) {
-    var _b = _a === void 0 ? {} : _a, atomicGroupOffsetsInput = _b.atomicGroupOffsets, _c = _b.maxScore, maxScore = _c === void 0 ? defaultMaxScore : _c, _d = _b.maxSteps, maxSteps = _d === void 0 ? defaultMaxSteps : _d, _e = _b.multiLine, multiLine = _e === void 0 ? defaultMultiLine : _e, _f = _b.timeout, timeout = _f === void 0 ? defaultTimeout : _f, _g = _b.caseInsensitive, caseInsensitive = _g === void 0 ? defaultCaseInsensitive : _g, _h = _b.dotAll, dotAll = _h === void 0 ? defaultDotAll : _h, _j = _b.unicode, unicode = _j === void 0 ? defaultUnicode : _j, _k = _b.downgradePattern, downgradePattern$1 = _k === void 0 ? true : _k;
-    if (caseInsensitive && unicode) {
-      throw new Error("`caseInsensitive` cannot be used with `unicode`.");
     }
-    if (downgradePattern$1 && atomicGroupOffsetsInput) {
-      throw new Error("`atomicGroupOffsets` cannot be used with `downgradePattern: true`.");
-    }
-    if (timeout <= 0) {
-      throw new Error("`timeout` must be a positive number.");
-    }
-    if (maxScore < 0) {
-      throw new Error("`maxScore` must be a positive number or 0.");
-    }
-    if (maxSteps <= 0) {
-      throw new Error("`maxSteps` must be a positive number.");
-    }
-    var _l = downgradePattern$1 ? downgradePattern({ pattern: inputPattern, unicode }) : {
-      atomicGroupOffsets: new Set(atomicGroupOffsetsInput || []),
-      pattern: inputPattern
-    }, pattern = _l.pattern, atomicGroupOffsets = _l.atomicGroupOffsets;
-    var patternDowngraded = downgradePattern$1 && inputPattern !== pattern;
-    var ast = parse(pattern, unicode);
-    if (!downgradePattern$1 && isMissingStartAnchor(ast)) {
-      throw new Error("Pattern is not bounded at the start and needs downgrading. See the `downgradePattern` option.");
-    }
-    var result = collectResults({
-      atomicGroupOffsets,
-      caseInsensitive,
-      dotAll,
-      maxScore,
-      maxSteps,
-      multiLine,
-      node: ast,
-      timeout
-    });
-    return __assign(__assign({}, result.error ? {
-      error: result.error,
-      safe: false
-    } : {
-      error: null,
-      safe: true
-    }), { pattern, patternDowngraded, score: result.score === Infinity ? { infinite: true } : { infinite: false, value: result.score }, trails: result.trails.map(function(trail) {
-      var safeRegexTrail = {
-        trail: trail.map(function(_a2) {
-          var left = _a2.left, right = _a2.right;
-          var entry = {
-            a: {
-              backreferenceStack: toRedosDetectorBackReferenceStack(right.stack),
-              node: toRedosDetectorNode(right.node),
-              quantifierIterations: toRedosDetectorQuantifierIterations(right.stack)
-            },
-            b: {
-              backreferenceStack: toRedosDetectorBackReferenceStack(left.stack),
-              node: toRedosDetectorNode(left.node),
-              quantifierIterations: toRedosDetectorQuantifierIterations(left.stack)
-            }
-          };
-          return entry;
-        })
-      };
-      return safeRegexTrail;
-    }) });
-  }
-
-  // node_modules/@a2ui/web_core/src/v0_9/basic_catalog/functions/safe_regex.js
-  function isSafeRegex(pattern, options = {}) {
-    if (pattern === null || pattern === void 0 || typeof pattern !== "string") {
-      return true;
-    }
-    if (pattern.length === 0) {
-      return true;
-    }
-    const maxPatternLength = options.maxPatternLength ?? 256;
-    if (pattern.length > maxPatternLength) {
-      return false;
-    }
+    let tree;
     try {
-      new RegExp(pattern);
-      return isSafePattern(pattern).safe && isSafePattern(`^(?:${pattern})$`).safe;
-    } catch {
-      return false;
+      tree = parseRegexSubset(pattern);
+    } catch (err) {
+      if (err instanceof RegexSyntaxError) {
+        return {
+          ok: false,
+          reason: "UNSUPPORTED_SYNTAX",
+          detail: err.message
+        };
+      }
+      throw err;
     }
+    const safetyRejection = checkRegexSafety(pattern, tree);
+    if (safetyRejection !== null) {
+      return {
+        ok: false,
+        reason: safetyRejection,
+        detail: `Unsafe regex pattern (${safetyRejection})`
+      };
+    }
+    return { ok: true, tree };
   }
 
   // node_modules/@a2ui/web_core/src/common/basic_functions.js
@@ -16941,19 +16086,48 @@ var bwA2UI = (() => {
       ...isValid2 ? {} : { message: "This field is required." }
     };
   }
-  function validateRegex(val2, pattern) {
-    if (!isSafeRegex(pattern)) {
-      throw new A2uiExpressionError(`Unsafe regex pattern (catastrophic backtracking risk): ${pattern}`, "regex");
+  var MAX_REGEX_CACHE_ENTRIES = 256;
+  var compiledRegexCache = /* @__PURE__ */ new Map();
+  function getCompiledRegex(pattern) {
+    const cached = compiledRegexCache.get(pattern);
+    if (cached !== void 0) {
+      compiledRegexCache.delete(pattern);
+      compiledRegexCache.set(pattern, cached);
+      return cached;
     }
+    const analysis = analyzeRegex(pattern);
+    if (!analysis.ok) {
+      throw new A2uiExpressionError(`Invalid or unsafe regex pattern (${analysis.reason}): ${pattern}`, "regex");
+    }
+    let compiled;
     try {
-      const isValid2 = new RegExp(pattern).test(String(val2 ?? ""));
-      return {
-        valid: isValid2,
-        ...isValid2 ? {} : { message: "Value does not match required pattern." }
-      };
+      compiled = new RegExp(pattern, "u");
     } catch (e2) {
-      throw new A2uiExpressionError(`Invalid regex pattern: ${pattern}`, "regex", e2);
+      throw new A2uiExpressionError(`Invalid regex pattern (UNSUPPORTED_SYNTAX): ${pattern}`, "regex", e2);
     }
+    if (compiledRegexCache.size >= MAX_REGEX_CACHE_ENTRIES) {
+      const oldestKey = compiledRegexCache.keys().next().value;
+      if (oldestKey !== void 0) {
+        compiledRegexCache.delete(oldestKey);
+      }
+    }
+    compiledRegexCache.set(pattern, compiled);
+    return compiled;
+  }
+  function validateRegex(val2, pattern) {
+    const compiled = getCompiledRegex(pattern);
+    const strVal = String(val2 ?? "");
+    if (countCodePoints(strVal) > MAX_REGEX_VALUE_CODE_POINTS) {
+      return {
+        valid: false,
+        message: "Value exceeds the maximum length for pattern matching."
+      };
+    }
+    const isValid2 = compiled.test(strVal);
+    return {
+      valid: isValid2,
+      ...isValid2 ? {} : { message: "Value does not match required pattern." }
+    };
   }
   function validateLength(val2, min, max) {
     let len = 0;
@@ -17108,60 +16282,68 @@ var bwA2UI = (() => {
     }
     return rules;
   }
-  var isTruthy = (value) => !!value;
-  var isTruthyOrValid = (value) => {
-    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-      const valid = value.valid;
-      if (typeof valid === "boolean")
-        return valid;
-    }
-    return !!value;
-  };
-  function executeAnd(values, truthy = isTruthy) {
+  var isTruthyOrValid = coerceDynamicBoolean;
+  function executeAnd(values, truthy = coerceDynamicBoolean) {
     if (!Array.isArray(values) || values.length < 2) {
       throw new A2uiExpressionError("and requires at least 2 values", "and");
     }
     return values.every(truthy);
   }
-  function executeOr(values, truthy = isTruthy) {
+  function executeOr(values, truthy = coerceDynamicBoolean) {
     if (!Array.isArray(values) || values.length < 2) {
       throw new A2uiExpressionError("or requires at least 2 values", "or");
     }
     return values.some(truthy);
   }
-  function executeNot(value, truthy = isTruthy) {
+  function executeNot(value, truthy = coerceDynamicBoolean) {
     return !truthy(value);
   }
-  function adaptAstPartForV10(part) {
-    if (typeof part !== "object" || part === null || Array.isArray(part)) {
+  function defineOwn2(target, key, value) {
+    Object.defineProperty(target, key, { value, enumerable: true, writable: true, configurable: true });
+  }
+  function adaptAstPartForV10(part, catalogId) {
+    if (Array.isArray(part)) {
+      return part.map((item) => adaptAstPartForV10(item, catalogId));
+    }
+    if (typeof part !== "object" || part === null) {
       return part;
     }
-    if ("path" in part && typeof part.path === "string" && !("@path" in part)) {
+    if (typeof part.path === "string" && part.componentId === void 0 && part["@path"] === void 0) {
       return { "@path": part.path };
     }
-    if ("call" in part && typeof part.call === "string" && !("@call" in part)) {
+    const hasCall = typeof part.call === "string";
+    const hasAtCall = typeof part["@call"] === "string";
+    const callName = hasCall && !hasAtCall ? part.call : hasAtCall ? part["@call"] : void 0;
+    if (callName !== void 0) {
       const args = {};
-      if (part.args && typeof part.args === "object") {
+      if (part.args && typeof part.args === "object" && !Array.isArray(part.args)) {
         for (const [k, v2] of Object.entries(part.args)) {
-          args[k] = adaptAstPartForV10(v2);
+          defineOwn2(args, k, adaptAstPartForV10(v2, catalogId));
         }
       }
-      return { "@call": part.call, args, returnType: part.returnType };
+      const resolvedCatalogId = part.catalogId !== void 0 && part.catalogId !== null ? part.catalogId : catalogId !== void 0 && !callName.startsWith("@") ? catalogId : void 0;
+      return resolvedCatalogId !== void 0 ? { "@call": callName, args, catalogId: resolvedCatalogId } : { "@call": callName, args };
     }
-    return part;
+    const adaptedObj = {};
+    for (const [k, v2] of Object.entries(part)) {
+      defineOwn2(adaptedObj, k, adaptAstPartForV10(v2, catalogId));
+    }
+    return adaptedObj;
   }
   function executeFormatString(template, context) {
-    const parser2 = new ExpressionParser();
-    const parts = parser2.parse(template);
+    const parser = new ExpressionParser();
+    const parts = parser.parse(template);
     if (parts.length === 0)
       return "";
-    const atLeastV10 = isAtLeastVersion(context.surface?.protocolVersion ?? context.surface?.defaultCatalog?.protocolVersion, "1.0");
+    const atLeastV10 = typeof context.atLeastV10 === "boolean" ? context.atLeastV10 : isAtLeastVersion(context.surface?.protocolVersion ?? context.surface?.defaultCatalog?.protocolVersion, "1.0");
+    const catalogId = atLeastV10 ? activeCallCatalogId(context) : void 0;
+    const partContext = atLeastV10 ? withoutAgentRouting(context) : context;
     const dynamicParts = parts.map((part) => {
       if (typeof part !== "object" || part === null || Array.isArray(part)) {
         return part;
       }
-      const adapted = atLeastV10 ? adaptAstPartForV10(part) : part;
-      return context.resolveSignal(adapted);
+      const adapted = atLeastV10 ? adaptAstPartForV10(part, catalogId) : part;
+      return partContext.resolveSignal(adapted);
     });
     return computed(() => {
       return dynamicParts.map((p2) => coerceToString(isSignal(p2) ? getValue(p2) : p2)).join("");
@@ -17265,13 +16447,13 @@ var bwA2UI = (() => {
     }
     window.open(url.href, "_blank", "noopener,noreferrer");
   }
-  function createAndImplementation(api, { truthy = isTruthy } = {}) {
+  function createAndImplementation(api, { truthy = coerceDynamicBoolean } = {}) {
     return createFunctionImplementation(api, (args) => executeAnd(args.values, truthy));
   }
-  function createOrImplementation(api, { truthy = isTruthy } = {}) {
+  function createOrImplementation(api, { truthy = coerceDynamicBoolean } = {}) {
     return createFunctionImplementation(api, (args) => executeOr(args.values, truthy));
   }
-  function createNotImplementation(api, { truthy = isTruthy } = {}) {
+  function createNotImplementation(api, { truthy = coerceDynamicBoolean } = {}) {
     return createFunctionImplementation(api, (args) => executeNot(args.value, truthy));
   }
   function createFormatStringImplementation(api) {
@@ -17357,25 +16539,29 @@ var bwA2UI = (() => {
   var MAX_GLOBAL_DEPTH = 50;
   var MAX_FUNC_CALL_DEPTH = 5;
   var RELAXED_PATH_PATTERN = /^(?:(?:\/(?:[^~/]|~[01])*)*|(?:[^~/]|~[01])+(?:\/(?:[^~/]|~[01])*)*)$/;
-  function* extractPointers(val2, currentPath, nestedKeys) {
+  function* extractPointers(val2, currentPath, nestedKeys, inArray = false) {
     if (typeof val2 === "string") {
       yield [val2, currentPath];
     } else if (Array.isArray(val2)) {
       for (let idx = 0; idx < val2.length; idx++) {
         const item = val2[idx];
         const subPath = `${currentPath}[${idx}]`;
-        yield* extractPointers(item, subPath, nestedKeys);
+        yield* extractPointers(item, subPath, nestedKeys, true);
       }
     } else if (typeof val2 === "object" && val2 !== null) {
       const obj = val2;
-      if ("componentId" in obj && typeof obj.componentId === "string" && ("path" in obj || "dataBinding" in obj)) {
-        yield [obj.componentId, `${currentPath}.componentId`];
-      } else if (nestedKeys?.size) {
+      const isTemplate = Object.hasOwn(obj, "componentId") && typeof obj["componentId"] === "string" && (Object.hasOwn(obj, "path") || Object.hasOwn(obj, "dataBinding"));
+      const isV08ListWrapper = !inArray && (Array.isArray(obj["explicitList"]) || typeof obj["template"] === "object" && obj["template"] !== null);
+      if (nestedKeys?.size && (inArray || !isTemplate && !isV08ListWrapper || Array.from(nestedKeys).some((subKey) => Object.hasOwn(obj, subKey)))) {
         for (const subKey of nestedKeys) {
-          if (subKey in obj) {
+          if (Object.hasOwn(obj, subKey)) {
             yield* extractPointers(obj[subKey], `${currentPath}.${subKey}`);
           }
         }
+      } else if (isTemplate) {
+        yield [obj["componentId"], `${currentPath}.componentId`];
+      } else if (Object.hasOwn(obj, "path") || Object.hasOwn(obj, "@path") || Object.hasOwn(obj, "call") || Object.hasOwn(obj, "@call")) {
+        return;
       } else {
         for (const [subKey, subVal] of Object.entries(obj)) {
           yield* extractPointers(subVal, `${currentPath}.${subKey}`);
@@ -17443,8 +16629,8 @@ var bwA2UI = (() => {
           throw new A2uiValidationError(`Invalid path syntax: '${path}'`);
         }
       }
-      const isFunctionCallWrapper = "functionCall" in obj && typeof obj.functionCall === "object" && obj.functionCall !== null;
-      const isBareFunctionCall = ("call" in obj || "@call" in obj) && "args" in obj;
+      const isFunctionCallWrapper = Object.hasOwn(obj, "functionCall") && typeof obj.functionCall === "object" && obj.functionCall !== null;
+      const isBareFunctionCall = (Object.hasOwn(obj, "call") || Object.hasOwn(obj, "@call")) && Object.hasOwn(obj, "args");
       if (isFunctionCallWrapper) {
         if (funcDepth >= MAX_FUNC_CALL_DEPTH) {
           throw new A2uiRecursionError(`Recursion limit exceeded: functionCall depth > ${MAX_FUNC_CALL_DEPTH}`);
@@ -17775,7 +16961,57 @@ var bwA2UI = (() => {
     return isAtLeastVersion(canonical, "1.0") ? canonical : `v${canonical}`;
   }
   var SurfaceModel = class {
-    constructor(id, defaultCatalog, availableCatalogsOrTheme = /* @__PURE__ */ new Map(), themeOrSendDataModel = {}, sendDataModelOrDataModel = false, dataModel, rootId = "root", metadata, protocolVersion) {
+    /**
+     * Sends calls to functions the renderer does not implement to the agent.
+     *
+     * When set, a v1.0 catalog's invoker routes a call whose function has no
+     * local implementation in that catalog (undeclared, or declared
+     * schema-only) here instead of failing, as the v1.0 fallback routing
+     * defines. When unset, such a call fails with an `EXPRESSION_ERROR`.
+     *
+     * Setting a different caller, or clearing it, drops the shared in-flight
+     * calls and the cached answers of the previous one.
+     */
+    get agentFunctionCaller() {
+      return this._agentFunctionCaller;
+    }
+    set agentFunctionCaller(caller) {
+      if (caller === this._agentFunctionCaller)
+        return;
+      this._agentFunctionCaller = caller;
+      this.inFlightAgentCalls.clear();
+      this.settledAgentCalls.clear();
+    }
+    /**
+     * The most settled agent function answers this surface caches (256 by
+     * default). When the cache is full, the oldest answer is evicted first.
+     * Lowering it evicts the oldest answers beyond the new bound.
+     *
+     * @throws {RangeError} On set, if the value isn't a positive integer.
+     */
+    get maxAgentCallCacheEntries() {
+      return this._maxAgentCallCacheEntries;
+    }
+    set maxAgentCallCacheEntries(value) {
+      assertMaxAgentCallCacheEntries(value);
+      this._maxAgentCallCacheEntries = value;
+      while (this.settledAgentCalls.size > value) {
+        this.evictOldestAgentCall();
+      }
+    }
+    evictOldestAgentCall() {
+      const oldestKey = this.settledAgentCalls.keys().next().value;
+      if (oldestKey !== void 0) {
+        this.settledAgentCalls.delete(oldestKey);
+      }
+    }
+    /**
+     * Whether this surface has been disposed.
+     */
+    get disposed() {
+      return this.isDisposed;
+    }
+    constructor(id, defaultCatalog, availableCatalogsOrTheme = /* @__PURE__ */ new Map(), themeOrSendDataModel = {}, sendDataModelOrDataModel = false, dataModel, rootId = "root", metadata, protocolVersion, maxAgentCallCacheEntries) {
       this.id = id;
       this.defaultCatalog = defaultCatalog;
       this.rootId = rootId;
@@ -17787,6 +17023,14 @@ var bwA2UI = (() => {
       this.onError = this._onError;
       this.onWarning = this._onWarning;
       this.onMetadataChanged = this._onMetadataChanged;
+      this.inFlightAgentCalls = /* @__PURE__ */ new Map();
+      this.settledAgentCalls = /* @__PURE__ */ new Map();
+      this._maxAgentCallCacheEntries = DEFAULT_MAX_AGENT_CALL_CACHE_ENTRIES;
+      this.isDisposed = false;
+      if (maxAgentCallCacheEntries !== void 0) {
+        assertMaxAgentCallCacheEntries(maxAgentCallCacheEntries);
+        this._maxAgentCallCacheEntries = maxAgentCallCacheEntries;
+      }
       this._metadataSignal = signal(cloneMetadata(metadata));
       this.metadataSignal = computed(() => getValue(this._metadataSignal));
       this.protocolVersion = canonicalProtocolVersion(protocolVersion ?? defaultCatalog?.protocolVersion);
@@ -17846,6 +17090,108 @@ var bwA2UI = (() => {
      */
     resolveCatalog(catalogId, subject = "Item") {
       return resolveSurfaceCatalog(this, catalogId, subject);
+    }
+    /**
+     * Sends a function call to the agent through {@link agentFunctionCaller}.
+     *
+     * For reactive bindings, a settled answer for the same catalog, function and
+     * canonical arguments is returned from the surface cache, and a call
+     * identical to one still awaiting its response shares that response instead
+     * of sending another message, so re-evaluating a binding or flipping a bound
+     * argument back does not repeat the request. Each caller receives its own
+     * copy of a shared or cached answer. Failed calls are evicted on failure,
+     * and imperative action calls (`bypassCache`) always execute fresh.
+     *
+     * Arguments that JSON cannot represent (such as `NaN`, a `Date` or an
+     * `undefined` array element) fail the call locally; an `undefined` object
+     * property is omitted.
+     *
+     * @param call The call to send, naming the catalog it resolved to.
+     * @param options Optional settings: an `abortSignal`, and `bypassCache` for
+     *   imperative action calls.
+     * @returns A promise resolving to the agent's result.
+     * @throws {A2uiRpcError} Through the returned promise, with code
+     *   `CANCELLED`, if the surface is disposed, or is disposed or given another
+     *   caller before the call is sent.
+     * @throws {A2uiExpressionError} Through the returned promise, if no
+     *   {@link agentFunctionCaller} is set or the arguments are not valid JSON.
+     */
+    callAgentFunction(call, options) {
+      const abortSignal = options?.abortSignal;
+      if (this.isDisposed) {
+        return Promise.reject(new A2uiRpcError(`Surface '${this.id}' has been disposed.`, RpcErrorCode.CANCELLED));
+      }
+      const caller = this.agentFunctionCaller;
+      if (!caller) {
+        return Promise.reject(new A2uiExpressionError(`Function '${call["@call"]}' is not implemented locally and surface '${this.id}' cannot call the agent.`, call["@call"]));
+      }
+      if (abortSignal?.aborted) {
+        return Promise.resolve(void 0);
+      }
+      let args;
+      try {
+        args = toJsonValue(call.args ?? {});
+      } catch (e2) {
+        return Promise.reject(new A2uiExpressionError(`Arguments of function '${call["@call"]}' are not valid JSON: ${e2.message}.`, call["@call"]));
+      }
+      call = { ...call, args };
+      const bypassCache = Boolean(options?.bypassCache);
+      const key = bypassCache ? void 0 : canonicalJsonKey([call.catalogId, call["@call"], args]);
+      if (key !== void 0) {
+        const settled = this.settledAgentCalls.get(key);
+        if (settled !== void 0) {
+          return Promise.resolve(cloneAnswer(settled.value));
+        }
+        const inFlight = this.inFlightAgentCalls.get(key);
+        if (inFlight) {
+          if (abortSignal) {
+            inFlight.signals.add(abortSignal);
+          } else {
+            inFlight.hasUnabortedCaller = true;
+          }
+          return inFlight.promise.then(cloneAnswer);
+        }
+      }
+      const entry = {
+        promise: void 0,
+        signals: new Set(abortSignal ? [abortSignal] : []),
+        hasUnabortedCaller: !abortSignal
+      };
+      const release = () => {
+        if (key !== void 0 && this.inFlightAgentCalls.get(key) === entry) {
+          this.inFlightAgentCalls.delete(key);
+        }
+      };
+      const pending = Promise.resolve().then(() => {
+        if (this.isDisposed || this._agentFunctionCaller !== caller) {
+          release();
+          throw new A2uiRpcError(`Pending calls for surface '${this.id}' were cancelled.`, RpcErrorCode.CANCELLED);
+        }
+        if (!entry.hasUnabortedCaller && Array.from(entry.signals).every((s2) => s2.aborted)) {
+          release();
+          return void 0;
+        }
+        return caller(call).then((val2) => {
+          release();
+          if (key !== void 0 && !this.isDisposed && this._agentFunctionCaller === caller) {
+            this.settledAgentCalls.delete(key);
+            while (this.settledAgentCalls.size >= this._maxAgentCallCacheEntries) {
+              this.evictOldestAgentCall();
+            }
+            this.settledAgentCalls.set(key, { value: cloneAnswer(val2) });
+          }
+          return val2;
+        }, (err) => {
+          release();
+          throw err;
+        });
+      });
+      entry.promise = pending;
+      if (key !== void 0) {
+        this.inFlightAgentCalls.set(key, entry);
+        pending.then(release, release);
+      }
+      return pending;
     }
     /**
      * Synchronous snapshot of the surface's metadata envelope.
@@ -17926,12 +17272,32 @@ var bwA2UI = (() => {
      * and `metadata`, and emits an `ActionPayload` via `onAction`. Local function
      * actions (`functionCall`) are executed locally and are not emitted as agent actions.
      *
+     * `payload` may be pending, as the result of `DataContext.resolveAction` is
+     * for an event action that waits on asynchronous calls, and its `context`
+     * and `userMessage` may hold pending values; all are awaited before the
+     * action is emitted. If any of them fails, nothing is emitted: a failure
+     * that was already reported, or a cancelled agent call, is not reported
+     * again, and any other rejection is reported as an `INVALID_ACTION`.
+     *
+     * A `userMessage` that is not a non-empty string is left out of the emitted
+     * action, whether it was given directly or settled from a pending value.
+     * `DataContext.resolveAction` is what reports an `INVALID_ACTION` for an
+     * expression that does not resolve to a string.
+     *
      * @param payload Action payload (name and context) to dispatch.
      * @param sourceComponentId Identifier of the component that triggered the action.
      * @param metadata Optional metadata envelope to attach to the outbound action.
      * @returns A promise that resolves once all registered listeners have processed the action.
      */
     async dispatchAction(payload, sourceComponentId, metadata) {
+      try {
+        if (isThenable(payload)) {
+          payload = await payload;
+        }
+      } catch (e2) {
+        await this.reportUnresolvedAction(e2);
+        return;
+      }
       if (!payload || typeof payload !== "object") {
         return;
       }
@@ -17943,8 +17309,28 @@ var bwA2UI = (() => {
       if (!name || typeof name !== "string") {
         return;
       }
-      const rawContext = eventPayload.context;
-      const context = rawContext && typeof rawContext === "object" && !Array.isArray(rawContext) ? rawContext : {};
+      let context = {};
+      let resolvedUserMessage = void 0;
+      try {
+        const settledContext = settleDeep(eventPayload.context);
+        const rawContext = isThenable(settledContext) ? await settledContext : settledContext;
+        if (findFailedArgument(rawContext)) {
+          return;
+        }
+        if (rawContext && typeof rawContext === "object" && !Array.isArray(rawContext)) {
+          context = rawContext;
+        }
+        if (eventPayload.userMessage !== void 0) {
+          const settledMsg = settleDeep(eventPayload.userMessage);
+          resolvedUserMessage = isThenable(settledMsg) ? await settledMsg : settledMsg;
+          if (findFailedArgument(resolvedUserMessage)) {
+            return;
+          }
+        }
+      } catch (e2) {
+        await this.reportUnresolvedAction(e2);
+        return;
+      }
       const actionToDispatch = {
         name,
         surfaceId: this.id,
@@ -17956,8 +17342,8 @@ var bwA2UI = (() => {
       if (typeof catalogId === "string" && catalogId) {
         actionToDispatch.catalogId = catalogId;
       }
-      if (typeof eventPayload.userMessage === "string" && eventPayload.userMessage.length > 0) {
-        actionToDispatch.userMessage = eventPayload.userMessage;
+      if (typeof resolvedUserMessage === "string" && resolvedUserMessage.length > 0) {
+        actionToDispatch.userMessage = resolvedUserMessage;
       }
       const payloadMetadata = eventPayload.metadata ?? payload.metadata;
       const mergedMetadata = mergeActionMetadata(payloadMetadata, metadata);
@@ -17965,6 +17351,19 @@ var bwA2UI = (() => {
         actionToDispatch.metadata = mergedMetadata;
       }
       await this._onAction.emit(actionToDispatch);
+    }
+    /**
+     * Reports a pending action value that rejected, unless the rejection is the
+     * cancellation of an agent call.
+     */
+    async reportUnresolvedAction(e2) {
+      if (isCancellation2(e2))
+        return;
+      await this.dispatchError({
+        code: "INVALID_ACTION",
+        surfaceId: this.id,
+        message: `Action could not be resolved: ${e2?.message ?? String(e2)}`
+      });
     }
     /**
      * Dispatches an error from this surface to registered listeners.
@@ -17975,7 +17374,7 @@ var bwA2UI = (() => {
     async dispatchError(error) {
       await this._onError.emit({
         ...error,
-        surfaceId: this.id
+        ...error.functionCallId !== void 0 ? {} : { surfaceId: this.id }
       });
     }
     /**
@@ -17994,6 +17393,10 @@ var bwA2UI = (() => {
      * Disposes the surface, data model, components, and event emitters.
      */
     dispose() {
+      this.isDisposed = true;
+      this._agentFunctionCaller = void 0;
+      this.inFlightAgentCalls.clear();
+      this.settledAgentCalls.clear();
       this.dataModel.dispose();
       this.componentsModel.dispose();
       this._onAction.dispose();
@@ -18002,6 +17405,25 @@ var bwA2UI = (() => {
       this._onMetadataChanged.dispose();
     }
   };
+  var DEFAULT_MAX_AGENT_CALL_CACHE_ENTRIES = 256;
+  function assertMaxAgentCallCacheEntries(value) {
+    if (typeof value !== "number" || !Number.isInteger(value) || value < 1) {
+      throw new RangeError("maxAgentCallCacheEntries must be a positive integer.");
+    }
+  }
+  function cloneAnswer(value) {
+    if (value === null || typeof value !== "object") {
+      return value;
+    }
+    try {
+      return structuredClone(value);
+    } catch {
+      return value;
+    }
+  }
+  function isCancellation2(e2) {
+    return e2 instanceof A2uiRpcError && e2.code === RpcErrorCode.CANCELLED;
+  }
   function extractActionTarget(payload) {
     if ("event" in payload && payload.event && typeof payload.event === "object") {
       return payload.event;
@@ -18048,9 +17470,7 @@ var bwA2UI = (() => {
         return;
       }
       this.surfaces.set(surface.id, surface);
-      const sub = surface.onAction.subscribe((action) => {
-        void this._onAction.emit(action);
-      });
+      const sub = surface.onAction.subscribe((action) => this._onAction.emit(action));
       this.surfaceUnsubscribers.set(surface.id, sub);
       const errSub = surface.onError.subscribe((err) => {
         void this._onError.emit(err);
@@ -18258,6 +17678,11 @@ var bwA2UI = (() => {
     }
     /**
      * Serialized JSON representation of the component definition.
+     *
+     * The component's envelope metadata, which only v1.0 components carry, is
+     * always written as `@metadata`. A bare `metadata` key is left to the
+     * component's own property of that name, so the tree reads back the same
+     * way whether or not the schema declares one.
      */
     get componentTree() {
       const metadata = this.metadata;
@@ -18265,7 +17690,7 @@ var bwA2UI = (() => {
         ...this._properties,
         id: this.id,
         component: this.type,
-        ...metadata !== void 0 ? { metadata } : {}
+        ...metadata !== void 0 ? { "@metadata": metadata } : {}
       };
     }
   };
@@ -18347,11 +17772,11 @@ var bwA2UI = (() => {
     if (details instanceof external_exports.ZodError) {
       issues = details.issues;
     } else if (Array.isArray(details) && details.length > 0) {
-      const first = details[0];
-      if (typeof first?.["path"] === "string") {
-        return normalizeJsonPointer(first["path"]);
+      const first2 = details[0];
+      if (typeof first2?.["path"] === "string") {
+        return normalizeJsonPointer(first2["path"]);
       }
-      if (Array.isArray(first?.["path"])) {
+      if (Array.isArray(first2?.["path"])) {
         issues = details;
       }
     }
@@ -18674,15 +18099,14 @@ var bwA2UI = (() => {
   function batchGraph(surface, newComponents, resolveCatalog) {
     const batch = { children: /* @__PURE__ */ new Map(), types: /* @__PURE__ */ new Map(), catalogs: /* @__PURE__ */ new Map() };
     for (const comp of newComponents) {
-      const { id, component: component2, ...properties } = comp;
+      const { id, component: component2 } = comp;
       if (typeof id !== "string" || !id)
         continue;
       const catalog = resolveCatalog(comp, surface);
-      delete properties.catalogId;
-      delete properties.metadata;
       const type = (typeof component2 === "string" ? component2 : surface.componentsModel.get(id)?.type) || "";
       if (!type || catalog.components.size === 0)
         return void 0;
+      const { properties } = componentPayloadState(comp, surface.protocolVersion, catalog.components.get(type)?.schema, { defaultCatalogSchema: surface.defaultCatalog?.components.get(type)?.schema });
       const children = Array.from(getComponentReferences({ ...properties, id, component: type }, catalog.componentRefMap), ([childId]) => childId);
       batch.children.set(id, children);
       batch.types.set(id, type);
@@ -18934,16 +18358,15 @@ var bwA2UI = (() => {
       candidateModel.addComponent(new ComponentModel(id, comp.type, comp.properties, comp.catalog));
     }
     for (const comp of newComponents) {
-      const { id, component: component2, ...properties } = comp;
+      const { id, component: component2 } = comp;
       if (typeof id !== "string" || !id)
         continue;
       const targetCatalog = resolveCatalog(comp, surface);
-      delete properties.catalogId;
-      delete properties.metadata;
       const existing = candidateModel.get(id);
       const componentType = (typeof component2 === "string" ? component2 : existing?.type) || "";
       if (!componentType)
         continue;
+      const { properties } = componentPayloadState(comp, surface.protocolVersion, targetCatalog.components.get(componentType)?.schema, { defaultCatalogSchema: surface.defaultCatalog?.components.get(componentType)?.schema });
       if (existing) {
         if (componentType !== existing.type || existing.catalog.id !== targetCatalog.id) {
           candidateModel.removeComponent(id);
@@ -19050,6 +18473,17 @@ var bwA2UI = (() => {
       }
     }
   }
+  function selectActionUnionError(error, actionKey, nativeActionKeys) {
+    if (error.issues.length !== 1) {
+      return error;
+    }
+    const rootIssue = error.issues[0];
+    if (rootIssue.code !== external_exports.ZodIssueCode.invalid_union || rootIssue.path.length !== 0) {
+      return error;
+    }
+    const matchingBranches = rootIssue.unionErrors.filter((branchErr) => !branchErr.issues.some((issue) => issue.code === external_exports.ZodIssueCode.unrecognized_keys && issue.path.length === 0 && issue.keys.includes(actionKey) || issue.code === external_exports.ZodIssueCode.invalid_type && issue.path.length === 1 && issue.path[0] !== actionKey && nativeActionKeys.includes(String(issue.path[0])) && issue.received === "undefined"));
+    return matchingBranches.length === 1 ? matchingBranches[0] : error;
+  }
   var BaseVersionAdapter = class {
     /** Canonical catalog protocol versions compatible with this adapter. */
     get compatibleCatalogVersions() {
@@ -19067,19 +18501,19 @@ var bwA2UI = (() => {
       }
       return isCatalogVersionCompatible(catalogVersion, this.version);
     }
-    extractOperations(payload) {
+    extractOperations(payload, options) {
       if (!payload || typeof payload !== "object")
         return [];
       if (Array.isArray(payload)) {
-        return payload.flatMap((item) => this.extractOperations(item));
+        return payload.flatMap((item) => this.extractOperations(item, options));
       }
       const msgObj = payload;
       if (Array.isArray(msgObj.messages)) {
-        return this.extractOperations(msgObj.messages);
+        return this.extractOperations(msgObj.messages, options);
       }
       const nativeActionKeys = this.getNativeActionKeys();
       validateActionSurfaceIds(msgObj, nativeActionKeys);
-      const presentNativeKeys = nativeActionKeys.filter((k) => k in msgObj).sort();
+      const presentNativeKeys = nativeActionKeys.filter((k) => Object.hasOwn(msgObj, k)).sort();
       if (presentNativeKeys.length > 1) {
         throw new A2uiValidationError(`Message contains multiple conflicting update actions: ${presentNativeKeys.join(", ")}.`);
       }
@@ -19093,19 +18527,20 @@ var bwA2UI = (() => {
         }
         throw new A2uiValidationError(`Invalid ${this.version} message: message must contain exactly one update action: ${sortedAllowed}.`);
       }
-      const preparedPayload = this.preparePayloadForValidation(msgObj);
+      const preparedPayload = this.preparePayloadForValidation(msgObj, options);
       const parseResult = this.schema.safeParse(preparedPayload);
       if (!parseResult.success) {
-        const formattedErrors = parseResult.error.errors.map(formatZodIssue).join("; ");
+        const scopedError = selectActionUnionError(parseResult.error, presentNativeKeys[0], nativeActionKeys);
+        const formattedErrors = scopedError.errors.map(formatZodIssue).join("; ");
         const envCtx = extractEnvelopeErrorContext(msgObj, this.version);
-        const preliminaryErr = new A2uiValidationError(`Invalid ${this.version} message: ${formattedErrors}`, parseResult.error, "VALIDATION_ERROR");
+        const preliminaryErr = new A2uiValidationError(`Invalid ${this.version} message: ${formattedErrors}`, scopedError, "VALIDATION_ERROR");
         const mapped = mapErrorToRendererMessage(preliminaryErr, envCtx);
         preliminaryErr.path = mapped.error.path;
         preliminaryErr.surfaceId = mapped.error.surfaceId || void 0;
         preliminaryErr.functionCallId = mapped.error.functionCallId;
         throw preliminaryErr;
       }
-      return this.extractOperationsFromObject(msgObj);
+      return this.extractOperationsFromObject(preparedPayload);
     }
     /**
      * Normalizes the message object before running schema validation.
@@ -19113,9 +18548,10 @@ var bwA2UI = (() => {
      * Defaults to attaching `version` if not present.
      *
      * @param msgObj Raw message object.
+     * @param _options Optional validation configuration options.
      * @returns Normalized message payload for schema validation.
      */
-    preparePayloadForValidation(msgObj) {
+    preparePayloadForValidation(msgObj, _options) {
       return "version" in msgObj ? msgObj : { version: this.version, ...msgObj };
     }
   };
@@ -19189,7 +18625,7 @@ var bwA2UI = (() => {
     literalBoolean: external_exports.boolean().optional(),
     literal: external_exports.boolean().optional()
   }).strict().superRefine(exactlyOneKey);
-  var ActionSchema3 = external_exports.object({
+  var ActionSchema4 = external_exports.object({
     name: external_exports.string().describe("A unique name identifying the action (e.g., 'submitForm')."),
     context: external_exports.array(external_exports.object({
       key: external_exports.string(),
@@ -19257,7 +18693,7 @@ var bwA2UI = (() => {
   });
   var ButtonSchema = external_exports.object({
     child: external_exports.string().describe("The ID of the component to display as the button's content."),
-    action: ActionSchema3.describe("Represents a user-initiated action."),
+    action: ActionSchema4.describe("Represents a user-initiated action."),
     primary: external_exports.boolean().optional().describe("Indicates if this button should be styled as the primary action.")
   });
   var CheckboxSchema = external_exports.object({
@@ -19446,7 +18882,7 @@ var bwA2UI = (() => {
         message: "A2UI Protocol message must have exactly one of: surfaceUpdate, dataModelUpdate, beginRendering, deleteSurface."
       });
     }
-  }).describe("Describes a JSON payload for an A2UI (Agent to UI) message, which is used to dynamically construct and update user interfaces. A message MUST contain exactly ONE of the action properties: 'beginRendering', 'surfaceUpdate', 'dataModelUpdate', or 'deleteSurface'.");
+  }).describe("Describes a JSON payload for an A2UI message, which is used to dynamically construct and update user interfaces. A message MUST contain exactly ONE of the action properties: 'beginRendering', 'surfaceUpdate', 'dataModelUpdate', or 'deleteSurface'.");
 
   // node_modules/@a2ui/web_core/src/processing/adapters/v0_8.js
   function normalizeV08Component(comp) {
@@ -19717,6 +19153,19 @@ var bwA2UI = (() => {
     getNativeActionKeys() {
       return [...INTERNAL_OPERATION_TYPES];
     }
+    preparePayloadForValidation(msgObj, options) {
+      const payload = super.preparePayloadForValidation(msgObj, options);
+      const allowUnknownElements = options ? options.allowUnknownElements ?? false : true;
+      if (allowUnknownElements && typeof payload.createSurface === "object" && payload.createSurface !== null && !Array.isArray(payload.createSurface)) {
+        const cs = payload.createSurface;
+        if ("theme" in cs) {
+          const withoutTheme = { ...cs };
+          delete withoutTheme.theme;
+          return { ...payload, createSurface: withoutTheme };
+        }
+      }
+      return payload;
+    }
     extractOperationsFromObject(msgObj) {
       const ops = [];
       if ("createSurface" in msgObj) {
@@ -19725,7 +19174,6 @@ var bwA2UI = (() => {
           type: "createSurface",
           surfaceId: String(cs?.surfaceId || ""),
           catalogId: typeof cs?.catalogId === "string" ? cs.catalogId : void 0,
-          theme: cs?.theme,
           sendDataModel: Boolean(cs?.sendDataModel),
           components: Array.isArray(cs?.components) ? cs.components : void 0,
           dataModel: cs?.dataModel && typeof cs.dataModel === "object" && !Array.isArray(cs.dataModel) ? cs.dataModel : void 0,
@@ -19891,7 +19339,6 @@ var bwA2UI = (() => {
   registerKnownActionsProvider(() => defaultVersionAdapterFactory.getAllKnownActions());
 
   // node_modules/@a2ui/web_core/src/validation/payload-validator.js
-  var COMPONENT_ENVELOPE_KEYS2 = ["id", "component", "catalogId", "metadata"];
   function getSystemFunctionApi(name) {
     return name === IndexApi.name ? IndexApi : void 0;
   }
@@ -19902,6 +19349,11 @@ var bwA2UI = (() => {
   }
   function nonStringCatalogIdMessage(name) {
     return `Function call '${name}' has a non-string 'catalogId'.`;
+  }
+  function assertRendererMayCall(catalog, name) {
+    if (catalog.functions.get(name)?.allowedCallers !== "agentOnly")
+      return;
+    throw new A2uiValidationError(`Function '${name}' cannot be called by renderer (allowedCallers is agentOnly).`);
   }
   function nestedCallRunsInCatalog(callCatalogId, catalogId, { catalogIsDefault }) {
     if (callCatalogId === void 0) {
@@ -19960,22 +19412,28 @@ var bwA2UI = (() => {
         const msg = `Cannot create component ${id} without a type.`;
         throw new A2uiValidationError(msg, [{ path: "/component", code: "missing_field", message: msg }], "VALIDATION_ERROR", { path: "/component" });
       }
-      const rawCatalogId = comp["catalogId"];
-      const componentCatalogId = typeof rawCatalogId === "string" ? rawCatalogId : void 0;
-      const properties = stripEnvelopeKeys(comp);
+      this.assertIdentifier(componentType, `Component type '${componentType}' must be a valid UAX #31 identifier`, false, "/component");
       const componentApi = this.catalog.components.get(componentType);
+      const split = this.enforceIdentifiers ? splitComponentEnvelope(comp, componentMixinLayout(componentApi?.schema)) : { properties: stripStructuralKeys(comp), mixins: {} };
+      const properties = split.properties;
+      const rawCatalogId = split.mixins.catalogId?.value;
+      const componentCatalogId = typeof rawCatalogId === "string" ? rawCatalogId : void 0;
       if (!componentApi) {
         if (!this.allowUnknown) {
           const msg = `Unknown component type '${componentType}' not found in catalog '${this.catalog.id}'.`;
           throw new A2uiValidationError(msg, [{ path: "/component", code: "invalid_value", message: msg }], "VALIDATION_ERROR", { path: "/component" });
         }
+        this.validateEnvelopeMixins(split.mixins, void 0, properties, componentType, id, componentCatalogId);
         if (!options?.skipNestedFunctions) {
           this.validateNestedFunctions(properties, componentCatalogId);
         }
         return;
       }
-      const knownKeys = getKnownSchemaKeys(componentApi.schema);
-      this.validateCommonEnvelopeFields(properties, knownKeys, componentType, id, componentCatalogId);
+      if (this.enforceIdentifiers) {
+        this.validateEnvelopeMixins(split.mixins, componentMixinLayout(componentApi.schema), properties, componentType, id, componentCatalogId);
+      } else {
+        this.validateLegacyAccessibility(properties, getKnownSchemaKeys(componentApi.schema), componentType, id);
+      }
       const result = componentApi.schema.safeParse(properties);
       if (!result.success) {
         const formattedErrors = result.error.errors.map(formatZodIssue).join(", ");
@@ -19985,36 +19443,98 @@ var bwA2UI = (() => {
         throw new A2uiValidationError(`Validation failed for component '${componentType}' (${id}): ${formattedErrors}`, details, "VALIDATION_ERROR", { path: firstPath && firstPath !== "/" ? firstPath : void 0 });
       }
       if (!options?.skipNestedFunctions) {
-        this.validateNestedFunctions(properties, componentCatalogId);
+        this.validateNestedFunctions(properties, componentCatalogId, "", componentApi.schema);
       }
     }
     /**
-     * Validates `accessibility` and `metadata` from `ComponentCommon` when the
-     * component schema does not explicitly declare them, removing them from
-     * `properties` before strict component schema parsing.
+     * Validates a pre-1.0 component's `ComponentCommon` `accessibility` when the
+     * component schema does not declare it, removing it from `properties`
+     * before strict component schema parsing.
+     *
+     * Below v1.0 `metadata` and `catalogId` are not part of the protocol, so a
+     * component carrying them is checked against its own schema like any other
+     * property.
      */
-    validateCommonEnvelopeFields(properties, knownKeys, componentType, id, componentCatalogId) {
-      if ("accessibility" in properties && !knownKeys?.has("accessibility")) {
-        const accVal = properties["accessibility"];
-        delete properties["accessibility"];
-        const accResult = AccessibilityAttributesSchema2.optional().safeParse(accVal);
-        if (!accResult.success) {
-          const formattedErrors = accResult.error.errors.map(formatZodIssue).join(", ");
-          const details = zodIssuesToDetails(accResult.error.issues, "/accessibility");
-          throw new A2uiValidationError(`Validation failed for component '${componentType}' (${id}): ${formattedErrors}`, details, "VALIDATION_ERROR", { path: details[0]?.path });
+    validateLegacyAccessibility(properties, knownKeys, componentType, id) {
+      if (!("accessibility" in properties) || knownKeys?.has("accessibility"))
+        return;
+      const accVal = properties["accessibility"];
+      delete properties["accessibility"];
+      this.parseEnvelopeValue(AccessibilityAttributesSchema2.optional(), accVal, "/accessibility", {
+        componentType,
+        id
+      });
+      this.validateNestedFunctions(accVal, void 0, "/accessibility", AccessibilityAttributesSchema2);
+    }
+    /**
+     * Validates the v1.0 envelope mixins a component carries.
+     *
+     * A mixin the component's schema declares with its standard schema (such
+     * as `checks` on a `Checkable` component) is put back into `properties`
+     * under that schema's key, so the component schema checks it. Any other
+     * mixin is checked here: `@metadata` against `ComponentCommon` (including
+     * the UAX #31 `extensions` keys), `@catalogId` as a string,
+     * `@accessibility` against `AccessibilityAttributes`. `@checks` is
+     * rejected on a component that is not checkable.
+     *
+     * @param mixins The component's envelope mixins.
+     * @param layout The component's mixin layout, or `undefined` when the
+     *   component type is unknown to the catalog.
+     * @param properties The component's own properties, which this may extend.
+     * @param componentType The component's type, for error messages.
+     * @param id The component's id, for error messages.
+     * @param componentCatalogId The catalog the component names, if any.
+     * @throws {A2uiValidationError} If a mixin is invalid.
+     */
+    validateEnvelopeMixins(mixins, layout, properties, componentType, id, componentCatalogId) {
+      const subject = { componentType, id };
+      for (const [key, mixin] of Object.entries(mixins)) {
+        const path = `/${mixin.wireKey}`;
+        if (key === "metadata") {
+          this.parseEnvelopeValue(ComponentCommonSchema2.shape["@metadata"], mixin.value, path, subject);
+          rethrowAt(path, () => validateMetadata(mixin.value));
         }
-        this.validateNestedFunctions(accVal, componentCatalogId, "/accessibility");
-      }
-      if ("metadata" in properties && !knownKeys?.has("metadata")) {
-        const metaVal = properties["metadata"];
-        delete properties["metadata"];
-        const metaResult = ComponentCommonSchema2.shape.metadata.safeParse(metaVal);
-        if (!metaResult.success) {
-          const formattedErrors = metaResult.error.errors.map(formatZodIssue).join(", ");
-          const details = zodIssuesToDetails(metaResult.error.issues, "/metadata");
-          throw new A2uiValidationError(`Validation failed for component '${componentType}' (${id}): ${formattedErrors}`, details, "VALIDATION_ERROR", { path: details[0]?.path });
+        const schemaKey = layout?.schemaKeys.get(key);
+        if (schemaKey !== void 0) {
+          properties[schemaKey] = mixin.value;
+          continue;
+        }
+        switch (key) {
+          case "catalogId":
+            if (typeof mixin.value !== "string") {
+              const msg = `Component '${id}' has a non-string '${mixin.wireKey}'.`;
+              throw new A2uiValidationError(msg, [{ path, code: "invalid_value", message: msg }], "VALIDATION_ERROR", { path });
+            }
+            break;
+          case "accessibility":
+            this.parseEnvelopeValue(AccessibilityAttributesSchema2.optional(), mixin.value, path, subject);
+            this.validateNestedFunctions(mixin.value, componentCatalogId, path, AccessibilityAttributesSchema2);
+            break;
+          case "checks":
+            if (layout) {
+              const msg = `Component '${componentType}' (${id}) is not checkable and does not accept '${mixin.wireKey}'.`;
+              throw new A2uiValidationError(msg, [{ path, code: "invalid_value", message: msg }], "VALIDATION_ERROR", { path });
+            }
+            this.validateNestedFunctions(mixin.value, componentCatalogId, path);
+            break;
+          default:
+            break;
         }
       }
+    }
+    /**
+     * Parses an envelope value against its schema.
+     *
+     * @throws {A2uiValidationError} If the value does not satisfy the schema,
+     *   with paths under `path`.
+     */
+    parseEnvelopeValue(schema, value, path, { componentType, id }) {
+      const result = schema.safeParse(value);
+      if (result.success)
+        return;
+      const formattedErrors = result.error.errors.map(formatZodIssue).join(", ");
+      const details = zodIssuesToDetails(result.error.issues, path);
+      throw new A2uiValidationError(`Validation failed for component '${componentType}' (${id}): ${formattedErrors}`, details, "VALIDATION_ERROR", { path: details[0]?.path });
     }
     /**
      * Asserts that a v1.0 call's envelope is well formed without consulting its
@@ -20056,11 +19576,12 @@ var bwA2UI = (() => {
      * @param componentCatalogId The `catalogId` the component names, if any.
      * @throws {A2uiValidationError} If any nested function call fails schema or identifier validation.
      */
-    checkNestedCallRecord(record, rawName, componentCatalogId) {
+    checkNestedCallRecord(record, rawName, componentCatalogId, slotSchema) {
       const rawArgs = record["args"];
       const argsDict = rawArgs !== void 0 ? rawArgs : {};
       if (!this.enforceIdentifiers) {
         this.validateFunction(rawName, argsDict);
+        this.assertPreV10ReturnType(record, rawName, slotSchema);
         return;
       }
       if (rawName.startsWith("@")) {
@@ -20075,16 +19596,35 @@ var bwA2UI = (() => {
       if (nestedCallRunsInCatalog(callCatalogId, this.catalog.id, {
         catalogIsDefault: componentCatalogId === void 0
       })) {
+        assertRendererMayCall(this.catalog, rawName);
         this.validateFunction(rawName, argsDict);
       } else {
         this.assertFunctionIdentifiers(rawName, argsDict);
       }
     }
-    validateNestedFunctions(val2, componentCatalogId, currentPath = "") {
+    /**
+     * Validates a pre-1.0 function call's `returnType` against both the catalog
+     * function definition and the enclosing typed `Dynamic*` slot schema.
+     */
+    assertPreV10ReturnType(record, rawName, slotSchema) {
+      const fn = this.catalog.functions.get(rawName);
+      const declaredReturnType = record["returnType"];
+      if (declaredReturnType !== void 0 && fn && fn.returnType !== "any" && declaredReturnType !== fn.returnType) {
+        throw returnTypeError(rawName, fn.returnType, String(declaredReturnType));
+      }
+      const allowedSlotTypes = allowedReturnTypesForSchema(slotSchema);
+      if (!allowedSlotTypes)
+        return;
+      const declaredMismatch = declaredReturnType !== void 0 && (typeof declaredReturnType !== "string" || !allowedSlotTypes.has(declaredReturnType));
+      const fnMismatch = fn !== void 0 && fn.returnType !== "any" && !allowedSlotTypes.has(fn.returnType);
+      if (declaredMismatch || fnMismatch) {
+        const actualType = declaredReturnType !== void 0 ? String(declaredReturnType) : String(fn?.returnType);
+        throw returnTypeError(rawName, [...allowedSlotTypes].join("' | '"), actualType);
+      }
+    }
+    validateNestedFunctions(val2, componentCatalogId, currentPath = "", schema) {
       if (Array.isArray(val2)) {
-        for (let i2 = 0; i2 < val2.length; i2++) {
-          this.validateNestedFunctions(val2[i2], componentCatalogId, `${currentPath}/${i2}`);
-        }
+        this.validateNestedArray(val2, componentCatalogId, currentPath, schema);
         return;
       }
       if (typeof val2 !== "object" || val2 === null) {
@@ -20092,22 +19632,47 @@ var bwA2UI = (() => {
       }
       const record = val2;
       if (this.enforceIdentifiers) {
-        validateReservedDirectives(Object.keys(record), this.catalog.protocolVersion);
+        this.validateRecordDirectives(record, currentPath);
       }
       const rawName = this.enforceIdentifiers ? record["@call"] : record["call"] ?? record["function"];
-      if (typeof rawName === "string" && (this.enforceIdentifiers || rawName.length > 0)) {
-        try {
-          this.checkNestedCallRecord(record, rawName, componentCatalogId);
-        } catch (err) {
-          if (err instanceof A2uiValidationError && currentPath) {
-            err.path = err.path && err.path !== "/" ? `${currentPath}${err.path}` : currentPath;
-          }
-          throw err;
-        }
+      const isCallRecord = typeof rawName === "string" && (this.enforceIdentifiers || rawName.length > 0);
+      if (isCallRecord) {
+        rethrowAt(currentPath, () => this.checkNestedCallRecord(record, rawName, componentCatalogId, schema));
       }
+      this.validateNestedRecordChildren(record, isCallRecord ? rawName : void 0, componentCatalogId, currentPath, schema);
+    }
+    validateNestedArray(items, componentCatalogId, currentPath, schema) {
+      const itemSchema = elementSchema(schema);
+      for (let i2 = 0; i2 < items.length; i2++) {
+        this.validateNestedFunctions(items[i2], componentCatalogId, `${currentPath}/${i2}`, itemSchema);
+      }
+    }
+    validateRecordDirectives(record, currentPath) {
+      const keys = Object.keys(record);
+      validateReservedDirectives(currentPath === "" ? keys.filter((key) => !AT_COMPONENT_MIXIN_KEYS.has(key)) : keys, this.catalog.protocolVersion);
+    }
+    validateNestedRecordChildren(record, callName, componentCatalogId, currentPath, schema) {
+      const callArgsSchema = callName !== void 0 ? this.resolveCallArgsSchema(record, callName, componentCatalogId) : void 0;
+      const recordSchema = callName === void 0 ? narrowRecordSchema(schema, record) : void 0;
       for (const [k, v2] of Object.entries(record)) {
-        this.validateNestedFunctions(v2, componentCatalogId, `${currentPath}/${k}`);
+        const childSchema = callName !== void 0 ? k === "args" ? callArgsSchema : void 0 : propertySchema2(recordSchema, k, record);
+        this.validateNestedFunctions(v2, componentCatalogId, `${currentPath}/${k}`, childSchema);
       }
+    }
+    resolveCallArgsSchema(record, rawName, componentCatalogId) {
+      if (!this.enforceIdentifiers) {
+        return this.catalog.functions.get(rawName)?.schema;
+      }
+      if (rawName.startsWith("@")) {
+        return getSystemFunctionApi(rawName)?.schema;
+      }
+      const callCatalogId = record["catalogId"];
+      if ((callCatalogId === void 0 || typeof callCatalogId === "string") && nestedCallRunsInCatalog(callCatalogId, this.catalog.id, {
+        catalogIsDefault: componentCatalogId === void 0
+      })) {
+        return this.catalog.functions.get(rawName)?.schema;
+      }
+      return void 0;
     }
     /**
      * Validates the arguments of a function call against the catalog definition.
@@ -20195,14 +19760,168 @@ var bwA2UI = (() => {
       };
     });
   }
-  function stripEnvelopeKeys(comp) {
-    const properties = {};
-    for (const [key, value] of Object.entries(comp)) {
-      if (COMPONENT_ENVELOPE_KEYS2.includes(key))
-        continue;
-      properties[key] = value;
-    }
+  function stripStructuralKeys(comp) {
+    const { id: _id, component: _component, ...properties } = comp;
     return properties;
+  }
+  function rethrowAt(path, check) {
+    try {
+      check();
+    } catch (err) {
+      if (err instanceof A2uiValidationError) {
+        err.path = err.path && err.path !== "/" ? `${path}${err.path}` : path;
+      }
+      throw err;
+    }
+  }
+  function returnTypeError(rawName, expected, received) {
+    const msg = `Validation failed for function '${rawName}': Expected returnType '${expected}', received '${received}'`;
+    return new A2uiValidationError(msg, [{ path: "/returnType", code: "invalid_value", message: msg }], "VALIDATION_ERROR", { path: "/returnType" });
+  }
+  var DYNAMIC_TYPE_REF = /^REF:[^|#]*#\/\$defs\/(DynamicString|DynamicNumber|DynamicBoolean|DynamicStringList|DynamicValue)(?:\||$)/;
+  var EXPECTED_DYNAMIC_RETURN_TYPES = {
+    DynamicString: "string",
+    DynamicNumber: "number",
+    DynamicBoolean: "boolean",
+    DynamicStringList: "array",
+    DynamicValue: "any"
+  };
+  function innerZodSchema(schema) {
+    const def = schema._def;
+    switch (def.typeName) {
+      case "ZodOptional":
+      case "ZodNullable":
+      case "ZodDefault":
+      case "ZodCatch":
+      case "ZodReadonly":
+        return def.innerType;
+      case "ZodBranded":
+        return def.type;
+      case "ZodEffects":
+        return def.schema;
+      case "ZodPipeline":
+        return def.out;
+      case "ZodLazy":
+        return def.getter?.();
+      default:
+        return void 0;
+    }
+  }
+  function unwrapZodSchema(schema) {
+    let current = schema;
+    for (let next = current && innerZodSchema(current); next; next = current && innerZodSchema(current)) {
+      current = next;
+    }
+    return current;
+  }
+  function directDynamicReturnType(schema) {
+    for (let current = schema; current; current = innerZodSchema(current)) {
+      const desc = current.description;
+      const match = typeof desc === "string" ? DYNAMIC_TYPE_REF.exec(desc) : null;
+      if (match)
+        return EXPECTED_DYNAMIC_RETURN_TYPES[match[1]];
+    }
+    return void 0;
+  }
+  function allowedReturnTypesForSchema(schema) {
+    const direct = directDynamicReturnType(schema);
+    if (direct !== void 0) {
+      return direct === "any" ? void 0 : /* @__PURE__ */ new Set([direct]);
+    }
+    const core = unwrapZodSchema(schema);
+    const def = core?._def;
+    if (def?.typeName === "ZodIntersection" && def.left && def.right) {
+      return allowedReturnTypesForSchema(def.left) ?? allowedReturnTypesForSchema(def.right);
+    }
+    if ((def?.typeName === "ZodUnion" || def?.typeName === "ZodDiscriminatedUnion") && Array.isArray(def.options)) {
+      return allowedReturnTypesForUnion(def.options);
+    }
+    return void 0;
+  }
+  function allowedReturnTypesForUnion(options) {
+    const types = /* @__PURE__ */ new Set();
+    for (const opt of options) {
+      if (directDynamicReturnType(opt) === "any")
+        return void 0;
+      const branchTypes = allowedReturnTypesForSchema(opt);
+      if (branchTypes) {
+        for (const t2 of branchTypes)
+          types.add(t2);
+      }
+    }
+    return types.size > 0 ? types : void 0;
+  }
+  function combineSchemas(schemas) {
+    if (schemas.length === 0)
+      return void 0;
+    if (schemas.length === 1)
+      return schemas[0];
+    return external_exports.union(schemas);
+  }
+  function elementSchema(schema) {
+    const core = unwrapZodSchema(schema);
+    if (!core)
+      return void 0;
+    const def = core._def;
+    if (def.typeName === "ZodArray") {
+      return def.type;
+    }
+    if ((def.typeName === "ZodUnion" || def.typeName === "ZodDiscriminatedUnion") && Array.isArray(def.options) && directDynamicReturnType(schema) === void 0) {
+      const matches = def.options.map((opt) => elementSchema(opt)).filter((item) => item !== void 0);
+      return combineSchemas(matches);
+    }
+    return void 0;
+  }
+  function propertySchema2(schema, key, record) {
+    const core = unwrapZodSchema(schema);
+    if (!core)
+      return void 0;
+    const def = core._def;
+    switch (def.typeName) {
+      case "ZodObject": {
+        const shape = def.shape?.();
+        return shape && typeof shape === "object" ? shape[key] : void 0;
+      }
+      case "ZodRecord":
+        return def.valueType;
+      case "ZodIntersection":
+        return propertySchema2(def.right, key, record) ?? propertySchema2(def.left, key, record);
+      case "ZodUnion":
+      case "ZodDiscriminatedUnion":
+        return unionPropertySchema(schema, core, def.options, key, record);
+      default:
+        return void 0;
+    }
+  }
+  function narrowUnionOptions(core, options, record) {
+    if (!record)
+      return options;
+    const def = core._def;
+    if (def.typeName === "ZodDiscriminatedUnion" && typeof def.discriminator === "string" && def.optionsMap instanceof Map) {
+      const match = def.optionsMap.get(record[def.discriminator]);
+      return match ? [match] : options;
+    }
+    const matching = options.filter((opt) => opt.safeParse(record).success);
+    return matching.length > 0 ? matching : options;
+  }
+  function narrowRecordSchema(schema, record) {
+    const core = unwrapZodSchema(schema);
+    if (!core || directDynamicReturnType(schema) !== void 0) {
+      return schema;
+    }
+    const def = core._def;
+    if ((def.typeName === "ZodUnion" || def.typeName === "ZodDiscriminatedUnion") && Array.isArray(def.options)) {
+      return combineSchemas(narrowUnionOptions(core, def.options, record));
+    }
+    return core;
+  }
+  function unionPropertySchema(schema, core, options, key, record) {
+    if (!Array.isArray(options) || directDynamicReturnType(schema) !== void 0) {
+      return void 0;
+    }
+    const active = narrowUnionOptions(core, options, record);
+    const matches = active.map((opt) => propertySchema2(opt, key, record)).filter((found) => found !== void 0);
+    return combineSchemas(matches);
   }
 
   // node_modules/@a2ui/web_core/src/rpc/rpc-handler.js
@@ -20263,7 +19982,8 @@ var bwA2UI = (() => {
         return errorResponse;
       }
       const effectiveContext = this.ensureDataContext(context, resolved.catalog, functionCallId);
-      const resolvedArgsResult = this.resolveDynamicArguments(args, effectiveContext, isUserActivated);
+      const scopedContext = effectiveContext && resolved.catalog.id ? withActiveCallCatalogId(effectiveContext, resolved.catalog.id, resolved.catalog) : effectiveContext;
+      const resolvedArgsResult = this.resolveDynamicArguments(args, scopedContext, isUserActivated);
       if ("error" in resolvedArgsResult) {
         const errorResponse = this.createResponseError(functionCallId, RpcErrorCode.EXECUTION_ERROR, resolvedArgsResult.error, version);
         await this.emitOutboundResponse(errorResponse);
@@ -20277,13 +19997,19 @@ var bwA2UI = (() => {
         await this.emitOutboundResponse(errorResponse);
         return errorResponse;
       }
+      const failedArg = findFailedArgument(settledArgs);
+      if (failedArg) {
+        const errorResponse = this.createResponseError(functionCallId, RpcErrorCode.EXECUTION_ERROR, (failedArg.error === void 0 ? "" : this.extractErrorMessage(failedArg.error)) || "An argument of the function call could not be resolved.", version);
+        await this.emitOutboundResponse(errorResponse);
+        return errorResponse;
+      }
       const parsedArgsResult = this.parseArguments(resolved.catalog, resolved.funcImpl, settledArgs, call);
       if ("error" in parsedArgsResult) {
         const errorResponse = this.createResponseError(functionCallId, RpcErrorCode.INVALID_FUNCTION_CALL, parsedArgsResult.error, version);
         await this.emitOutboundResponse(errorResponse);
         return errorResponse;
       }
-      const response = await this.executeFunctionSafely(resolved.funcImpl, parsedArgsResult.args, effectiveContext, functionCallId, version);
+      const response = await this.executeFunctionSafely(resolved.funcImpl, parsedArgsResult.args, scopedContext, functionCallId, version);
       await this.emitOutboundResponse(response);
       return response;
     }
@@ -20344,14 +20070,36 @@ var bwA2UI = (() => {
       return this.dispatchAgentCall(surfaceId, normalized);
     }
     /**
-     * Disposes the RPC handler and cancels all pending agent function calls with a `CANCELLED` error.
+     * Cancels all pending agent function calls originating from the given surface.
+     *
+     * Each pending call is rejected with an `A2uiRpcError` whose code is
+     * `CANCELLED`. `DataContext` does not report such a rejection, so a
+     * renderer may call this to reset a surface that it keeps.
+     *
+     * @param surfaceId Identifier of the surface whose pending calls should be cancelled.
      */
-    dispose() {
+    cancelSurfaceCalls(surfaceId) {
+      for (const [id, pending] of Array.from(this.pendingAgentCalls.entries())) {
+        if (pending.surfaceId === surfaceId) {
+          pending.reject(new A2uiRpcError(`Pending calls for surface '${surfaceId}' were cancelled.`, RpcErrorCode.CANCELLED, id));
+        }
+      }
+    }
+    /**
+     * Disposes the RPC handler: cancels all pending agent function calls with a
+     * `CANCELLED` error, rejects later calls with `DISPOSED`, and removes the
+     * outbound listener.
+     *
+     * @param reason Optional reason, added to the `CANCELLED` error messages.
+     */
+    dispose(reason) {
       if (this.isDisposed)
         return;
       this.isDisposed = true;
-      for (const [id, pending] of this.pendingAgentCalls.entries()) {
-        pending.reject(new A2uiRpcError(`RpcHandler disposed while call '${id}' was pending.`, RpcErrorCode.CANCELLED, id));
+      this.outboundListener = void 0;
+      const suffix = reason !== void 0 && reason.length > 0 ? `: ${reason}` : ".";
+      for (const [id, pending] of Array.from(this.pendingAgentCalls.entries())) {
+        pending.reject(new A2uiRpcError(`RpcHandler disposed while call '${id}' was pending${suffix}`, RpcErrorCode.CANCELLED, id));
       }
       this.pendingAgentCalls.clear();
     }
@@ -20402,7 +20150,10 @@ var bwA2UI = (() => {
     resolveFunctionImplementation(catalogId, call, context, expectedVersion) {
       let catalog;
       if (catalogId) {
-        catalog = context?.surface?.availableCatalogs?.get(catalogId) ?? this.catalogs.find((c2) => c2.id === catalogId);
+        const surfaceCatalog = context?.surface?.availableCatalogs?.get(catalogId);
+        const handlerCatalog = this.catalogs.find((c2) => c2.id === catalogId);
+        const surfaceFunc = surfaceCatalog?.functions?.get(call);
+        catalog = typeof surfaceFunc?.execute === "function" ? surfaceCatalog : handlerCatalog ?? surfaceCatalog;
         if (!catalog) {
           return { error: `Catalog not found: ${catalogId}` };
         }
@@ -20466,7 +20217,14 @@ var bwA2UI = (() => {
       });
       try {
         for (const [key, val2] of Object.entries(args)) {
-          resolvedArgs[key] = context.resolveDynamicValue(val2, 1, isUserActivated);
+          Object.defineProperty(resolvedArgs, key, {
+            value: resolveArgumentValue(context, val2, 1, isUserActivated, {
+              allowAgentRouting: false
+            }),
+            enumerable: true,
+            writable: true,
+            configurable: true
+          });
         }
       } catch (err) {
         expressionError = this.extractErrorMessage(err) || "An error occurred during function execution.";
@@ -20588,6 +20346,7 @@ var bwA2UI = (() => {
         const callName = (call["@call"] ?? call.call) || "unknown";
         timer = this.createTimeoutTimer(functionCallId, callName, effectiveTimeoutMs, cleanup, reject);
         this.pendingAgentCalls.set(functionCallId, {
+          surfaceId,
           resolve: (val2) => {
             cleanup();
             resolve(val2);
@@ -20631,8 +20390,8 @@ var bwA2UI = (() => {
      * @param reject Rejection callback invoked if transmission throws or rejects.
      */
     sendOutboundMessage(surfaceId, functionCallId, call, version, cleanup, reject) {
-      const { call: legacyCallName, "@call": callName, ...rest } = call;
-      const callFunction = { "@call": callName ?? legacyCallName, ...rest };
+      const { call: unprefixedCallName, "@call": callName, ...rest } = call;
+      const callFunction = { "@call": callName ?? unprefixedCallName, ...rest };
       const outboundMsg = {
         version: version || "1.0",
         callAgentFunction: {
@@ -20683,37 +20442,110 @@ var bwA2UI = (() => {
     }
   };
 
+  // node_modules/@a2ui/web_core/src/processing/outbound-envelope.js
+  function toOutboundActionMessage(action, version) {
+    const canonical = toCanonicalVersion(version);
+    if (!canonical) {
+      return void 0;
+    }
+    const body = {
+      name: action.name,
+      surfaceId: action.surfaceId,
+      sourceComponentId: action.sourceComponentId,
+      timestamp: action.timestamp,
+      context: action.context,
+      ...action.userMessage !== void 0 ? { userMessage: action.userMessage } : {},
+      ...action.catalogId !== void 0 ? { catalogId: action.catalogId } : {},
+      ...action.metadata !== void 0 ? { metadata: action.metadata } : {}
+    };
+    if (isAtLeastVersion(canonical, "1.0")) {
+      return {
+        version: "1.0",
+        action: body
+      };
+    }
+    if (canonical === "0.9" || canonical === "0.9.1") {
+      return {
+        version: canonical === "0.9.1" ? "v0.9.1" : "v0.9",
+        action: body
+      };
+    }
+    return void 0;
+  }
+
   // node_modules/@a2ui/web_core/src/processing/message-processor.js
   var MessageProcessor = class {
     /**
      * Initializes a new `MessageProcessor` instance.
      *
+     * The processor keeps its own copy of `catalogs`, which `addCatalog` adds
+     * to; the array passed in is not changed.
+     *
      * @param catalogs List of available component catalogs.
      * @param actionHandler Global handler for actions dispatched from all surfaces.
      * @param options Configuration options for the processor.
+     * @throws {RangeError} If `options.maxAgentCallCacheEntries` isn't a positive integer.
+     * @throws {A2uiValidationError} If `options.unifiedOutbound` is true without `options.outboundListener`.
      */
     constructor(catalogs, actionHandler, options) {
       this.actionHandler = actionHandler;
+      this.disposed = false;
       this.graphBounds = /* @__PURE__ */ new WeakMap();
-      this.registeredCatalogs = catalogs;
+      const maxEntries = options?.maxAgentCallCacheEntries;
+      if (maxEntries !== void 0 && (typeof maxEntries !== "number" || !Number.isInteger(maxEntries) || maxEntries < 1)) {
+        throw new RangeError("maxAgentCallCacheEntries must be a positive integer.");
+      }
+      if (options?.unifiedOutbound && !options?.outboundListener) {
+        throw new A2uiValidationError("unifiedOutbound requires an outboundListener in MessageProcessorOptions.");
+      }
+      this.maxAgentCallCacheEntries = maxEntries;
+      this.registeredCatalogs = [...catalogs];
       this.model = new SurfaceGroupModel();
       this.adapterRegistry = options?.adapterRegistry ?? defaultVersionAdapterFactory;
       this.defaultVersion = options?.version;
       this.errorHandler = options?.errorHandler;
       this.reportErrorsOnly = options?.reportErrorsOnly ?? false;
+      this.outboundListener = options?.outboundListener;
+      this.unifiedOutbound = Boolean(options?.unifiedOutbound);
       this.rpc = new RpcHandler({
         catalogs: this.registeredCatalogs,
         outboundListener: options?.outboundListener,
         defaultTimeoutMs: options?.defaultTimeoutMs
       });
+      this.hasOutboundListener = Boolean(options?.outboundListener);
       this.validationConfig = options?.validationConfig ? withStrictDefaults(options.validationConfig) : void 0;
+      if (this.unifiedOutbound) {
+        this.model.onAction.subscribe((action) => {
+          this.forwardAction(action);
+        });
+      }
       if (this.actionHandler) {
         this.model.onAction.subscribe(this.actionHandler);
       }
+      this.model.onSurfaceDeleted.subscribe((surfaceId) => {
+        this.rpc.cancelSurfaceCalls(surfaceId);
+      });
     }
-    /** The catalogs the processor was created with, in priority order. */
+    /** The catalogs the processor holds, in priority order. */
     get catalogs() {
       return [...this.registeredCatalogs];
+    }
+    /**
+     * Adds a catalog to the ones this processor holds.
+     *
+     * `createSurface` messages, renderer function calls and
+     * `getRendererCapabilities` see the catalog from this call on. Surfaces
+     * created before the call keep the catalogs they were created with.
+     *
+     * @param catalog The catalog to add.
+     * @throws {A2uiCatalogError} If the processor already holds a catalog with
+     *     the same id.
+     */
+    addCatalog(catalog) {
+      if (this.registeredCatalogs.some((c2) => c2.id === catalog.id)) {
+        throw new A2uiCatalogError(`Catalog already registered: ${catalog.id}`);
+      }
+      this.registeredCatalogs.push(catalog);
     }
     /**
      * Invokes a remote function on the server agent using an options bag.
@@ -20730,6 +20562,8 @@ var bwA2UI = (() => {
      * Disposes the MessageProcessor, tearing down active surfaces and rejecting pending RPC calls.
      */
     dispose() {
+      this.disposed = true;
+      this.model.dispose();
       this.rpc.dispose();
     }
     /**
@@ -20752,7 +20586,7 @@ var bwA2UI = (() => {
           if (compareSemVer(ver, "1.0") >= 0) {
             return this.generateInlineCatalog(c2);
           }
-          return this.generateLegacyInlineCatalog(c2, options?.componentEnvelopeRef ?? "common_types.json#/$defs/ComponentCommon");
+          return this.generateV09InlineCatalog(c2, options?.componentEnvelopeRef ?? "common_types.json#/$defs/ComponentCommon");
         }) : void 0;
         if (inlineCatalogs) {
           versionCaps.inlineCatalogs = inlineCatalogs;
@@ -20793,9 +20627,9 @@ var bwA2UI = (() => {
      *
      * @param catalog The catalog instance to serialize.
      * @param componentEnvelopeRef Reference URI for the component base envelope.
-     * @returns Legacy inline catalog object with array-based functions and flat theme properties.
+     * @returns Pre-1.0 inline catalog object with array-based functions and flat theme properties.
      */
-    generateLegacyInlineCatalog(catalog, componentEnvelopeRef = "common_types.json#/$defs/ComponentCommon") {
+    generateV09InlineCatalog(catalog, componentEnvelopeRef = "common_types.json#/$defs/ComponentCommon") {
       const components = {};
       for (const [name, comp] of catalog.components.entries()) {
         let props = {};
@@ -21085,7 +20919,46 @@ var bwA2UI = (() => {
         this.model.emitError(payload);
       }
       this.errorHandler?.(errorMsg);
+      const isV08Action = context.actionType === "beginRendering" || context.actionType === "surfaceUpdate" || context.actionType === "dataModelUpdate";
+      const effectiveVersion = context.version ?? (isV08Action ? "v0.8" : this.fallbackWireVersion());
+      const outboundErrorMsg = effectiveVersion === context.version ? errorMsg : mapErrorToRendererMessage(err, { ...context, version: effectiveVersion });
+      if (this.unifiedOutbound && compareSemVer(outboundErrorMsg.version, "0.8") !== 0) {
+        this.invokeOutboundListener(outboundErrorMsg);
+      }
       return errorMsg;
+    }
+    fallbackWireVersion() {
+      if (this.defaultVersion && toCanonicalVersion(this.defaultVersion)) {
+        return this.defaultVersion;
+      }
+      const allV08 = this.registeredCatalogs.length > 0 && this.registeredCatalogs.every((c2) => c2.protocolVersion !== void 0 && compareSemVer(c2.protocolVersion, "0.8") === 0);
+      if (allV08) {
+        return "v0.8";
+      }
+      const allV1 = this.registeredCatalogs.length > 0 && this.registeredCatalogs.every((c2) => c2.protocolVersion !== void 0 && isAtLeastVersion(c2.protocolVersion, "1.0"));
+      return allV1 ? "1.0" : "v0.9";
+    }
+    forwardAction(action) {
+      if (this.disposed || !this.outboundListener)
+        return;
+      const surfaceVersion = this.model.getSurface(action.surfaceId)?.protocolVersion;
+      const version = surfaceVersion ?? this.fallbackWireVersion();
+      const envelope = toOutboundActionMessage(action, version);
+      if (envelope) {
+        this.invokeOutboundListener(envelope);
+      }
+    }
+    invokeOutboundListener(message) {
+      if (this.disposed || !this.outboundListener)
+        return;
+      try {
+        const result = this.outboundListener(message);
+        if (result && typeof result.catch === "function") {
+          result.catch(() => {
+          });
+        }
+      } catch {
+      }
     }
     extractSingleMessageOperations(item) {
       const envelopeContext = extractEnvelopeErrorContext(item, this.defaultVersion);
@@ -21100,7 +20973,7 @@ var bwA2UI = (() => {
           throw err;
         }
       }
-      const itemOps = adapter.extractOperations(item);
+      const itemOps = adapter.extractOperations(item, this.validationConfig);
       const itemVer = envelopeContext.version;
       for (const op of itemOps) {
         if (itemVer && toCanonicalVersion(itemVer)) {
@@ -21253,7 +21126,7 @@ var bwA2UI = (() => {
       if (targetCatalog) {
         availableCatalogs.set(targetCatalog.id, targetCatalog);
       }
-      return new DataContext(new SurfaceModel(fallbackSurfaceId, targetCatalog, availableCatalogs), "/");
+      return new DataContext(new SurfaceModel(fallbackSurfaceId, targetCatalog, availableCatalogs, void 0, void 0, void 0, void 0, void 0, void 0, this.maxAgentCallCacheEntries), "/");
     }
     /**
      * Processes a single canonical internal operation.
@@ -21341,19 +21214,49 @@ var bwA2UI = (() => {
         throw new A2uiIntegrityError(`Surface ${surfaceId} already exists.`, void 0, "INTEGRITY_ERROR", { surfaceId });
       }
       const validatedTheme = this.validateSurfaceTheme(theme, catalog, surfaceId);
-      const surfaceVersion = catalog?.protocolVersion ?? msgVersion;
+      const surfaceVersion = msgVersion ?? catalog?.protocolVersion;
       const availableCatalogs = new Map(this.registeredCatalogs.filter((c2) => isCatalogVersionCompatible(c2.protocolVersion, surfaceVersion)).map((c2) => [c2.id, c2]));
-      const surface = new SurfaceModel(surfaceId, catalog, availableCatalogs, validatedTheme, sendDataModel ?? false, void 0, op.rootId ?? "root", op.metadata, surfaceVersion);
-      this.model.addSurface(surface);
-      if (dataModel) {
-        surface.dataModel.set("/", dataModel);
+      const surface = new SurfaceModel(surfaceId, catalog, availableCatalogs, validatedTheme, sendDataModel ?? false, void 0, op.rootId ?? "root", op.metadata, surfaceVersion, this.maxAgentCallCacheEntries);
+      if (this.hasOutboundListener && isAtLeastVersion(surface.protocolVersion, "1.0")) {
+        surface.agentFunctionCaller = (call) => this.model.getSurface(surfaceId) === surface ? this.rpc.callAgentFunction(surfaceId, call, { version: surface.protocolVersion }) : Promise.reject(new A2uiRpcError(`Pending calls for surface '${surfaceId}' were cancelled.`, RpcErrorCode.CANCELLED));
       }
-      if (components && components.length > 0) {
-        this.processUpdateComponentsOp({
-          type: "updateComponents",
-          surfaceId,
-          components
-        });
+      this.model.addSurface(surface);
+      try {
+        if (dataModel) {
+          for (const [key, value] of Object.entries(dataModel)) {
+            const escapedKey = key.replace(/~/g, "~0").replace(/\//g, "~1");
+            const path = `/${escapedKey}`;
+            try {
+              if (key === "") {
+                const currentRoot = surface.dataModel.get("/") ?? {};
+                const nextRoot = { ...currentRoot };
+                if (value === void 0 || value === null && isAtLeastVersion(surface.protocolVersion, "1.0")) {
+                  delete nextRoot[""];
+                } else {
+                  nextRoot[""] = value;
+                }
+                surface.dataModel.set("/", nextRoot);
+              } else {
+                surface.dataModel.set(path, value);
+              }
+            } catch (err) {
+              if (err instanceof A2uiDataError && !err.surfaceId) {
+                err.surfaceId = surfaceId;
+              }
+              throw err;
+            }
+          }
+        }
+        if (components && components.length > 0) {
+          this.processUpdateComponentsOp({
+            type: "updateComponents",
+            surfaceId,
+            components
+          });
+        }
+      } catch (err) {
+        this.model.deleteSurface(surfaceId);
+        throw err;
       }
     }
     processDeleteSurfaceOp(op) {
@@ -21367,8 +21270,9 @@ var bwA2UI = (() => {
         throw new A2uiValidationError(`Component '${component2}' is missing an 'id'; entries require a valid string 'id'.`);
       }
       const targetCatalog = this.resolveComponentCatalog(comp, surface);
-      if ("metadata" in comp && comp["metadata"] !== void 0) {
-        validateMetadata(comp["metadata"]);
+      if (isAtLeastVersion(surface.protocolVersion, "1.0")) {
+        const { mixins } = splitComponentEnvelope(comp, this.componentLayout(comp, surface, targetCatalog));
+        validateMetadata(mixins.metadata?.value);
       }
       const existing = surface.componentsModel.get(id);
       const skipNestedFunctions = !this.validationConfig && !isAtLeastVersion(surface.protocolVersion, "1.0");
@@ -21396,11 +21300,66 @@ var bwA2UI = (() => {
      * @returns The payload to validate.
      */
     componentPayloadForValidation(comp, surface, componentCatalog) {
-      const { catalogId: _catalogId, ...payload } = comp;
-      if (isAtLeastVersion(surface.protocolVersion, "1.0") && componentCatalog !== surface.defaultCatalog) {
-        payload["catalogId"] = componentCatalog.id;
+      if (!isAtLeastVersion(surface.protocolVersion, "1.0"))
+        return comp;
+      const namedCatalogId = this.componentCatalogId(comp, surface);
+      if (namedCatalogId !== void 0 && typeof namedCatalogId !== "string")
+        return comp;
+      const catalogKey = atMixinKey("catalogId");
+      const { [catalogKey]: _catalogId, ...payload } = comp;
+      if (comp[catalogKey] === void 0 && namedCatalogId !== void 0) {
+        delete payload["catalogId"];
+      }
+      if (componentCatalog !== surface.defaultCatalog) {
+        payload[catalogKey] = componentCatalog.id;
       }
       return payload;
+    }
+    /**
+     * Returns the catalog a v1.0 component object names: its `@catalogId`, or
+     * else a legacy bare `catalogId` that the component's schema in the
+     * surface's default catalog doesn't declare as its own property.
+     *
+     * @param comp Raw component payload.
+     * @param surface Surface the component belongs to.
+     * @returns The catalog the component names, or `undefined` if it names
+     *   none or the surface is below v1.0, which has no per-component catalog.
+     */
+    componentCatalogId(comp, surface) {
+      if (!isAtLeastVersion(surface.protocolVersion, "1.0"))
+        return void 0;
+      const atCatalogId = comp[atMixinKey("catalogId")];
+      if (atCatalogId !== void 0)
+        return atCatalogId;
+      const bareCatalogId = comp["catalogId"];
+      if (bareCatalogId === void 0)
+        return void 0;
+      const layout = this.componentLayout(comp, surface, surface.defaultCatalog);
+      return layout.customKeys.has("catalogId") ? void 0 : bareCatalogId;
+    }
+    /**
+     * Returns how a component's schema declares the envelope mixins.
+     *
+     * A legacy bare `catalogId` that routed the component, because its schema
+     * in the surface's default catalog doesn't declare one, is the mixin here
+     * too, even if the schema in `catalog` declares a `catalogId` property.
+     *
+     * @param comp Raw component payload.
+     * @param surface Surface the component belongs to.
+     * @param catalog Catalog the component resolves to, if known.
+     * @returns The component's mixin layout.
+     */
+    componentLayout(comp, surface, catalog) {
+      const layout = componentMixinLayout(this.componentSchema(comp, surface, catalog));
+      if (catalog === surface.defaultCatalog)
+        return layout;
+      return routeLegacyCatalogId(layout, comp, this.componentSchema(comp, surface, surface.defaultCatalog));
+    }
+    /** Returns the schema of a component's type in `catalog`, if any. */
+    componentSchema(comp, surface, catalog) {
+      const { id, component: component2 } = comp;
+      const type = typeof component2 === "string" && component2 ? component2 : typeof id === "string" ? surface.componentsModel.get(id)?.type : void 0;
+      return type ? catalog?.components.get(type)?.schema : void 0;
     }
     /**
      * Resolves the catalog that defines a component in an update.
@@ -21418,10 +21377,11 @@ var bwA2UI = (() => {
      *   the surface has no default catalog.
      */
     resolveComponentCatalog(comp, surface) {
-      const { id, component: component2, catalogId } = comp;
+      const { id, component: component2 } = comp;
       const subject = `Component '${id}'`;
       const atLeastV1 = isAtLeastVersion(surface.protocolVersion, "1.0");
-      if (typeof catalogId === "string" && (catalogId || atLeastV1)) {
+      const catalogId = this.componentCatalogId(comp, surface);
+      if (typeof catalogId === "string") {
         return this.resolveSurfaceItemCatalog(surface, catalogId, subject);
       }
       if (!atLeastV1) {
@@ -21440,9 +21400,11 @@ var bwA2UI = (() => {
      * the surface's default catalog, whatever catalog an enclosing call or the
      * component names, so a call may run in a catalog other than the
      * component's. This pass resolves every call's catalog and checks the
-     * arguments of the calls that run outside the component's catalog;
-     * component validation, which runs first and walks every nested call, has
-     * already checked the others, as decided by `nestedCallRunsInCatalog`.
+     * calls that run outside the component's catalog: the renderer makes them,
+     * so they may not call an `agentOnly` function, and their arguments must
+     * match the function's definition. Component validation, which runs first
+     * and walks every nested call, has already checked the others, as decided
+     * by `nestedCallRunsInCatalog`.
      * Reserved `@` system functions belong to no catalog and are validated by
      * `PayloadValidator`; their arguments are still walked here.
      *
@@ -21483,6 +21445,9 @@ var bwA2UI = (() => {
     }
     validateExternalCatalogFunction(target, name, rawArgs, surfaceId, currentPath) {
       try {
+        if (isAtLeastVersion(target.protocolVersion, "1.0")) {
+          assertRendererMayCall(target, name);
+        }
         new PayloadValidator(target, this.validationConfig).validateFunction(name, rawArgs ?? {});
       } catch (err) {
         if (err instanceof A2uiError) {
@@ -21515,11 +21480,13 @@ var bwA2UI = (() => {
           visit(v2, `${currentPath}/${k}`);
         }
       };
-      for (const [key, value] of Object.entries(comp)) {
-        if (key === "id" || key === "component" || key === "catalogId" || key === "metadata") {
-          continue;
-        }
+      const { properties, mixins } = splitComponentEnvelope(comp, this.componentLayout(comp, surface, componentCatalog));
+      for (const [key, value] of Object.entries(properties)) {
         visit(value, `/${key}`);
+      }
+      for (const mixin of [mixins.accessibility, mixins.checks]) {
+        if (mixin)
+          visit(mixin.value, `/${mixin.wireKey}`);
       }
     }
     /**
@@ -21540,18 +21507,20 @@ var bwA2UI = (() => {
     resolveSurfaceItemCatalog(surface, catalogId, subject) {
       if (catalogId !== void 0 && !surface.availableCatalogs.has(catalogId)) {
         const known = this.registeredCatalogs.find((c2) => c2.id === catalogId);
-        if (known) {
+        if (known && !isCatalogVersionCompatible(known.protocolVersion, surface.protocolVersion)) {
           throw new A2uiCatalogError(`${subject} names catalog '${catalogId}', whose specification version (${known.protocolVersion}) does not match surface '${surface.id}' version (${surface.protocolVersion}).`);
         }
       }
       return surface.resolveCatalog(catalogId, subject);
     }
     applyComponentUpdate(comp, surface) {
-      const { id, component: component2, catalogId: _catalogId, metadata: rawMetadata, ...properties } = comp;
+      const { id, component: component2 } = comp;
       if (typeof id !== "string")
         return;
-      const metadata = extractComponentMetadata(rawMetadata);
       const targetCatalog = this.resolveComponentCatalog(comp, surface);
+      const state = componentPayloadState(comp, surface.protocolVersion, this.componentSchema(comp, surface, targetCatalog), { defaultCatalogSchema: this.componentSchema(comp, surface, surface.defaultCatalog) });
+      const properties = state.properties;
+      const metadata = extractComponentMetadata(state.metadata);
       const existing = surface.componentsModel.get(id);
       if (existing) {
         const componentType = typeof component2 === "string" ? component2 : existing.type;
@@ -21714,164 +21683,651 @@ var bwA2UI = (() => {
   };
 
   // node_modules/@a2ui/web_core/src/resolution/generic-binder.js
+  var CHILD_REF_STATIC_NODE = Object.freeze({ type: "STATIC" });
+  function hasActiveBehavior(node) {
+    switch (node.type) {
+      case "STATIC":
+        return false;
+      case "DYNAMIC":
+      case "ACTION":
+      case "STRUCTURAL":
+      case "CHECKABLE":
+        return true;
+      case "ARRAY":
+        return Boolean(node.templateFallback) || hasActiveBehavior(node.element);
+      case "OBJECT":
+        return node.catchall !== void 0 && hasActiveBehavior(node.catchall) || Object.values(node.shape).some(hasActiveBehavior);
+    }
+  }
+  var DEFAULT_OPTIONS_CACHE_KEY2 = {};
   var behaviorCache = /* @__PURE__ */ new WeakMap();
-  function scrapeSchemaBehavior(schema) {
-    const cached = behaviorCache.get(schema);
+  var componentBehaviorCache = /* @__PURE__ */ new WeakMap();
+  function getOptionsBehaviorCache(store, options) {
+    const key = options ?? DEFAULT_OPTIONS_CACHE_KEY2;
+    let map = store.get(key);
+    if (!map) {
+      map = /* @__PURE__ */ new WeakMap();
+      store.set(key, map);
+    }
+    return map;
+  }
+  function makeObjectBehavior(shape, catchall) {
+    return catchall && catchall.type !== "STATIC" ? { type: "OBJECT", shape, catchall } : { type: "OBJECT", shape };
+  }
+  function resolveChildRefOptions(protocolVersion) {
+    if (!protocolVersion) {
+      return void 0;
+    }
+    if (isAtLeastVersion(protocolVersion, "1.0")) {
+      return V10_CHILD_REF_OPTIONS;
+    }
+    if (isAtLeastVersion(protocolVersion, "0.9")) {
+      return V09_CHILD_REF_OPTIONS;
+    }
+    return V08_CHILD_REF_OPTIONS;
+  }
+  function augmentRootObjectShape(schema, baseShape, options) {
+    const nextShape = { ...baseShape };
+    for (const [key, refKind] of extractRefFields(schema, options)) {
+      if (refKind.kind === "single") {
+        if (nextShape[key]?.type === "DYNAMIC") {
+          nextShape[key] = CHILD_REF_STATIC_NODE;
+        }
+      } else if (refKind.kind === "list" && nextShape[key]?.type !== "STRUCTURAL") {
+        const current = nextShape[key];
+        nextShape[key] = current?.type === "ARRAY" && hasActiveBehavior(current.element) ? { type: "ARRAY", element: current.element, templateFallback: true } : { type: "STRUCTURAL" };
+      } else if (refKind.kind === "nested" && (!Object.hasOwn(nextShape, key) || nextShape[key]?.type === "STATIC")) {
+        nextShape[key] = { type: "STRUCTURAL" };
+      }
+    }
+    const accessibility = getFieldBehavior(AccessibilityAttributesSchema2, /* @__PURE__ */ new Set(), options);
+    if (!Object.hasOwn(nextShape, "accessibility")) {
+      nextShape.accessibility = accessibility;
+    }
+    if (!Object.hasOwn(nextShape, AT_ACCESSIBILITY)) {
+      nextShape[AT_ACCESSIBILITY] = accessibility;
+    }
+    if (!Object.hasOwn(nextShape, AT_CHECKS)) {
+      nextShape[AT_CHECKS] = { type: "CHECKABLE" };
+    }
+    return nextShape;
+  }
+  var AT_ACCESSIBILITY = "@accessibility";
+  var AT_CHECKS = "@checks";
+  function scrapeSchemaBehavior(schema, options) {
+    if (!schema) {
+      return { type: "STATIC" };
+    }
+    const cache = getOptionsBehaviorCache(behaviorCache, options);
+    const cached = cache.get(schema);
     if (cached) {
       return cached;
     }
-    const behavior = getFieldBehavior(schema);
-    const result = behavior.type === "OBJECT" && behavior.shape && !("accessibility" in behavior.shape) ? {
-      ...behavior,
-      shape: {
-        ...behavior.shape,
-        accessibility: getFieldBehavior(AccessibilityAttributesSchema2)
-      }
-    } : behavior;
-    behaviorCache.set(schema, result);
+    const behavior = getFieldBehavior(schema, /* @__PURE__ */ new Set(), options);
+    const result = behavior.type === "OBJECT" ? makeObjectBehavior(augmentRootObjectShape(schema, behavior.shape, options), behavior.catchall) : behavior;
+    cache.set(schema, result);
     return result;
   }
-  function unwrapZodSchema(type) {
-    let current = type;
-    while (current) {
-      const typeName = current._def?.typeName;
-      if (typeName === "ZodOptional" || typeName === "ZodNullable" || typeName === "ZodDefault" || typeName === "ZodReadonly") {
-        current = current._def.innerType;
-      } else if (typeName === "ZodEffects") {
-        current = current._def.schema;
-      } else if (typeName === "ZodBranded") {
-        current = current._def.type;
-      } else if (typeName === "ZodLazy") {
-        current = current._def.getter();
-      } else {
-        break;
+  function scrapeComponentBehavior(schema, options) {
+    if (!schema) {
+      return makeObjectBehavior(augmentRootObjectShape(void 0, {}, options));
+    }
+    const cache = getOptionsBehaviorCache(componentBehaviorCache, options);
+    const cached = cache.get(schema);
+    if (cached) {
+      return cached;
+    }
+    const scraped = scrapeSchemaBehavior(schema, options);
+    const result = scraped.type === "OBJECT" ? scraped : makeObjectBehavior(augmentRootObjectShape(schema, {}, options));
+    cache.set(schema, result);
+    return result;
+  }
+  function getRefDefName(type, visited = /* @__PURE__ */ new Set()) {
+    const field = unwrapZodField(type);
+    if (field.firstRefDefName) {
+      return field.firstRefDefName;
+    }
+    for (const s2 of field.traversed) {
+      if (visited.has(s2)) {
+        return "";
       }
     }
-    return current;
-  }
-  function getRefDefName(type) {
-    let current = type;
-    let desc = "";
-    while (current) {
-      desc = current.description ?? current._def?.description ?? "";
-      if (desc)
-        break;
-      const typeName = current._def?.typeName;
-      if (typeName === "ZodOptional" || typeName === "ZodNullable" || typeName === "ZodDefault" || typeName === "ZodReadonly") {
-        current = current._def.innerType;
-      } else if (typeName === "ZodEffects") {
-        current = current._def.schema;
-      } else if (typeName === "ZodBranded") {
-        current = current._def.type;
-      } else if (typeName === "ZodLazy") {
-        current = current._def.getter();
-      } else {
-        break;
+    if (field.schema?._def?.typeName === "ZodPipeline") {
+      const nextVisited = new Set(visited);
+      for (const s2 of field.traversed) {
+        nextVisited.add(s2);
+      }
+      const def = field.schema._def;
+      const inRef = getRefDefName(def["in"], nextVisited);
+      if (inRef) {
+        return inRef;
+      }
+      if (!unwrapZodField(def["in"]).hasTransform) {
+        return getRefDefName(def["out"], nextVisited);
       }
     }
-    if (!desc || !desc.startsWith("REF:"))
-      return "";
-    const cleanDesc = desc.slice(4);
-    return extractRefDefName(cleanDesc.split("|")[0]);
+    return "";
   }
-  function isCheckableField(type) {
-    const defName = getRefDefName(type);
-    if (defName === "Checkable" || defName === "CheckRule") {
+  function hasChildRefKind(type, kind, visited = /* @__PURE__ */ new Set()) {
+    const field = unwrapZodField(type);
+    if (field.refs.has(kind)) {
       return true;
     }
-    const current = unwrapZodSchema(type);
-    if (current?._def?.typeName === "ZodArray") {
-      const elem = current._def.type;
-      const elemDefName = getRefDefName(elem);
-      if (elemDefName === "CheckRule") {
+    for (const s2 of field.traversed) {
+      if (visited.has(s2)) {
+        return false;
+      }
+    }
+    if (field.schema?._def?.typeName === "ZodPipeline") {
+      const nextVisited = new Set(visited);
+      for (const s2 of field.traversed) {
+        nextVisited.add(s2);
+      }
+      const def = field.schema._def;
+      if (hasChildRefKind(def["in"], kind, nextVisited)) {
         return true;
+      }
+      if (!unwrapZodField(def["in"]).hasTransform) {
+        return hasChildRefKind(def["out"], kind, nextVisited);
       }
     }
     return false;
   }
+  function somePipelineLeaf(schema, predicate, visited = /* @__PURE__ */ new Set()) {
+    const field = unwrapZodField(schema);
+    for (const s2 of field.traversed) {
+      if (visited.has(s2)) {
+        return false;
+      }
+    }
+    if (field.schema?._def?.typeName === "ZodPipeline") {
+      const nextVisited = new Set(visited);
+      for (const s2 of field.traversed) {
+        nextVisited.add(s2);
+      }
+      const def = field.schema._def;
+      if (somePipelineLeaf(def["in"], predicate, nextVisited)) {
+        return true;
+      }
+      const inField = unwrapZodField(def["in"]);
+      if (!inField.hasTransform || canSchemaHoldObjectOrArray(def["in"])) {
+        return somePipelineLeaf(def["out"], predicate, nextVisited);
+      }
+      return false;
+    }
+    return predicate(field.schema);
+  }
+  function isSingleChildField(prop, options) {
+    if (hasChildRefKind(prop, "component-id"))
+      return true;
+    const refDef = getRefDefName(prop);
+    return refDef === "ComponentId" || refDef === "Child" || Boolean(refDef && options?.childRefNames?.has(refDef));
+  }
+  function isCheckableField(type, unwrapped) {
+    const defName = unwrapped?.firstRefDefName || getRefDefName(type);
+    if (defName === "Checkable" || defName === "CheckRule") {
+      return true;
+    }
+    return somePipelineLeaf(type, (leaf) => {
+      if (leaf?._def?.typeName === "ZodArray") {
+        return getRefDefName(leaf._def.type) === "CheckRule";
+      }
+      return false;
+    });
+  }
   function isActionOption(option) {
     if (getRefDefName(option) === "Action")
       return true;
-    const current = unwrapZodSchema(option);
-    const def = current._def;
-    return def?.typeName === "ZodObject" && Boolean(def.shape?.().event);
+    return somePipelineLeaf(option, (current) => {
+      if (current?._def?.typeName !== "ZodObject")
+        return false;
+      const shape = current.shape;
+      const keys = Object.keys(shape);
+      return keys.length === 1 && (keys[0] === "event" || keys[0] === "functionCall");
+    });
   }
-  function isDynamicOption(option) {
+  function isDynamicOption(option, options) {
     const refDef = getRefDefName(option);
     if (refDef === "DataBinding" || refDef === "FunctionCall" || refDef.startsWith("Dynamic")) {
       return true;
     }
-    const current = unwrapZodSchema(option);
-    const def = current._def;
-    if (def?.typeName !== "ZodObject")
-      return false;
-    const shape = def.shape?.() || {};
-    const hasComponentId = Object.values(shape).some((prop) => getRefDefName(prop) === "ComponentId");
-    return (Boolean(shape["@path"]) || Boolean(shape.path) || Boolean(shape["@call"]) || Boolean(shape.call)) && !hasComponentId;
+    return somePipelineLeaf(option, (current) => {
+      if (current?._def?.typeName !== "ZodObject")
+        return false;
+      const shape = current.shape;
+      const hasComponentId = isTemplateRefObject(current) || Object.values(shape).some((prop) => isSingleChildField(prop, options));
+      return (Object.hasOwn(shape, "@path") || Object.hasOwn(shape, "path") || Object.hasOwn(shape, "@call") || Object.hasOwn(shape, "call")) && !hasComponentId;
+    });
   }
-  function isChildListOption(option) {
-    if (childRefKindOf(option) === "child-list" || getRefDefName(option) === "ChildList") {
+  function isChildListOption(option, options) {
+    const refDef = getRefDefName(option);
+    if (hasChildRefKind(option, "child-list") || refDef === "ChildList" || Boolean(refDef && options?.childListRefNames?.has(refDef))) {
       return true;
     }
-    const current = unwrapZodSchema(option);
-    const def = current._def;
-    if (def?.typeName !== "ZodObject")
-      return false;
-    const shape = def.shape?.() || {};
-    return Object.values(shape).some((prop) => getRefDefName(prop) === "ComponentId");
+    return somePipelineLeaf(option, (current) => isTemplateRefObject(current));
+  }
+  function isArrayOption(option) {
+    return somePipelineLeaf(option, (current) => current?._def?.typeName === "ZodArray");
+  }
+  function hasSingleChildObjectField(option, options) {
+    return somePipelineLeaf(option, (current) => {
+      if (current?._def?.typeName !== "ZodObject")
+        return false;
+      const shape = current.shape;
+      return Object.values(shape).some((prop) => isSingleChildField(prop, options));
+    });
   }
   function isDynamicDef(defName, typeName) {
-    return (defName === "DataBinding" || defName === "FunctionCall" || defName.startsWith("Dynamic")) && typeName !== "ZodObject" && typeName !== "ZodArray";
+    if (defName === "DataBinding" || defName === "FunctionCall") {
+      return true;
+    }
+    return defName.startsWith("Dynamic") && typeName !== "ZodObject" && typeName !== "ZodArray";
   }
-  function matchUnionBehavior(options) {
-    if (options.some(isActionOption))
+  function isBooleanOrNullishOption(option) {
+    return somePipelineLeaf(option, (leaf) => {
+      const typeName = leaf?._def?.typeName;
+      return typeName === "ZodBoolean" || typeName === "ZodNull" || typeName === "ZodUndefined";
+    });
+  }
+  function flattenUnionOptions(unionOptions, visited = /* @__PURE__ */ new Set()) {
+    const result = [];
+    for (const opt of unionOptions) {
+      const unwrapped = unwrapZodField(opt);
+      let seen = false;
+      for (const s2 of unwrapped.traversed) {
+        if (visited.has(s2)) {
+          seen = true;
+          break;
+        }
+      }
+      if (seen) {
+        continue;
+      }
+      const nextVisited = new Set(visited);
+      for (const s2 of unwrapped.traversed) {
+        nextVisited.add(s2);
+      }
+      if (!unwrapped.firstRefDefName && unwrapped.refs.size === 0) {
+        const nested = getUnionOptions(unwrapped.schema);
+        if (nested) {
+          result.push(...flattenUnionOptions(nested, nextVisited));
+          continue;
+        }
+        if (unwrapped.schema?._def?.typeName === "ZodPipeline") {
+          const def = unwrapped.schema._def;
+          const inField = unwrapZodField(def["in"]);
+          const inTypeName = inField.schema?._def?.typeName;
+          if (!inField.hasTransform && (inTypeName === "ZodAny" || inTypeName === "ZodUnknown")) {
+            result.push(...flattenUnionOptions([def["out"]], nextVisited));
+            continue;
+          }
+        }
+      }
+      result.push(opt);
+    }
+    return result;
+  }
+  function hasBooleanLeaf(option) {
+    return somePipelineLeaf(option, (leaf) => leaf?._def?.typeName === "ZodBoolean");
+  }
+  function matchUnionBehavior(unionOptions, options) {
+    const flatOptions = flattenUnionOptions(unionOptions);
+    if (flatOptions.some(isActionOption))
       return { type: "ACTION" };
-    if (options.some(isDynamicOption))
-      return { type: "DYNAMIC" };
-    if (options.some(isChildListOption))
+    if (flatOptions.some((opt) => isDynamicOption(opt, options))) {
+      const dynamicOptions = flatOptions.filter((opt) => isDynamicOption(opt, options));
+      const literalOptions = flatOptions.filter((opt) => !isDynamicOption(opt, options));
+      const hasNonBooleanDynamic = dynamicOptions.some((opt) => {
+        const refDef = getRefDefName(opt);
+        return refDef.startsWith("Dynamic") && refDef !== "DynamicBoolean";
+      });
+      const hasBooleanSource = dynamicOptions.some((opt) => getRefDefName(opt) === "DynamicBoolean" || isDynamicBooleanSchema(opt)) || literalOptions.some(hasBooleanLeaf);
+      const isBoolean = !hasNonBooleanDynamic && hasBooleanSource && literalOptions.every(isBooleanOrNullishOption);
+      return isBoolean ? { type: "DYNAMIC", isBoolean: true } : { type: "DYNAMIC" };
+    }
+    if (flatOptions.some((opt) => isChildListOption(opt, options)) || flatOptions.some(isArrayOption) && flatOptions.some((opt) => hasSingleChildObjectField(opt, options))) {
       return { type: "STRUCTURAL" };
+    }
     return void 0;
   }
-  function scrapeObjectShape(objShape) {
+  function mergePropertyWithCatchall(explicitVal, catchallVal) {
+    if (explicitVal === CHILD_REF_STATIC_NODE) {
+      return CHILD_REF_STATIC_NODE;
+    }
+    if (explicitVal.type === "STATIC") {
+      return catchallVal;
+    }
+    if (explicitVal.type === "OBJECT" || explicitVal.type === "ARRAY" || explicitVal.type === "DYNAMIC") {
+      return mergeIntersectedBehaviors(explicitVal, catchallVal);
+    }
+    return explicitVal;
+  }
+  var BEHAVIOR_PRECEDENCE = {
+    ACTION: 5,
+    CHECKABLE: 4,
+    STRUCTURAL: 3,
+    ARRAY: 2,
+    OBJECT: 2,
+    DYNAMIC: 1,
+    STATIC: 0
+  };
+  function mergeIntersectedBehaviors(left, right) {
+    if (left.type === "STATIC" && right.type === "STATIC") {
+      return left === CHILD_REF_STATIC_NODE || right === CHILD_REF_STATIC_NODE ? CHILD_REF_STATIC_NODE : { type: "STATIC" };
+    }
+    if (left.type === "STATIC")
+      return right;
+    if (right.type === "STATIC")
+      return left;
+    if (left.type === "OBJECT" && right.type === "OBJECT") {
+      const allKeys = /* @__PURE__ */ new Set([...Object.keys(left.shape), ...Object.keys(right.shape)]);
+      const shape = {};
+      for (const key of allKeys) {
+        const hasLeft = Object.hasOwn(left.shape, key);
+        const hasRight = Object.hasOwn(right.shape, key);
+        let merged;
+        if (hasLeft && hasRight) {
+          merged = mergeIntersectedBehaviors(left.shape[key], right.shape[key]);
+        } else if (hasLeft) {
+          merged = right.catchall ? mergePropertyWithCatchall(left.shape[key], right.catchall) : left.shape[key];
+        } else if (hasRight) {
+          merged = left.catchall ? mergePropertyWithCatchall(right.shape[key], left.catchall) : right.shape[key];
+        }
+        if (merged !== void 0) {
+          shape[key] = merged;
+        }
+      }
+      const catchall = left.catchall && right.catchall ? mergeIntersectedBehaviors(left.catchall, right.catchall) : left.catchall ?? right.catchall;
+      return makeObjectBehavior(shape, catchall);
+    }
+    if (left.type === "ARRAY" && right.type === "ARRAY") {
+      const element = mergeIntersectedBehaviors(left.element, right.element);
+      return left.templateFallback && right.templateFallback ? { type: "ARRAY", element, templateFallback: true } : { type: "ARRAY", element };
+    }
+    if (left.type === "DYNAMIC" && right.type === "DYNAMIC") {
+      return left.isBoolean || right.isBoolean ? { type: "DYNAMIC", isBoolean: true } : { type: "DYNAMIC" };
+    }
+    if (!hasActiveBehavior(left) && hasActiveBehavior(right)) {
+      return right;
+    }
+    if (!hasActiveBehavior(right) && hasActiveBehavior(left)) {
+      return left;
+    }
+    return BEHAVIOR_PRECEDENCE[right.type] > BEHAVIOR_PRECEDENCE[left.type] ? right : left;
+  }
+  function mergeUnionPropertyBehaviors(left, right) {
+    if (left.type === right.type) {
+      if (left.type === "OBJECT" && right.type === "OBJECT") {
+        return mergeUnionObjectBehaviors([left, right]);
+      }
+      if (left.type === "ARRAY" && right.type === "ARRAY") {
+        const element = mergeUnionPropertyBehaviors(left.element, right.element);
+        return left.templateFallback || right.templateFallback ? { type: "ARRAY", element, templateFallback: true } : { type: "ARRAY", element };
+      }
+      if (left.type === "DYNAMIC" && right.type === "DYNAMIC") {
+        return left.isBoolean && right.isBoolean ? { type: "DYNAMIC", isBoolean: true } : { type: "DYNAMIC" };
+      }
+      return left === CHILD_REF_STATIC_NODE || right === CHILD_REF_STATIC_NODE ? CHILD_REF_STATIC_NODE : left;
+    }
+    if (left.type === "STRUCTURAL" && right.type === "ARRAY") {
+      return hasActiveBehavior(right.element) ? { type: "ARRAY", element: right.element, templateFallback: true } : { type: "STRUCTURAL" };
+    }
+    if (left.type === "ARRAY" && right.type === "STRUCTURAL") {
+      return hasActiveBehavior(left.element) ? { type: "ARRAY", element: left.element, templateFallback: true } : { type: "STRUCTURAL" };
+    }
+    if (left.type === "STATIC") {
+      return right.type === "DYNAMIC" ? { type: "DYNAMIC" } : right;
+    }
+    if (right.type === "STATIC") {
+      return left.type === "DYNAMIC" ? { type: "DYNAMIC" } : left;
+    }
+    return { type: "STATIC" };
+  }
+  function mergeUnionObjectBehaviors(objects) {
+    const allKeys = /* @__PURE__ */ new Set();
+    for (const obj of objects) {
+      for (const key of Object.keys(obj.shape)) {
+        allKeys.add(key);
+      }
+    }
+    const mergedShape = {};
+    for (const key of allKeys) {
+      let acc;
+      let hasChildRef = false;
+      for (const obj of objects) {
+        if (Object.hasOwn(obj.shape, key)) {
+          const candidate = obj.shape[key];
+          if (candidate === CHILD_REF_STATIC_NODE) {
+            hasChildRef = true;
+          }
+          acc = acc === void 0 ? candidate : mergeUnionPropertyBehaviors(acc, candidate);
+        }
+      }
+      if (acc !== void 0) {
+        mergedShape[key] = acc.type === "STATIC" && hasChildRef ? CHILD_REF_STATIC_NODE : acc;
+      }
+    }
+    let mergedCatchall;
+    if (objects.some((obj) => obj.catchall !== void 0)) {
+      for (const obj of objects) {
+        const candidate = obj.catchall ?? { type: "STATIC" };
+        mergedCatchall = mergedCatchall === void 0 ? candidate : mergeUnionPropertyBehaviors(mergedCatchall, candidate);
+      }
+    }
+    return makeObjectBehavior(mergedShape, mergedCatchall);
+  }
+  function canObjectSchemaPassKey(schema, key, visited = /* @__PURE__ */ new Set()) {
+    if (!schema) {
+      return true;
+    }
+    const unwrapped = unwrapZodField(schema);
+    for (const s2 of unwrapped.traversed) {
+      if (visited.has(s2)) {
+        return true;
+      }
+    }
+    const nextVisited = new Set(visited);
+    for (const s2 of unwrapped.traversed) {
+      nextVisited.add(s2);
+    }
+    const current = unwrapped.schema;
+    const typeName = current?._def?.typeName;
+    switch (typeName) {
+      case "ZodObject": {
+        const shape = current.shape;
+        if (Object.hasOwn(shape, key)) {
+          return true;
+        }
+        const def = current._def;
+        if (def["unknownKeys"] === "passthrough") {
+          return true;
+        }
+        return Boolean(def["catchall"] && def["catchall"]._def?.typeName !== "ZodNever");
+      }
+      case "ZodIntersection": {
+        const def = current._def;
+        return canObjectSchemaPassKey(def.left, key, nextVisited) && canObjectSchemaPassKey(def.right, key, nextVisited);
+      }
+      case "ZodPipeline": {
+        const def = current._def;
+        const inField = unwrapZodField(def["in"]);
+        if (inField.hasTransform) {
+          const inIsObject = inField.schema?._def?.typeName === "ZodObject";
+          return (!inIsObject || canObjectSchemaPassKey(def["in"], key, nextVisited)) && canObjectSchemaPassKey(def["out"], key, nextVisited);
+        }
+        return canObjectSchemaPassKey(def["in"], key, nextVisited) && canObjectSchemaPassKey(def["out"], key, nextVisited);
+      }
+      case "ZodUnion":
+      case "ZodDiscriminatedUnion": {
+        const opts = getUnionOptions(current) ?? [];
+        return opts.some((opt) => canObjectSchemaPassKey(opt, key, nextVisited));
+      }
+      default:
+        return true;
+    }
+  }
+  function allowsUnknownObjectKeys(schema, visited = /* @__PURE__ */ new Set()) {
+    return canObjectSchemaPassKey(schema, "__a2ui_unknown_key_probe__", visited);
+  }
+  function getArrayElementSchema(schema) {
+    if (!schema) {
+      return void 0;
+    }
+    const current = unwrapZodField(schema).schema;
+    return current?._def?.typeName === "ZodArray" ? current._def.type : void 0;
+  }
+  function filterPipedBehavior(behavior, inSchema, outSchema, visited, ignoreInConstraints = false) {
+    if (behavior.type === "OBJECT") {
+      const shape = {};
+      for (const [key, propBehavior] of Object.entries(behavior.shape)) {
+        if ((ignoreInConstraints || canObjectSchemaPassKey(inSchema, key, visited)) && canObjectSchemaPassKey(outSchema, key, visited)) {
+          shape[key] = propBehavior;
+        }
+      }
+      const catchall = behavior.catchall && (ignoreInConstraints || allowsUnknownObjectKeys(inSchema, visited)) && allowsUnknownObjectKeys(outSchema, visited) ? behavior.catchall : void 0;
+      return makeObjectBehavior(shape, catchall);
+    }
+    if (behavior.type === "ARRAY") {
+      const element = filterPipedBehavior(behavior.element, getArrayElementSchema(inSchema), getArrayElementSchema(outSchema), visited, ignoreInConstraints);
+      return behavior.templateFallback ? { type: "ARRAY", element, templateFallback: true } : { type: "ARRAY", element };
+    }
+    return behavior;
+  }
+  function pipeBehaviors(inSchema, outSchema, visited, options) {
+    const inField = unwrapZodField(inSchema);
+    const inBehavior = getFieldBehavior(inSchema, visited, options);
+    const outBehavior = getFieldBehavior(outSchema, visited, options);
+    if (inField.hasTransform) {
+      if (!canSchemaHoldObjectOrArray(inSchema) && !hasActiveBehavior(inBehavior)) {
+        return inBehavior;
+      }
+      const combined = inBehavior.type === "OBJECT" || inBehavior.type === "ARRAY" || !hasActiveBehavior(inBehavior) ? mergeIntersectedBehaviors(inBehavior, outBehavior) : inBehavior;
+      return filterPipedBehavior(combined, inSchema, outSchema, visited, true);
+    }
+    return filterPipedBehavior(mergeIntersectedBehaviors(inBehavior, outBehavior), inSchema, outSchema, visited);
+  }
+  function matchObjectVariantUnionBehavior(unionOptions, visited, options) {
+    const nonNullish = flattenUnionOptions(unionOptions).filter((opt) => {
+      const typeName = unwrapZodField(opt).schema?._def?.typeName;
+      return typeName !== "ZodNull" && typeName !== "ZodUndefined";
+    });
+    if (nonNullish.length === 0) {
+      return { type: "STATIC" };
+    }
+    const branchBehaviors = nonNullish.map((opt) => getFieldBehavior(opt, visited, options));
+    if (branchBehaviors.every((b2) => b2.type === "OBJECT")) {
+      return mergeUnionObjectBehaviors(branchBehaviors);
+    }
+    const arrayBehaviors = branchBehaviors.filter((b2) => b2.type === "ARRAY");
+    if (arrayBehaviors.length > 0 && branchBehaviors.every((b2) => b2.type === "ARRAY" || b2.type === "STATIC")) {
+      const merged = arrayBehaviors.slice(1).reduce((acc, cur) => mergeUnionPropertyBehaviors(acc, cur), arrayBehaviors[0]);
+      return hasActiveBehavior(merged) ? merged : { type: "STATIC" };
+    }
+    return { type: "STATIC" };
+  }
+  function scrapeObjectShape(objShape, visited, options) {
     const shape = {};
     for (const [key, value] of Object.entries(objShape)) {
-      shape[key] = getFieldBehavior(value);
+      const behavior = getFieldBehavior(value, visited, options);
+      shape[key] = behavior.type === "STATIC" && isSingleChildPropertySchema(key, value, options) ? CHILD_REF_STATIC_NODE : behavior;
     }
     return shape;
   }
-  function getFieldBehavior(type) {
-    const defName = getRefDefName(type);
-    if (isCheckableField(type)) {
+  function getFieldBehavior(type, visited = /* @__PURE__ */ new Set(), options, inArray = false) {
+    if (!type) {
+      return { type: "STATIC" };
+    }
+    const field = unwrapZodField(type);
+    for (const s2 of field.traversed) {
+      if (visited.has(s2)) {
+        return { type: "STATIC" };
+      }
+    }
+    const nextVisited = new Set(visited);
+    for (const s2 of field.traversed) {
+      nextVisited.add(s2);
+    }
+    const defName = field.firstRefDefName || getRefDefName(type);
+    if (isCheckableField(type, field)) {
       return { type: "CHECKABLE" };
     }
     if (defName === "Action") {
       return { type: "ACTION" };
     }
-    const current = unwrapZodSchema(type);
-    if (childRefKindOf(current) === "child-list" || defName === "ChildList") {
+    const current = field.schema;
+    if (!current?._def) {
+      return { type: "STATIC" };
+    }
+    const unionOptions = getUnionOptions(current);
+    const marksOuterChildList = (field.refs.has("child-list") || hasChildRefKind(type, "child-list") || defName === "ChildList" || Boolean(defName && options?.childListRefNames?.has(defName))) && canSchemaHoldListRef(type, options);
+    if (!unionOptions && marksOuterChildList) {
       return { type: "STRUCTURAL" };
     }
-    if (isDynamicDef(defName, current._def?.typeName)) {
-      return { type: "DYNAMIC" };
+    const typeName = current._def.typeName;
+    if (isDynamicDef(defName, typeName)) {
+      return isDynamicBooleanSchema(type) || defName === "DynamicBoolean" ? { type: "DYNAMIC", isBoolean: true } : { type: "DYNAMIC" };
     }
-    if (current._def.typeName === "ZodUnion") {
-      const unionBehavior = matchUnionBehavior(current._def.options);
-      if (unionBehavior)
+    if (typeName === "ZodPipeline") {
+      const def = current._def;
+      const merged = pipeBehaviors(def["in"], def["out"], nextVisited, options);
+      return merged.type === "STRUCTURAL" && !canSchemaHoldListRef(current, options) ? { type: "STATIC" } : merged;
+    }
+    if (typeName === "ZodIntersection") {
+      const def = current._def;
+      const merged = mergeIntersectedBehaviors(getFieldBehavior(def.left, nextVisited, options, inArray), getFieldBehavior(def.right, nextVisited, options, inArray));
+      return merged.type === "STRUCTURAL" && !canSchemaHoldListRef(current, options) ? { type: "STATIC" } : merged;
+    }
+    if (unionOptions) {
+      const unionBehavior = matchUnionBehavior(unionOptions, options) ?? (marksOuterChildList ? { type: "STRUCTURAL" } : void 0);
+      if (unionBehavior) {
+        if (unionBehavior.type === "STRUCTURAL") {
+          const flatOptions = flattenUnionOptions(unionOptions);
+          let mergedElement;
+          for (const opt of flatOptions) {
+            if (!isChildListOption(opt, options) && isArrayOption(opt)) {
+              const branchBehavior = getFieldBehavior(opt, nextVisited, options);
+              if (branchBehavior.type === "ARRAY") {
+                mergedElement = mergedElement === void 0 ? branchBehavior.element : mergeUnionPropertyBehaviors(mergedElement, branchBehavior.element);
+              }
+            }
+          }
+          if (mergedElement && hasActiveBehavior(mergedElement)) {
+            return { type: "ARRAY", element: mergedElement, templateFallback: true };
+          }
+        }
         return unionBehavior;
+      }
+      return matchObjectVariantUnionBehavior(unionOptions, nextVisited, options);
     }
-    if (current._def.typeName === "ZodArray") {
+    if (typeName === "ZodArray") {
       return {
         type: "ARRAY",
-        element: getFieldBehavior(current._def.type)
+        element: getFieldBehavior(current._def.type, nextVisited, options, true)
       };
     }
-    if (current._def.typeName === "ZodObject") {
-      return {
-        type: "OBJECT",
-        shape: scrapeObjectShape(current._def.shape())
-      };
+    if (typeName === "ZodRecord") {
+      const valueType = current._def["valueType"];
+      return makeObjectBehavior({}, valueType ? getFieldBehavior(valueType, nextVisited, options) : void 0);
+    }
+    if (typeName === "ZodObject") {
+      if (!inArray && isTemplateRefObject(current)) {
+        return { type: "STRUCTURAL" };
+      }
+      const rawShape = current.shape;
+      const rawCatchall = current._def["catchall"];
+      const catchall = rawCatchall && rawCatchall._def?.typeName !== "ZodNever" ? getFieldBehavior(rawCatchall, nextVisited, options) : void 0;
+      return makeObjectBehavior(scrapeObjectShape(rawShape, nextVisited, options), catchall);
     }
     return { type: "STATIC" };
+  }
+  function finalizeResolvedProps(resolved, mirrorsAccessibility) {
+    if (!resolved || typeof resolved !== "object")
+      return {};
+    const { [AT_CHECKS]: _checks, ...rest } = resolved;
+    if (mirrorsAccessibility && AT_ACCESSIBILITY in rest) {
+      rest["accessibility"] = rest[AT_ACCESSIBILITY];
+    }
+    return rest;
   }
   var MAX_DYNAMIC_CHILD_LIST_SIZE = 1e4;
   function getSafeChildList(value) {
@@ -21886,46 +22342,55 @@ var bwA2UI = (() => {
      *
      * @param context Component context providing state and event dispatching.
      * @param schema Zod schema defining the component properties.
+     * @param options Optional child-reference analysis options overriding protocol-version defaults.
      */
-    constructor(context, schema) {
+    constructor(context, schema, options) {
       this.dataListeners = [];
       this.propsListeners = [];
       this.currentProps = {};
       this.isConnected = false;
       this.actionClosures = /* @__PURE__ */ new Map();
       this.context = context;
-      this.behaviorTree = scrapeSchemaBehavior(schema);
-      if (this.behaviorTree.type !== "OBJECT") {
-        this.behaviorTree = { type: "OBJECT", shape: {} };
-      }
+      const resolvedOptions = options ?? resolveChildRefOptions(context.componentModel?.catalog?.protocolVersion ?? context.dataContext?.surface?.protocolVersion ?? context.dataContext?.surface?.defaultCatalog?.protocolVersion);
+      this.behaviorTree = scrapeComponentBehavior(schema, resolvedOptions);
+      this.mirrorsAccessibility = !componentMixinLayout(schema).customKeys.has("accessibility");
       this.resolveInitialProps();
     }
     resolveInitialProps() {
       const props = this.context.componentModel.properties;
       const resolved = this.resolveAndBind(props, this.behaviorTree, [], true);
-      this.currentProps = { ...this.currentProps, ...resolved || {} };
+      this.currentProps = finalizeResolvedProps(resolved, this.mirrorsAccessibility);
     }
     connect() {
       if (this.isConnected)
         return;
       this.isConnected = true;
-      const sub = this.context.componentModel.onUpdated.subscribe(() => {
+      const sub = this.context.componentModel.onUpdated?.subscribe(() => {
         this.rebuildAllBindings();
       });
-      this.compUnsub = () => sub.unsubscribe();
+      this.compUnsub = sub ? () => sub.unsubscribe() : void 0;
       this.rebuildAllBindings();
     }
     rebuildAllBindings() {
       this.dataListeners.forEach((l2) => l2());
       this.dataListeners = [];
       const props = this.context.componentModel.properties;
-      const resolved = this.resolveAndBind(props, this.behaviorTree, [], false);
-      this.currentProps = { ...this.currentProps, ...resolved || {} };
+      this.currentProps = {};
+      this.prevActionClosures = this.actionClosures;
+      this.actionClosures = /* @__PURE__ */ new Map();
+      let resolved;
+      try {
+        resolved = this.resolveAndBind(props, this.behaviorTree, [], false);
+      } finally {
+        this.prevActionClosures = void 0;
+      }
+      this.currentProps = finalizeResolvedProps(resolved, this.mirrorsAccessibility);
       this.notify();
     }
-    bindDynamicValue(value, path, isSync) {
+    bindDynamicValue(value, path, isSync, isBoolean) {
+      const coerce2 = isBoolean ? coerceDynamicBoolean : (v2) => v2;
       const bound = this.context.dataContext.subscribeDynamicValue(value, (newVal) => {
-        this.updateDeepValue(path, newVal);
+        this.updateDeepValue(path, coerce2(newVal));
         this.notify();
       });
       if (!isSync) {
@@ -21933,7 +22398,7 @@ var bwA2UI = (() => {
       } else {
         bound.unsubscribe();
       }
-      return bound.value;
+      return coerce2(bound.value);
     }
     /**
      * Synchronously evaluates dynamic expressions within a nested object tree.
@@ -21963,8 +22428,9 @@ var bwA2UI = (() => {
     }
     bindAction(value, path) {
       const cacheKey = path.join("/");
-      const cached = this.actionClosures.get(cacheKey);
+      const cached = this.actionClosures.get(cacheKey) ?? this.prevActionClosures?.get(cacheKey);
       if (cached && jsonEquals(cached.raw, value)) {
+        this.actionClosures.set(cacheKey, cached);
         return cached.closure;
       }
       const closure = async (options) => {
@@ -21979,7 +22445,10 @@ var bwA2UI = (() => {
           });
           return;
         }
-        const resolved = this.context.dataContext.resolveAction(value, { userActivation: true });
+        let resolved = this.context.dataContext.resolveAction(value, { userActivation: true });
+        if (isThenable(resolved)) {
+          resolved = await resolved;
+        }
         if (resolved === void 0) {
           return;
         }
@@ -22006,7 +22475,7 @@ var bwA2UI = (() => {
       if (!templatePath || !templateComponentId) {
         return value;
       }
-      const atLeastV10 = isAtLeastVersion(this.context.dataContext.surface?.protocolVersion ?? this.context.dataContext.surface?.defaultCatalog?.protocolVersion, "1.0");
+      const atLeastV10 = this.context.dataContext.atLeastV10;
       const binding = atLeastV10 ? { "@path": templatePath } : { path: templatePath };
       const bound = this.context.dataContext.subscribeDynamicValue(binding, (newVal) => {
         const resolvedChildren = this.mapTemplateChildren(newVal, templateComponentId, templatePath);
@@ -22040,20 +22509,28 @@ var bwA2UI = (() => {
         severity: "error"
       };
     }
-    bindCheckable(value, path, isSync) {
+    bindCheckable(value, path, isSync, initialTarget) {
       const rules = Array.isArray(value) ? value : [];
       const ruleResults = rules.map(() => ({
         valid: true,
         message: "",
         severity: "error"
       }));
-      const parentPath = path.slice(0, -1);
-      const applyValidationState = () => {
+      const computeValidationState = () => {
         const errors = ruleResults.filter((r2) => !r2.valid && r2.severity === "error").map((r2) => r2.message);
         const failedResults = ruleResults.filter((r2) => !r2.valid);
-        this.updateDeepValue([...parentPath, "isValid"], errors.length === 0);
-        this.updateDeepValue([...parentPath, "validationErrors"], errors);
-        this.updateDeepValue([...parentPath, "validationResults"], failedResults);
+        return {
+          isValid: errors.length === 0,
+          validationErrors: errors,
+          validationResults: failedResults
+        };
+      };
+      const parentPath = path.slice(0, -1);
+      const applyValidationState = () => {
+        const state = computeValidationState();
+        this.updateDeepValue([...parentPath, "isValid"], state.isValid);
+        this.updateDeepValue([...parentPath, "validationErrors"], state.validationErrors);
+        this.updateDeepValue([...parentPath, "validationResults"], state.validationResults);
       };
       const updateValidationState = () => {
         applyValidationState();
@@ -22066,6 +22543,12 @@ var bwA2UI = (() => {
         const explicitMessage = this.isPathBoundCondition(condition) ? void 0 : ruleMessage;
         const fallbackMessage = ruleMessage ?? "Validation failed";
         ruleResults[index].message = fallbackMessage;
+        if (this.context.dataContext.atLeastV10) {
+          this.bindCheckCondition(condition, isSync, (result) => {
+            ruleResults[index] = result;
+          }, updateValidationState, explicitMessage, fallbackMessage);
+          return;
+        }
         const bound = this.context.dataContext.subscribeDynamicValue(condition, (newVal) => {
           ruleResults[index] = this.extractValidationResult(newVal, explicitMessage, fallbackMessage);
           updateValidationState();
@@ -22077,8 +22560,80 @@ var bwA2UI = (() => {
         }
         ruleResults[index] = this.extractValidationResult(bound.value, explicitMessage, fallbackMessage);
       });
-      applyValidationState();
+      if (initialTarget) {
+        const state = computeValidationState();
+        initialTarget.isValid = state.isValid;
+        initialTarget.validationErrors = state.validationErrors;
+        initialTarget.validationResults = state.validationResults;
+      }
       return value;
+    }
+    /**
+     * Binds the condition of one check rule on a v1.0 surface.
+     *
+     * While the condition waits on an asynchronous call, such as a function
+     * call routed to the agent, the rule is pending and counts as valid. When
+     * the call settles the rule is evaluated; if the call failed the rule is
+     * invalid. Either way subscribers are notified.
+     *
+     * @param condition The rule's condition.
+     * @param isSync Whether the binding is resolved once, without subscriptions.
+     * @param setResult Stores the rule's result.
+     * @param onUpdate Recomputes the validation state and notifies subscribers.
+     * @param explicitMessage Message that overrides the one the condition returns.
+     * @param fallbackMessage Message used when the condition returns none.
+     */
+    bindCheckCondition(condition, isSync, setResult, onUpdate, explicitMessage, fallbackMessage) {
+      const sig = resolveSignalKeepingPending(this.context.dataContext, condition);
+      let active = !isSync;
+      let current;
+      const apply = (value, notify) => {
+        current = value;
+        const settled = settleDeep(value);
+        if (isThenable(settled)) {
+          setResult({ valid: true, message: fallbackMessage, severity: "error" });
+          Promise.resolve(settled).then((settledValue) => {
+            if (!active || current !== value)
+              return;
+            setResult(this.checkResultOf(settledValue, explicitMessage, fallbackMessage));
+            onUpdate();
+          }, () => {
+            if (!active || current !== value)
+              return;
+            setResult({ valid: false, message: fallbackMessage, severity: "error" });
+            onUpdate();
+          });
+        } else {
+          setResult(this.checkResultOf(settled, explicitMessage, fallbackMessage));
+        }
+        if (notify)
+          onUpdate();
+      };
+      if (isSync) {
+        apply(peekValue(sig), false);
+        sig.unsubscribe?.();
+        return;
+      }
+      let initial = true;
+      const dispose = effect(() => {
+        const value = getValue(sig);
+        if (!initial)
+          apply(value, true);
+      });
+      initial = false;
+      apply(peekValue(sig), false);
+      this.dataListeners.push(() => {
+        active = false;
+        dispose();
+        sig.unsubscribe?.();
+      });
+    }
+    /** The result of a check rule whose condition settled to `value`. */
+    checkResultOf(value, explicitMessage, fallbackMessage) {
+      if (findFailedArgument(value)) {
+        return { valid: false, message: fallbackMessage, severity: "error" };
+      }
+      return this.extractValidationResult(value, explicitMessage, fallbackMessage);
     }
     /** Whether a check condition is a data binding rather than a function call. */
     isPathBoundCondition(condition) {
@@ -22087,56 +22642,89 @@ var bwA2UI = (() => {
       const rec = condition;
       return this.context.dataContext.atLeastV10 ? typeof rec["@path"] === "string" && !("@call" in rec) : typeof rec["path"] === "string" && !("call" in rec);
     }
-    bindObject(valObj, shape, path, isSync) {
+    getWritableBindingPath(rawPropValue) {
+      if (!rawPropValue || typeof rawPropValue !== "object" || Array.isArray(rawPropValue)) {
+        return void 0;
+      }
+      const rawObj = rawPropValue;
+      const bindingKey = this.context.dataContext.atLeastV10 ? "@path" : "path";
+      const pathVal = rawObj[bindingKey];
+      if (typeof pathVal === "string" && (this.context.dataContext.atLeastV10 || !Object.hasOwn(rawObj, "componentId"))) {
+        return pathVal;
+      }
+      return void 0;
+    }
+    bindObject(valObj, shape, path, isSync, catchall) {
       const result = {};
       for (const [k, v2] of Object.entries(valObj)) {
-        const childBehavior = shape[k] || { type: "STATIC" };
-        result[k] = this.resolveAndBind(v2, childBehavior, [...path, k], isSync);
+        const childBehavior = Object.hasOwn(shape, k) ? shape[k] : catchall ?? { type: "STATIC" };
+        result[k] = this.resolveAndBind(v2, childBehavior, [...path, k], isSync, result);
       }
       for (const [k, childBehavior] of Object.entries(shape)) {
         if (childBehavior.type === "DYNAMIC") {
           const setterName = `set${k.charAt(0).toUpperCase() + k.slice(1)}`;
           const rawPropValue = valObj[k];
           result[setterName] = (newValue) => {
-            if (rawPropValue && typeof rawPropValue === "object") {
-              const rawObj = rawPropValue;
-              const bindingKey = this.context.dataContext.atLeastV10 ? "@path" : "path";
-              const pathVal = rawObj[bindingKey];
-              if (typeof pathVal === "string" && (this.context.dataContext.atLeastV10 || !("componentId" in rawObj))) {
-                this.context.dataContext.set(pathVal, newValue);
-              }
+            const pathVal = this.getWritableBindingPath(rawPropValue);
+            if (pathVal !== void 0) {
+              this.context.dataContext.set(pathVal, newValue);
             }
           };
         }
       }
+      if (catchall?.type === "DYNAMIC") {
+        for (const [k, v2] of Object.entries(valObj)) {
+          if (!Object.hasOwn(shape, k) && k.length > 0) {
+            const pathVal = this.getWritableBindingPath(v2);
+            if (pathVal !== void 0) {
+              const setterName = `set${k.charAt(0).toUpperCase() + k.slice(1)}`;
+              if (!Object.hasOwn(valObj, setterName)) {
+                result[setterName] = (newValue) => {
+                  this.context.dataContext.set(pathVal, newValue);
+                };
+              }
+            }
+          }
+        }
+      }
       return result;
     }
-    resolveAndBind(value, behavior, path, isSync) {
-      if (value === void 0 || value === null)
+    resolveAndBind(value, behavior, path, isSync, parentTarget) {
+      if (value === void 0 || value === null && !(behavior.type === "DYNAMIC" && behavior.isBoolean)) {
         return value;
+      }
       switch (behavior.type) {
         case "DYNAMIC":
-          return this.bindDynamicValue(value, path, isSync);
+          return this.bindDynamicValue(value, path, isSync, behavior.isBoolean);
         case "ACTION":
+          if (typeof value !== "object" || Array.isArray(value))
+            return value;
           return this.bindAction(value, path);
         case "STRUCTURAL":
           return this.bindStructuralTemplate(value, path, isSync);
         case "CHECKABLE":
-          return this.bindCheckable(value, path, isSync);
+          if (!Array.isArray(value))
+            return value;
+          return this.bindCheckable(value, path, isSync, parentTarget);
         case "STATIC":
           return value;
         case "ARRAY":
-          if (!Array.isArray(value))
-            return value;
+          if (!Array.isArray(value)) {
+            return behavior.templateFallback ? this.bindStructuralTemplate(value, path, isSync) : value;
+          }
           return value.map((item, index) => this.resolveAndBind(item, behavior.element, [...path, index.toString()], isSync));
         case "OBJECT":
-          if (typeof value !== "object")
+          if (typeof value !== "object" || Array.isArray(value))
             return value;
-          return this.bindObject(value, behavior.shape, path, isSync);
+          return this.bindObject(value, behavior.shape, path, isSync, behavior.catchall);
       }
     }
     updateDeepValue(path, newValue) {
-      this.currentProps = this.cloneAndUpdate(this.currentProps, path, newValue);
+      const updated = this.cloneAndUpdate(this.currentProps, path, newValue);
+      if (this.mirrorsAccessibility && path[0] === AT_ACCESSIBILITY && AT_ACCESSIBILITY in updated) {
+        updated["accessibility"] = updated[AT_ACCESSIBILITY];
+      }
+      this.currentProps = updated;
     }
     cloneAndUpdate(obj, path, newValue) {
       if (path.length === 0)
@@ -22158,6 +22746,7 @@ var bwA2UI = (() => {
      * Disposes all active data subscriptions and detaches component listeners.
      */
     dispose() {
+      this.actionClosures.clear();
       if (!this.isConnected)
         return;
       this.isConnected = false;
@@ -22434,102 +23023,6 @@ var bwA2UI = (() => {
     return true;
   }
 
-  // node_modules/@a2ui/web_core/src/resolution/ref-fields.js
-  var COMPONENT_ID_REF = "REF:common_types.json#/$defs/ComponentId";
-  var CHILD_LIST_REF = "REF:common_types.json#/$defs/ChildList";
-  var EMPTY_REF_FIELDS = /* @__PURE__ */ new Map();
-  var refFieldsCache = /* @__PURE__ */ new WeakMap();
-  function extractRefFields(schema) {
-    const cached = refFieldsCache.get(schema);
-    if (cached) {
-      return cached;
-    }
-    const unwrapped = unwrap2(schema);
-    if (unwrapped.schema._def.typeName !== "ZodObject") {
-      refFieldsCache.set(schema, EMPTY_REF_FIELDS);
-      return EMPTY_REF_FIELDS;
-    }
-    const fields = /* @__PURE__ */ new Map();
-    const shape = unwrapped.schema.shape;
-    for (const [key, value] of Object.entries(shape)) {
-      const field = unwrap2(value);
-      if (marksChildList(field) || isChildListUnion(field.schema)) {
-        fields.set(key, { kind: "list" });
-        continue;
-      }
-      if (marksComponentId(field)) {
-        fields.set(key, { kind: "single" });
-        continue;
-      }
-      if (field.schema._def.typeName === "ZodArray") {
-        const element = unwrap2(field.schema._def.type);
-        if (marksComponentId(element)) {
-          fields.set(key, { kind: "list" });
-          continue;
-        }
-        if (element.schema._def.typeName === "ZodObject") {
-          const subKeys = /* @__PURE__ */ new Set();
-          const elementShape = element.schema.shape;
-          for (const [subKey, subValue] of Object.entries(elementShape)) {
-            if (marksComponentId(unwrap2(subValue))) {
-              subKeys.add(subKey);
-            }
-          }
-          if (subKeys.size > 0) {
-            fields.set(key, { kind: "nested", keys: subKeys });
-          }
-        }
-      }
-    }
-    const result = fields;
-    refFieldsCache.set(schema, result);
-    return result;
-  }
-  function unwrap2(schema) {
-    const descriptions = [];
-    const refs = /* @__PURE__ */ new Set();
-    let current = schema;
-    for (; ; ) {
-      if (current.description) {
-        descriptions.push(current.description);
-      }
-      const ref = childRefKindOf(current);
-      if (ref) {
-        refs.add(ref);
-      }
-      const typeName = current._def.typeName;
-      if (typeName === "ZodOptional" || typeName === "ZodNullable" || typeName === "ZodDefault") {
-        current = current._def.innerType;
-      } else if (typeName === "ZodEffects") {
-        current = current._def.schema;
-      } else {
-        return { schema: current, descriptions, refs };
-      }
-    }
-  }
-  function marksComponentId(field) {
-    return field.refs.has("component-id") || hasPointer(field.descriptions, COMPONENT_ID_REF);
-  }
-  function marksChildList(field) {
-    return field.refs.has("child-list") || hasPointer(field.descriptions, CHILD_LIST_REF);
-  }
-  function hasPointer(descriptions, pointer) {
-    return descriptions.some((d2) => d2.startsWith(pointer));
-  }
-  function isChildListUnion(schema) {
-    if (schema._def.typeName !== "ZodUnion") {
-      return false;
-    }
-    const options = schema._def.options;
-    return options.some((o2) => {
-      if (o2._def.typeName !== "ZodObject") {
-        return false;
-      }
-      const shape = o2.shape;
-      return shape.componentId && shape.path;
-    });
-  }
-
   // node_modules/@a2ui/web_core/src/resolution/node-resolver.js
   var ROOT_COMPONENT_ID = "root";
   var ROOT_DATA_PATH = "/";
@@ -22547,7 +23040,7 @@ var bwA2UI = (() => {
      *   `surface.defaultCatalog`, which may be `undefined`.
      * @throws {A2uiStateError} If the catalog instance differs from the surface's catalog.
      */
-    constructor(surface, catalog = surface.defaultCatalog) {
+    constructor(surface, catalog = surface.defaultCatalog ?? surface.catalog) {
       this.records = /* @__PURE__ */ new Map();
       this.nodesByEdge = /* @__PURE__ */ new Map();
       this.nodesByComponentId = /* @__PURE__ */ new Map();
@@ -22555,7 +23048,8 @@ var bwA2UI = (() => {
       this.dispatchedErrors = /* @__PURE__ */ new Map();
       this.modelSubs = [];
       this._disposed = false;
-      if (catalog !== surface.defaultCatalog) {
+      const surfaceCatalog = surface.defaultCatalog ?? surface.catalog;
+      if (catalog !== surfaceCatalog) {
         throw new A2uiStateError("NodeResolver requires the same catalog instance its surface was constructed with.");
       }
       this.surface = surface;
@@ -22567,7 +23061,7 @@ var bwA2UI = (() => {
       if (surface.componentsModel?.onDeleted) {
         this.modelSubs.push(surface.componentsModel.onDeleted.subscribe((id) => this.onComponentDeleted(id)));
       }
-      if (surface.componentsModel.get(this.rootId)) {
+      if (surface.componentsModel?.get(this.rootId)) {
         this.buildRoot();
       }
     }
@@ -22592,7 +23086,7 @@ var bwA2UI = (() => {
         return;
       }
       codes.add(code);
-      this.surface.dispatchError({ code, message });
+      this.surface.dispatchError?.({ code, message });
     }
     clearDispatched(componentId, dataPath) {
       const byPath = this.dispatchedErrors.get(componentId);
@@ -22724,20 +23218,21 @@ var bwA2UI = (() => {
         return record2.node;
       }
       const compCatalog = this.catalogFor(model);
-      const api = compCatalog.components.get(model.type);
+      const api = compCatalog?.components?.get(model.type);
       if (!api) {
-        this.dispatchOnce("UNKNOWN_COMPONENT_TYPE", componentId, dataPath, `Component '${componentId}' has type '${model.type}', which is not in catalog '${compCatalog.id}'.`);
-        return this.registerNode(new MutableComponentNode(instanceIdFor(componentId, dataPath, occurrence), componentId, model.type, dataPath, {}, void 0, void 0, "unknown-type", computed(() => getValue(model.metadataSignal))), { edgeKey, parent, occurrence, refFields: EMPTY_REF_FIELDS2, componentModel: model }).node;
+        this.dispatchOnce("UNKNOWN_COMPONENT_TYPE", componentId, dataPath, compCatalog ? `Component '${componentId}' has type '${model.type}', which is not in catalog '${compCatalog.id}'.` : `Component '${componentId}' has type '${model.type}', and neither the component nor surface '${this.surface.id}' defines a catalog.`);
+        return this.registerNode(new MutableComponentNode(instanceIdFor(componentId, dataPath, occurrence), componentId, model.type, dataPath, {}, void 0, void 0, "unknown-type", computed(() => model.metadataSignal ? getValue(model.metadataSignal) : model.metadata)), { edgeKey, parent, occurrence, refFields: EMPTY_REF_FIELDS2, componentModel: model }).node;
       }
       this.clearDispatched(componentId, dataPath);
       const context = new ComponentContext(this.surface, componentId, dataPath, parent?.context?.dataContext);
-      const binder = new GenericBinder(context, api.schema);
-      const record = this.registerNode(new MutableComponentNode(instanceIdFor(componentId, dataPath, occurrence), componentId, model.type, dataPath, {}, api, context, "resolved", computed(() => getValue(model.metadataSignal))), {
+      const refOptions = isAtLeastVersion(compCatalog?.protocolVersion, "1.0") ? V10_CHILD_REF_OPTIONS : isAtLeastVersion(compCatalog?.protocolVersion, "0.9") ? V09_CHILD_REF_OPTIONS : V08_CHILD_REF_OPTIONS;
+      const binder = new GenericBinder(context, api.schema, refOptions);
+      const record = this.registerNode(new MutableComponentNode(instanceIdFor(componentId, dataPath, occurrence), componentId, model.type, dataPath, {}, api, context, "resolved", computed(() => model.metadataSignal ? getValue(model.metadataSignal) : model.metadata)), {
         edgeKey,
         parent,
         occurrence,
-        refFields: extractRefFields(api.schema),
-        behavior: scrapeSchemaBehavior(api.schema),
+        refFields: extractRefFields(api.schema, refOptions),
+        behavior: scrapeComponentBehavior(api.schema, refOptions),
         componentModel: model,
         binder
       });
@@ -22750,14 +23245,17 @@ var bwA2UI = (() => {
       return record.node;
     }
     /**
-     * Returns the catalog a component model resolves against: the catalog it
-     * was bound to, never the surface's default catalog directly.
+     * Returns the catalog a component model resolves against: the catalog bound
+     * on the model when set, falling back to the surface's default catalog when
+     * `model.catalog` is `undefined` (for example on components constructed with
+     * the pre-1.0 3-argument `ComponentModel` overload or partial test stand-ins).
      *
      * @param model Component model to resolve.
-     * @returns The component model's catalog.
+     * @returns The catalog to look up `model.type` in, or `undefined` when neither
+     *   the component nor the surface defines one.
      */
     catalogFor(model) {
-      return model.catalog;
+      return model.catalog ?? this.surface.defaultCatalog ?? this.surface.catalog;
     }
     registerNode(node, partial) {
       const record = {
@@ -22800,7 +23298,7 @@ var bwA2UI = (() => {
       }
       if (existing && !existing.disposed) {
         const model = this.surface.componentsModel.get(componentId);
-        const api = model ? this.catalogFor(model).components.get(model.type) : void 0;
+        const api = model ? this.catalogFor(model)?.components?.get(model.type) : void 0;
         const existingRecord = this.records.get(existing);
         const upToDate = existing.componentId === componentId && existing.dataPath === dataPath && existingRecord?.occurrence === occurrence && (existing.isPlaceholder ? model === void 0 && existing.state === "pending" || model !== void 0 && api === void 0 && existing.state === "unknown-type" && existingRecord?.componentModel === model : model !== void 0 && existing.type === model.type && existingRecord?.componentModel === model);
         if (upToDate) {
@@ -22842,16 +23340,9 @@ var bwA2UI = (() => {
         return;
       }
       const raw = record.lastBinderProps ?? record.binder?.snapshot ?? {};
-      const next = { ...raw };
-      const newEdges = /* @__PURE__ */ new Map();
       const modelProps = record.componentModel?.properties;
-      if (modelProps) {
-        for (const key of record.refFields.keys()) {
-          if (key in next && !(key in modelProps)) {
-            delete next[key];
-          }
-        }
-      }
+      const next = modelProps ? pruneOmittedProps(raw, modelProps, record.behavior) : { ...raw };
+      const newEdges = /* @__PURE__ */ new Map();
       const occurrences = /* @__PURE__ */ new Map();
       const resolveChild = (slot, componentId, dataPath) => {
         const occurrenceKey = `${escapeIdPart(componentId)}@${escapeIdPart(dataPath)}`;
@@ -22897,20 +23388,68 @@ var bwA2UI = (() => {
           }
           case "nested": {
             const value = next[key];
+            const slotKey = escapeIdPart(key);
+            if (typeof value === "string" && value) {
+              next[key] = resolveChild(slotKey, value, record.node.dataPath);
+              break;
+            }
             if (!Array.isArray(value)) {
               break;
             }
-            next[key] = value.map((item, index) => {
+            const rawProp = modelProps?.[key];
+            const fromTemplate = rawProp !== void 0 && !Array.isArray(rawProp);
+            const safeValue = getSafeChildList(value);
+            next[key] = safeValue.map((item, index) => {
+              if (typeof item === "string" && item) {
+                return resolveChild(slotKey, item, record.node.dataPath);
+              }
               if (!item || typeof item !== "object" || Array.isArray(item)) {
                 return item;
               }
-              const entry = { ...item };
+              const rawEntry = item;
+              if (fromTemplate) {
+                if (typeof rawEntry.id === "string" && typeof rawEntry.basePath === "string") {
+                  return resolveChild(slotKey, rawEntry.id, rawEntry.basePath);
+                }
+                return item;
+              }
+              const hasNestedKey = Array.from(ref.keys).some((subKey) => Object.hasOwn(rawEntry, subKey));
+              if (!hasNestedKey) {
+                return item;
+              }
+              const entry = { ...rawEntry };
               let resolvedAny = false;
               for (const subKey of ref.keys) {
-                const childId = entry[subKey];
-                if (typeof childId === "string" && childId) {
-                  entry[subKey] = resolveChild(`${escapeIdPart(key)}[${index}].${escapeIdPart(subKey)}`, childId, record.node.dataPath);
+                const subVal = entry[subKey];
+                const subSlotKey = `${slotKey}[${index}].${escapeIdPart(subKey)}`;
+                if (typeof subVal === "string" && subVal) {
+                  entry[subKey] = resolveChild(subSlotKey, subVal, record.node.dataPath);
                   resolvedAny = true;
+                } else if (Array.isArray(subVal)) {
+                  const safeSubVal = getSafeChildList(subVal);
+                  let resolvedSubList = false;
+                  const mappedSubVal = safeSubVal.map((subItem) => {
+                    if (typeof subItem === "string" && subItem) {
+                      resolvedSubList = true;
+                      return resolveChild(subSlotKey, subItem, record.node.dataPath);
+                    }
+                    if (subItem && typeof subItem === "object" && !Array.isArray(subItem)) {
+                      const subEntry = subItem;
+                      if (typeof subEntry.id === "string" && typeof subEntry.basePath === "string") {
+                        resolvedSubList = true;
+                        return resolveChild(subSlotKey, subEntry.id, subEntry.basePath);
+                      }
+                      if (typeof subEntry.componentId === "string" && subEntry.componentId) {
+                        resolvedSubList = true;
+                        return resolveChild(subSlotKey, subEntry.componentId, record.node.dataPath);
+                      }
+                    }
+                    return subItem;
+                  });
+                  if (resolvedSubList) {
+                    entry[subKey] = mappedSubVal;
+                    resolvedAny = true;
+                  }
                 }
               }
               return resolvedAny ? entry : item;
@@ -22941,6 +23480,9 @@ var bwA2UI = (() => {
       const previous = peekValue(record.node.props);
       for (const key of Object.keys(wrapped)) {
         wrapped[key] = stabilize(previous[key], wrapped[key]);
+      }
+      if (next["accessibility"] !== void 0 && next["accessibility"] === next["@accessibility"]) {
+        wrapped["accessibility"] = wrapped["@accessibility"];
       }
       record.node.setProps(wrapped);
     }
@@ -22998,6 +23540,9 @@ var bwA2UI = (() => {
     return occurrence > 1 ? `${base}#${occurrence}` : base;
   }
   function wrapDynamicValues(value, behavior, raw, dataContext) {
+    if (isComponentNode(value)) {
+      return value;
+    }
     switch (behavior.type) {
       case "DYNAMIC": {
         const bindingKey = dataContext.atLeastV10 ? "@path" : "path";
@@ -23019,22 +23564,33 @@ var bwA2UI = (() => {
         if (!value || typeof value !== "object" || Array.isArray(value)) {
           return value;
         }
+        const rawRecord = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
         const setterNames = /* @__PURE__ */ new Set();
         for (const [key, childBehavior] of Object.entries(behavior.shape)) {
           if (childBehavior.type === "DYNAMIC") {
             setterNames.add(`set${key.charAt(0).toUpperCase()}${key.slice(1)}`);
           }
         }
-        const rawRecord = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+        if (behavior.catchall?.type === "DYNAMIC") {
+          for (const key of Object.keys(rawRecord)) {
+            if (!Object.hasOwn(behavior.shape, key) && key.length > 0) {
+              const setterName = `set${key.charAt(0).toUpperCase()}${key.slice(1)}`;
+              if (!Object.hasOwn(rawRecord, setterName)) {
+                setterNames.add(setterName);
+              }
+            }
+          }
+        }
         const out = {};
         for (const [key, item] of Object.entries(value)) {
           if (setterNames.has(key)) {
             continue;
           }
-          out[key] = wrapDynamicValues(item, behavior.shape[key] ?? { type: "STATIC" }, rawRecord[key], dataContext);
+          const childBehavior = Object.hasOwn(behavior.shape, key) ? behavior.shape[key] : behavior.catchall ?? { type: "STATIC" };
+          out[key] = wrapDynamicValues(item, childBehavior, rawRecord[key], dataContext);
         }
         for (const [key, childBehavior] of Object.entries(behavior.shape)) {
-          if (childBehavior.type === "DYNAMIC" && !(key in out)) {
+          if (childBehavior.type === "DYNAMIC" && !Object.hasOwn(out, key)) {
             out[key] = new ResolvedBinding(void 0);
           }
         }
@@ -23074,7 +23630,7 @@ var bwA2UI = (() => {
         for (const key of nextKeys) {
           const stabilized = stabilize(prev[key], next[key]);
           out[key] = stabilized;
-          if (!(key in prev) || !Object.is(stabilized, prev[key])) {
+          if (!Object.hasOwn(prev, key) || !Object.is(stabilized, prev[key])) {
             allSame = false;
           }
         }
@@ -23089,6 +23645,65 @@ var bwA2UI = (() => {
     }
     const proto = Object.getPrototypeOf(value);
     return proto === Object.prototype || proto === null;
+  }
+  var VALIDATION_STATE_KEYS = /* @__PURE__ */ new Set(["isValid", "validationErrors", "validationResults"]);
+  function pruneOmittedProps(resolved, rawProps, behavior) {
+    const shape = behavior?.type === "OBJECT" ? behavior.shape : void 0;
+    const catchall = behavior?.type === "OBJECT" ? behavior.catchall : void 0;
+    let hasActiveCheckable = false;
+    const dynamicSetterNames = /* @__PURE__ */ new Set();
+    if (shape) {
+      for (const [key, childBehavior] of Object.entries(shape)) {
+        if (childBehavior.type === "DYNAMIC") {
+          dynamicSetterNames.add(`set${key.charAt(0).toUpperCase()}${key.slice(1)}`);
+        } else if (childBehavior.type === "CHECKABLE" && Object.hasOwn(rawProps, key) && rawProps[key] !== void 0 && rawProps[key] !== null) {
+          hasActiveCheckable = true;
+        }
+      }
+    }
+    if (catchall) {
+      for (const key of Object.keys(rawProps)) {
+        if (shape && Object.hasOwn(shape, key)) {
+          continue;
+        }
+        if (catchall.type === "DYNAMIC" && key.length > 0) {
+          dynamicSetterNames.add(`set${key.charAt(0).toUpperCase()}${key.slice(1)}`);
+        } else if (catchall.type === "CHECKABLE" && rawProps[key] !== void 0 && rawProps[key] !== null) {
+          hasActiveCheckable = true;
+        }
+      }
+    }
+    const out = {};
+    for (const [key, val2] of Object.entries(resolved)) {
+      if (!Object.hasOwn(rawProps, key)) {
+        if (dynamicSetterNames.has(key) || hasActiveCheckable && VALIDATION_STATE_KEYS.has(key)) {
+          out[key] = val2;
+        }
+        continue;
+      }
+      const childBehavior = shape && Object.hasOwn(shape, key) ? shape[key] : catchall;
+      out[key] = pruneOmittedValue(val2, rawProps[key], childBehavior);
+    }
+    if (Object.hasOwn(resolved, "accessibility") && !Object.hasOwn(rawProps, "accessibility") && Object.hasOwn(out, "@accessibility")) {
+      out["accessibility"] = out["@accessibility"];
+    }
+    return out;
+  }
+  function pruneOmittedValue(resolved, rawValue, behavior) {
+    if (rawValue === void 0 || rawValue === null) {
+      return rawValue;
+    }
+    if (behavior?.type === "STRUCTURAL" && Array.isArray(rawValue)) {
+      return [...rawValue];
+    }
+    if ((!behavior || behavior.type === "OBJECT" || behavior.type === "STATIC") && isPlainObject6(resolved) && isPlainObject6(rawValue)) {
+      return pruneOmittedProps(resolved, rawValue, behavior);
+    }
+    if ((!behavior || behavior.type === "ARRAY" || behavior.type === "STATIC") && Array.isArray(resolved) && Array.isArray(rawValue)) {
+      const elementBehavior = behavior?.type === "ARRAY" ? behavior.element : void 0;
+      return resolved.slice(0, rawValue.length).map((item, index) => pruneOmittedValue(item, rawValue[index], elementBehavior));
+    }
+    return resolved;
   }
 
   // node_modules/@a2ui/web_core/src/catalogs/basic/v1/functions/basic_functions.js
@@ -24550,50 +25165,10 @@ var bwA2UI = (() => {
       bw: implementations[api.name]
     }));
     const fns = [...functions];
-    const proxies = [];
     for (const f2 of schemaOnly.functions.values()) {
-      if (fns.some((x2) => x2.name === f2.name)) continue;
-      if (f2.allowedCallers === "agentOnly") {
-        fns.push(f2);
-        continue;
-      }
-      const proxy = {
-        ...f2,
-        execute(args, ctx) {
-          const call = proxy.callAgent;
-          const surfaceId = ctx?.surface?.id;
-          if (!call || !surfaceId) throw new Error(`Agent function "${f2.name}" called with no agent connection`);
-          const reactive = !ctx.isUserActivated;
-          const key = reactive ? `${surfaceId}\0${f2.name}\0${stableJson(args)}` : null;
-          if (key && proxy.inflight.has(key)) return proxy.inflight.get(key);
-          const functionCallId = newCallId();
-          const p2 = Promise.resolve(call(surfaceId, { "@call": f2.name, catalogId: json.catalogId, args }, { functionCallId })).catch((e2) => {
-            throw new A2uiExpressionError(`[${e2?.code ?? "EXECUTION_ERROR"}] ${e2?.message ?? e2}`, f2.name, { functionCallId, code: e2?.code });
-          }).finally(() => {
-            if (key) proxy.inflight.delete(key);
-          });
-          if (key) proxy.inflight.set(key, p2);
-          return p2;
-        },
-        inflight: /* @__PURE__ */ new Map()
-      };
-      proxies.push(proxy);
-      fns.push(proxy);
+      if (!fns.some((x2) => x2.name === f2.name)) fns.push(f2);
     }
-    const catalog = new Catalog(json.catalogId, PROTOCOL_VERSION, components, fns);
-    AGENT_PROXIES.set(catalog, proxies);
-    return catalog;
-  }
-  var AGENT_PROXIES = /* @__PURE__ */ new WeakMap();
-  function stableJson(v2) {
-    if (Array.isArray(v2)) return `[${v2.map(stableJson).join(",")}]`;
-    if (v2 && typeof v2 === "object") return `{${Object.keys(v2).sort().map((k) => `${JSON.stringify(k)}:${stableJson(v2[k])}`).join(",")}}`;
-    return JSON.stringify(v2) ?? "null";
-  }
-  var callCounter = 0;
-  function newCallId() {
-    const rnd = globalThis.crypto?.randomUUID?.();
-    return rnd ? `bw-${rnd}` : `bw-${Date.now().toString(36)}-${(++callCounter).toString(36)}`;
+    return new Catalog(json.catalogId, PROTOCOL_VERSION, components, fns);
   }
   function buildBasicCatalog(implementations, extraFunctions = []) {
     return buildCatalog(catalog_json_default, implementations, [...BASIC_FUNCTIONS, ...extraFunctions]);
@@ -24614,38 +25189,14 @@ var bwA2UI = (() => {
     const api = Catalog.fromJson(doc, PROTOCOL_VERSION).functions.get(name);
     return { ...api, execute };
   }
-  var ENVELOPE_KEYS = ["@checks", "@accessibility", "@metadata", "@catalogId"];
-  function normalizeComponent(c2) {
-    if (!c2 || typeof c2 !== "object" || Array.isArray(c2)) return c2;
-    let out = c2;
-    for (const key of ENVELOPE_KEYS) {
-      if (!(key in c2)) continue;
-      const bare = key.slice(1);
-      if (bare in c2) continue;
-      if (out === c2) out = { ...c2 };
-      out[bare] = out[key];
-      delete out[key];
-    }
-    return out;
-  }
-  function normalizeComponents(list) {
-    return Array.isArray(list) ? list.map(normalizeComponent) : list;
-  }
   function normalizeMessage(msg, opts = {}) {
     if (!msg || typeof msg !== "object") return msg;
     if (Array.isArray(msg)) return msg.map((m2) => normalizeMessage(m2, opts));
     if (Array.isArray(msg.messages)) return { ...msg, messages: msg.messages.map((m2) => normalizeMessage(m2, opts)) };
-    if (msg.createSurface && typeof msg.createSurface === "object") {
-      const cs = { ...msg.createSurface };
-      if (opts.dropTheme && "theme" in cs) {
-        delete cs.theme;
-        opts.onDrop?.(cs.surfaceId);
-      }
-      if (cs.components) cs.components = normalizeComponents(cs.components);
+    if (opts.dropTheme && msg.createSurface && typeof msg.createSurface === "object" && "theme" in msg.createSurface) {
+      const { theme, ...cs } = msg.createSurface;
+      opts.onDrop?.(cs.surfaceId);
       return { ...msg, createSurface: cs };
-    }
-    if (msg.updateComponents?.components) {
-      return { ...msg, updateComponents: { ...msg.updateComponents, components: normalizeComponents(msg.updateComponents.components) } };
     }
     return msg;
   }
@@ -24667,6 +25218,10 @@ var bwA2UI = (() => {
     }
     return null;
   }
+  function detach(value) {
+    if (!value || typeof value !== "object") return value;
+    return typeof structuredClone === "function" ? structuredClone(value) : JSON.parse(JSON.stringify(value));
+  }
   var envelopes = (input) => Array.isArray(input) ? input : Array.isArray(input?.messages) ? input.messages : [input];
   function surfaceIdOf(msg) {
     for (const v2 of Object.values(msg)) {
@@ -24683,13 +25238,10 @@ var bwA2UI = (() => {
     const validationConfig = typeof validation === "string" ? VALIDATION[validation] : validation;
     const processor = new MessageProcessor(catalogs, void 0, {
       ...validationConfig ? { validationConfig } : {},
-      outboundListener: (msg) => onOutbound(msg)
+      // Without onOutbound (static rendering), web_core has no agent to call: a function that
+      // needs the agent fails locally and is reported, instead of being sent nowhere.
+      ...onOutbound ? { outboundListener: (msg) => onOutbound(msg) } : {}
     });
-    for (const c2 of catalogs) {
-      for (const proxy of AGENT_PROXIES.get(c2) ?? []) {
-        proxy.callAgent = (surfaceId, call, options) => processor.callAgentFunction(surfaceId, call, options);
-      }
-    }
     const dropTheme = validation !== "strict";
     const onDrop = (surfaceId) => onNote({
       level: "warning",
@@ -24715,8 +25267,8 @@ var bwA2UI = (() => {
           } });
           return false;
         });
-        const input = rejected.length ? accepted : messages;
-        const errors = accepted.length ? processor.processMessagesWithErrors(normalizeMessage(input, { dropTheme, onDrop })) : [];
+        const detached = accepted.map(detach);
+        const errors = detached.length ? processor.processMessagesWithErrors(normalizeMessage(detached, { dropTheme, onDrop })) : [];
         return [...rejected, ...errors];
       },
       capabilities(options = {}) {
@@ -24764,11 +25316,11 @@ var bwA2UI = (() => {
   // node_modules/quikdown/dist/quikdown_ast.esm.js
   var quikdownVersion = "1.3.2";
   var MAX_LOOP_ITERATIONS = 1e3;
-  function quikdown_ast(markdown, options = {}) {
-    if (!markdown || typeof markdown !== "string") {
+  function quikdown_ast(markdown2, options = {}) {
+    if (!markdown2 || typeof markdown2 !== "string") {
       return { type: "document", children: [] };
     }
-    const text = markdown.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    const text = markdown2.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
     const children = parseBlocks(text);
     return {
       type: "document",
@@ -25331,11 +25883,11 @@ var bwA2UI = (() => {
     if (blocks.length === 1 && blocks[0].t === "p") return { content: blocks[0].c, block: false };
     return { content: blocks, block: blocks.length > 0 };
   }
-  function markdownToTaco(md, parse2 = quikdown_ast) {
+  function markdownToTaco(md, parse = quikdown_ast) {
     const source = typeof md === "string" ? md : String(md ?? "");
     if (source === "") return { content: [], block: false };
     try {
-      return astToTaco(parse2(source));
+      return astToTaco(parse(source));
     } catch {
       return { content: [source], block: false };
     }
@@ -25544,8 +26096,8 @@ var bwA2UI = (() => {
       },
       /** Re-run the component's update with current props (after local state changes). */
       refresh() {
-        var _a;
-        __privateMethod(_a = view, _View_instances, updateComponent_fn).call(_a, view.p, view.p);
+        var _a2;
+        __privateMethod(_a2 = view, _View_instances, updateComponent_fn).call(_a2, view.p, view.p);
       },
       /**
        * Reactive read of a value the core left raw ({"@path"}) or resolved without
@@ -25924,10 +26476,11 @@ var bwA2UI = (() => {
   });
   function iconTaco(p2, ctx) {
     const raw = p2.name;
+    const shape = raw?.value && typeof raw.value === "object" ? raw.value : raw;
     let d2 = "";
     let name = "";
-    if (raw && typeof raw === "object" && !Array.isArray(raw) && "svgPath" in raw) {
-      d2 = safeSvgPath(str(ctx.read(raw.svgPath)));
+    if (shape && typeof shape === "object" && !Array.isArray(shape) && "svgPath" in shape) {
+      d2 = safeSvgPath(str(ctx.read(shape.svgPath)));
     } else {
       name = str(ctx.read(raw));
       d2 = Object.hasOwn(ICONS, name) ? ICONS[name] : "";
@@ -26114,15 +26667,15 @@ var bwA2UI = (() => {
         if (e2.key !== "Tab") return;
         const items = [...e2.currentTarget.querySelectorAll(FOCUSABLE)];
         if (!items.length) return;
-        const first = items[0];
-        const last2 = items[items.length - 1];
+        const first2 = items[0];
+        const last = items[items.length - 1];
         const doc = e2.currentTarget.ownerDocument;
-        if (e2.shiftKey && doc.activeElement === first) {
+        if (e2.shiftKey && doc.activeElement === first2) {
           e2.preventDefault();
-          last2.focus();
-        } else if (!e2.shiftKey && doc.activeElement === last2) {
+          last.focus();
+        } else if (!e2.shiftKey && doc.activeElement === last) {
           e2.preventDefault();
-          first.focus();
+          first2.focus();
         }
       };
       return {
@@ -26159,8 +26712,8 @@ var bwA2UI = (() => {
       overlay.style.display = isOpen ? "" : "none";
       if (isOpen && !wasOpen) {
         queueMicrotask(() => {
-          const first = overlay.querySelector(within(".a2ui-modal-body")) ?? overlay.querySelector(".a2ui-modal-close");
-          first?.focus();
+          const first2 = overlay.querySelector(within(".a2ui-modal-body")) ?? overlay.querySelector(".a2ui-modal-close");
+          first2?.focus();
         });
       }
       return true;
@@ -26453,7 +27006,7 @@ var bwA2UI = (() => {
     },
     a11yTarget: (el) => el.querySelector("input")
   });
-  var BASIC_COMPONENTS = {
+  var BASIC_COMPONENTS2 = {
     Text,
     Image,
     Icon,
@@ -26624,7 +27177,7 @@ ${styles.alternateCss}` : "", themeVarsCss(bw2, styles, ".a2ui-surface"), adapte
   // src/renderer.js
   var surfaceCounter = 0;
   function createBasicCatalog({ components = {}, functions = [] } = {}) {
-    return buildBasicCatalog({ ...BASIC_COMPONENTS, ...components }, functions);
+    return buildBasicCatalog({ ...BASIC_COMPONENTS2, ...components }, functions);
   }
   function frameError(err, surfaceId) {
     const error = { code: String(err.code), message: String(err.message) };
@@ -26664,10 +27217,11 @@ ${styles.alternateCss}` : "", themeVarsCss(bw2, styles, ".a2ui-surface"), adapte
       const meta = {};
       if (opts.includeCapabilities !== false) meta.a2uiRendererCapabilities = core.capabilities();
       const dm = core.dataModelMetadata();
-      if (dm) meta.a2uiRendererDataModel = dm;
+      if (dm) meta.a2uiRendererDataModel = detach(dm);
       return meta;
     }
-    function emit(message) {
+    function emit(live) {
+      const message = detach(live);
       outbound.push(message);
       if (outbound.length > OUTBOUND_KEEP) outbound.shift();
       try {
@@ -26987,8 +27541,7 @@ ${styles.alternateCss}` : "", themeVarsCss(bw2, styles, ".a2ui-surface"), adapte
   // src/static/index.js
   function renderToHTML(messages, opts = {}) {
     const bw2 = opts.bw ?? bitwrench_default;
-    const core = createCore({ catalogs: opts.catalogs ?? [createBasicCatalog()], validation: opts.validation, limits: opts.limits, onOutbound: () => {
-    } });
+    const core = createCore({ catalogs: opts.catalogs ?? [createBasicCatalog()], validation: opts.validation, limits: opts.limits });
     const errors = [...core.process(messages)];
     const ids = opts.surfaceId ? [opts.surfaceId] : [...core.surfaces().keys()];
     const parts = [];
@@ -27017,7 +27570,8 @@ ${styles.alternateCss}` : "", themeVarsCss(bw2, styles, ".a2ui-surface"), adapte
 ${body}` : body,
       css,
       surfaces: ids,
-      errors,
+      // The same failure can be reported while resolving and while composing: list it once.
+      errors: [...new Map(errors.map((e2) => [JSON.stringify(e2), e2])).values()],
       taco: tacos
     };
   }

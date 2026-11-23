@@ -36,7 +36,7 @@ Include the catalog. The basic catalog document has an `instructions` field and 
 Models make mistakes. The renderer helps you notice:
 
 * **Errors are explicit** - invalid messages produce `error` envelopes (and `onDiagnostic` calls) with a JSON path. Feed them back to the model and ask for a corrected message.
-* **Nothing unsafe renders** - a bad message cannot run code or inject HTML (see [Security](security.md)).
+* **Declarative only** - a bad message is rendered from approved components, with text as text and URLs checked, never as code or HTML (see [Security](security.md) for the trust boundary).
 * **Streaming is tolerant** - use `validation: 'relaxed'` and `receiveStream()` so components render as lines arrive.
 
 ## The LLM sandbox page

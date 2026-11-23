@@ -2,7 +2,7 @@
 # runs it). Each entry has a reason and an expiry date; test/unit/release-tools.test.js
 # checks that none has expired and that runtime entries match .github/audit-allowlist.json.
 
-# Runtime: zod 3 inside @a2ui/web_core 0.15.0. Mitigated by the size guard; see
+# Runtime: zod 3 inside @a2ui/web_core 0.16.1. Mitigated by the size guard; see
 # .github/audit-allowlist.json for the full reason and mitigation.
 [[IgnoredVulns]]
 id = "GHSA-mrhx-c7xc-m3w5"

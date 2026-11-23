@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>bitwrench-a2ui: A2UI renderer for plain JavaScript</title>
-<meta name="description" content="Render A2UI v1.0 agent-generated interfaces in plain JavaScript with bitwrench. One script tag, live DOM or an HTML string, no framework or build step.">
+<meta name="description" content="Render A2UI v1.0 agent-generated interfaces in plain JavaScript with bitwrench. One script tag, live DOM or a static HTML string, no framework, JSX or build step on your side.">
 <link rel="canonical" href="https://deftio.github.io/bitwrench-a2ui/pages/">
 <meta property="og:title" content="bitwrench-a2ui">
 <meta property="og:description" content="A2UI renderer for plain JavaScript, built on bitwrench.">
@@ -28,9 +28,9 @@
 
   bw.mount('#hero', {
     t: 'div', a: { class: 'site-hero' }, c: { t: 'div', a: { class: 'site-hero-inner' }, c: [
-      { t: 'div', c: ['A2UI v1.0', 'No build step', 'No framework', 'DOM or HTML', 'Apache-2.0'].map(x => ({ t: 'span', a: { class: 'site-pill' }, c: x })) },
+      { t: 'div', c: ['A2UI v1.0', 'Plain JavaScript', 'No framework or JSX', 'DOM or static HTML', 'Apache-2.0'].map(x => ({ t: 'span', a: { class: 'site-pill' }, c: x })) },
       { t: 'h1', c: 'A2UI renderer for plain JavaScript' },
-      { t: 'p', c: ['Render agent-generated interfaces with ', { t: 'a', a: { href: 'https://deftio.github.io/bitwrench/pages/', style: 'color:inherit;text-decoration:underline;text-underline-offset:3px' }, c: 'bitwrench' }, '. Google\'s A2UI core handles the protocol; bitwrench draws it as plain JavaScript data, to live DOM or to an HTML string.'] },
+      { t: 'p', c: ['A2UI rendering in an ordinary browser page. No framework, JSX or build step on your side. Powered by ', { t: 'a', a: { href: 'https://deftio.github.io/bitwrench/pages/', style: 'color:inherit;text-decoration:underline;text-underline-offset:3px' }, c: 'bitwrench' }, ': Google\'s A2UI core handles the protocol, and bitwrench draws it from plain JavaScript objects, to live DOM or to a static HTML string.'] },
       { t: 'a', a: { class: 'site-cta primary', href: 'playground.html' }, c: 'Open the playground' },
       { t: 'a', a: { class: 'site-cta ghost', href: 'docs.html?doc=quick-start' }, c: 'Quick start' },
       { t: 'a', a: { class: 'site-cta ghost', href: site.SITE.repo }, c: 'GitHub' },
@@ -73,23 +73,24 @@
   }
 
   const side = site.tabs([
-    { label: 'Wire messages', render: () => site.code(wire.map(m => JSON.stringify(m)).join('\n\n') || '(none yet)') },
-    { label: 'To the agent', render: () => site.code(outbound.map(m => site.pretty(m)).join('\n\n') || 'Interact with the surface: button clicks become action messages.') },
+    { label: 'Received (wire)', render: () => site.code(wire.map(m => JSON.stringify(m)).join('\n\n') || '(none yet)') },
+    { label: 'Sent to agent', render: () => site.code(outbound.map(m => site.pretty(m)).join('\n\n') || 'Interact with the surface: button clicks become action messages.') },
     { label: 'Data model', render: () => site.code(renderer && renderer.surfaceIds().length ? site.pretty(renderer.inspect().dataModel) : '{}') },
-    { label: 'TACO', render: () => site.code(renderer && renderer.surfaceIds().length ? site.pretty(renderer.inspect().taco) : '(nothing rendered yet)') },
+    { label: 'UI objects (TACO)', render: () => site.code(renderer && renderer.surfaceIds().length ? site.pretty(renderer.inspect().taco) : '(nothing rendered yet)') },
   ]);
   function drawSide() { side.draw(); }
 
   site.onMode(mode => renderer && renderer.setThemeMode(mode === 'dark' ? 'dark' : 'light'));
 
   const demo = site.section('See it work',
-    'Pick a demo. Messages stream in on the right, the surface renders in the middle, and clicking a button sends an action that a small simulated agent answers. Nothing leaves your browser.',
+    ['Pick a demo. Messages stream in, the surface renders, and clicking a button sends an action that a small simulated agent answers; nothing leaves your browser. The inspector keeps four views apart: the JSON ', { t: 'b', c: 'received' }, ' exactly as it arrived, the messages ', { t: 'b', c: 'sent' }, ' back, the live ', { t: 'b', c: 'data model', }, ' your edits change, and the ', { t: 'b', c: 'UI objects' }, ' the renderer built from them.'],
     { t: 'div', c: [
       { t: 'div', a: { class: 'site-toolbar' }, c: [
         { t: 'label', a: { for: 'demo-pick' }, c: 'Demo' },
         { t: 'select', a: { id: 'demo-pick', class: 'site-btn', onchange: e => play(e.target.value) },
           c: demoIds.map(id => ({ t: 'option', a: { value: id }, c: FIXTURES.find(f => f.id === id).title })) },
         { t: 'button', a: { type: 'button', class: 'site-btn', onclick: () => play(current.id) }, c: 'Replay' },
+        { t: 'button', a: { type: 'button', class: 'site-btn', onclick: () => { document.getElementById('demo-pick').value = 'stream'; play('stream'); } }, c: 'Watch a stream' },
         { t: 'a', a: { class: 'site-link', href: 'playground.html' }, c: 'Edit these messages in the playground →' },
       ] },
       { t: 'div', a: { style: 'display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start' }, c: [
@@ -102,7 +103,7 @@
     'No bundler, no framework, no npm needed. Load bitwrench and bitwrench-a2ui, create a renderer, and feed it A2UI messages from your agent.',
     site.code(`<div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/bitwrench@2.1.15/dist/bitwrench.umd.min.js" integrity="sha384-udDmcsr7TEJzzxbXOV5b0EaJuEcmQjGTZNDr8fNdR/xEMq7raSMWAGgLZOqU6JLu" crossorigin="anonymous"><\/script>
-<script src="https://cdn.jsdelivr.net/npm/bitwrench-a2ui@0.9.3/dist/bitwrench-a2ui.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/bitwrench-a2ui@0.9.4/dist/bitwrench-a2ui.min.js"><\/script>
 <script>
   const renderer = bwA2UI.createRenderer({
     mount: '#app',
@@ -112,7 +113,7 @@
 <\/script>`));
 
   const how = site.section('How it works',
-    'Three layers, each with one job. The A2UI core is Google\'s own, so protocol behavior matches the official renderers.',
+    ['Three layers, each with one job. The protocol layer is Google\'s own ', { t: 'code', c: '@a2ui/web_core' }, ', the same core the official renderers use. Where the published core and the v1.0 spec differ, the renderer adapts, and each adaptation is documented in ', { t: 'a', a: { href: 'docs.html?doc=compatibility' }, c: 'Compatibility' }, '.'],
     { t: 'div', a: { class: 'site-grid' }, c: [
       ['1. Google\'s A2UI core', 'Validates messages, keeps each surface\'s components and data model, resolves bindings and functions, and expands list templates.'],
       ['2. The bitwrench adapter', 'Mounts each component once and updates it in place, so inputs keep focus and caret while the agent changes the surface.'],
@@ -125,9 +126,9 @@
       ['UI as data', 'Each A2UI component becomes a TACO object you can inspect, store and transform. The inspector above shows it.'],
       ['CSS as data', 'Themes are generated from a few seed colors, light and dark, and composed as rule objects at runtime. No stylesheet build.'],
       ['DOM or HTML', 'The same components render live or to an HTML string in Node: snapshots, previews, server-side first paint, tests.'],
-      ['No build, no framework', 'Two script tags, or one single-file bundle that drops into an MCP App.'],
-      ['Conformance tested', 'All 36 cases of the upstream adapter, accessibility and Markdown suites pass, and all 43 upstream examples render.'],
-      ['Safe by construction', 'No code or HTML from the wire, a strict URL policy, and no handlers in static output.'],
+      ['No build step on your side', 'Two script tags, or one single-file bundle that drops into an MCP App. The published files are built and tested in the repository.'],
+      ['Tested against upstream', 'All 36 applicable cases of the pinned upstream adapter, accessibility and Markdown suites pass, and all 43 upstream examples render. Accessibility checks are structural (jsdom), not a browser audit.'],
+      ['Declarative, catalog-controlled', 'Agents pick components from catalogs you register. Text is set as text, Markdown goes through an allowlist, URLs follow a strict policy, functions run only if a catalog defines them, and static output has no handlers. See Security.'],
     ].map(([h, p]) => ({ t: 'div', a: { class: 'site-card' }, c: [{ t: 'h3', c: h }, { t: 'p', a: { class: 'site-muted' }, c: p }] })) });
 
   const pages = site.section('Explore', null, { t: 'div', a: { class: 'site-grid' }, c: [
@@ -141,7 +142,25 @@
     ['docs.html?doc=compatibility', 'Compatibility', 'Conformance results and known differences.'],
   ].map(([href, h, p]) => ({ t: 'a', a: { class: 'site-card', href, style: 'text-decoration:none;color:inherit' }, c: [{ t: 'h3', c: h }, { t: 'p', a: { class: 'site-muted' }, c: p }] })) });
 
-  bw.mount('#app', [demo, quick, how, features, pages]);
+  const objects = site.section('UI and CSS as objects',
+    ['bitwrench builds user interfaces and CSS from ordinary JavaScript objects, so UI trees, component properties and style rules can be built, combined, inspected and transformed at runtime. It calls its UI object form TACO: Tag, Attributes, Content, Options. This page is built the same way: its layout, the demo above and its stylesheet are objects (', { t: 'a', a: { href: `${site.SITE.repo}/blob/main/pages/index.html` }, c: 'source' }, ', ', { t: 'a', a: { href: `${site.SITE.repo}/blob/main/pages/site.js` }, c: 'site.js' }, ').'],
+    { t: 'div', c: [
+      site.code(`const ui = {
+  t: 'div',
+  a: { class: 'card' },
+  c: [
+    { t: 'h2', c: 'Hello' },
+    { t: 'p', c: 'UI as data.' },
+  ],
+};
+const css = { '.card': { padding: '1rem', borderRadius: '8px' } };
+
+bw.injectCSS(bw.css(css));
+bw.DOM('#app', ui);          // or bw.html(ui) for an HTML string`),
+      { t: 'p', a: { class: 'site-muted' }, c: 'The renderer turns each A2UI component into a data-only object like ui above (the UI objects tab shows them). Objects your own code writes may also carry trusted behavior such as event handlers; nothing executable is accepted from the A2UI wire.' },
+    ] });
+
+  bw.mount('#app', [demo, objects, quick, how, features, pages]);
   side.draw();
   play('booking');
 })();

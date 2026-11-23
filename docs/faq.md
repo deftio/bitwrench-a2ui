@@ -4,7 +4,7 @@ Short answers to questions people ask about this project.
 
 ## What is the relationship to Google's A2UI?
 
-A2UI is an open protocol published by Google at https://a2ui.org. bitwrench-a2ui is an independent, community renderer for it. It uses Google's own `@a2ui/web_core` for protocol handling, so its behavior matches the official renderers, and draws the UI with bitwrench. It is not affiliated with or endorsed by Google.
+A2UI is an open protocol published by Google at https://a2ui.org. bitwrench-a2ui is an independent, community renderer for it. It uses Google's own `@a2ui/web_core` for protocol handling, the same core as the official renderers, and draws the UI with bitwrench. Where the published core and the v1.0 spec differ, it adapts; each adaptation and known difference is listed in [compatibility](compatibility.md). It is not affiliated with or endorsed by Google.
 
 ## Why bitwrench instead of React or Lit?
 

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Playground · bitwrench-a2ui</title>
-<meta name="description" content="Edit A2UI v1.0 messages and watch bitwrench render them: step through streams, inspect the data model, view tree and TACO, and export HTML.">
+<meta name="description" content="Edit A2UI v1.0 messages and watch bitwrench render them: step through streams, inspect the wire messages, data model and UI objects (TACO), and export HTML.">
 </head>
 <body>
 <div id="site-nav"></div>
@@ -145,12 +145,12 @@
     return r && r.surfaceIds().length ? r.inspect(r.surfaceIds()[0]) : null;
   }
   const inspector = site.tabs([
-    { label: 'Messages', render: () => ({ t: 'ol', a: { class: 'site-log', start: '1' }, c: state.messages.map((m, i) => ({
+    { label: 'Received (wire)', render: () => ({ t: 'ol', a: { class: 'site-log', start: '1' }, c: state.messages.map((m, i) => ({
       t: 'li', a: { style: i < state.pointer ? '' : 'opacity:0.45' }, c: `${i < state.pointer ? '✓' : '·'} ${Object.keys(m).find(k => k !== 'version') || '?'}  ${JSON.stringify(m).slice(0, 160)}` })) }) },
     { label: 'Data model', render: () => site.code(snap() ? site.pretty(snap().dataModel) : '{}') },
     { label: 'View tree', render: () => site.code(snap() ? site.pretty(snap().viewTree) : '(no surface)') },
-    { label: 'TACO', render: () => site.code(snap() ? site.pretty(snap().taco) : '(no surface)') },
-    { label: () => 'Outbound', render: () => site.code(state.outbound.map(m => site.pretty(m)).join('\n\n') || 'Actions, errors and function calls the renderer sends to the agent appear here.') },
+    { label: 'UI objects (TACO)', render: () => site.code(snap() ? site.pretty(snap().taco) : '(no surface)') },
+    { label: () => 'Sent to agent', render: () => site.code(state.outbound.map(m => site.pretty(m)).join('\n\n') || 'Actions, errors and function calls the renderer sends to the agent appear here.') },
     { label: 'Diagnostics', render: () => ({ t: 'ul', a: { class: 'site-log' }, c: state.diags.length ? state.diags.map(d => ({ t: 'li', c: [
       { t: 'span', a: { class: `site-badge ${d.level === 'error' ? 'err' : 'warn'}` }, c: `${d.source || ''} ${d.code || d.level}` }, ' ', String(d.message || '').slice(0, 400)] })) : [{ t: 'li', c: 'No diagnostics.' }] }) },
     { label: 'HTML', render: () => site.code(state.messages.length ? exportHtml() : '') },
@@ -190,6 +190,10 @@
       site.panel('Rendered surface', { t: 'div', a: { id: 'pg-surface', style: 'min-height:300px' } }),
     ] },
     { t: 'div', a: { style: 'margin-top:16px' }, c: site.panel('Inspector', inspector.taco) },
+    { t: 'p', a: { class: 'site-muted', style: 'margin-top:8px;font-size:0.9rem' }, c: [
+      { t: 'b', c: 'Three representations: ' }, 'the wire JSON exactly as received (edits never change it); the data model, which your input changes; and the UI objects, the plain JavaScript objects (bitwrench calls them TACO: tag, attributes, content, options) that the renderer builds from both and mounts as DOM or turns into HTML. ',
+      { t: 'a', a: { class: 'site-link', href: 'docs.html?doc=how-it-works' }, c: 'How it works →' },
+    ] },
     { t: 'p', a: { class: 'site-muted', style: 'margin-top:16px;font-size:0.9rem' }, c: [
       'Demos with a scripted reply answer button clicks through a small simulated agent in this page. Upstream examples come from ',
       { t: 'a', a: { class: 'site-link', href: 'https://github.com/a2ui-project/a2ui/tree/main/catalogs/basic/v1/examples' }, c: 'a2ui-project/a2ui' }, ' (Apache-2.0).',
