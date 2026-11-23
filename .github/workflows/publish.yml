@@ -112,7 +112,8 @@ jobs:
       - name: Publish the tarball built and tested above
         env:
           VERSION: ${{ needs.build.outputs.version }}
-          TARBALL: release/${{ needs.build.outputs.tarball }}
+          # "./" matters: npm reads a bare "release/x.tgz" as the GitHub repo release/x.tgz.
+          TARBALL: ./release/${{ needs.build.outputs.tarball }}
           NPM_TAG: ${{ needs.build.outputs.npm-tag }}
           # No token: npm authenticates this job with OIDC (trusted publishing). The
           # trusted publisher on npmjs.com must name workflow publish.yml, environment npm.

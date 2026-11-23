@@ -1,8 +1,8 @@
 // The pure parts of tools/release.js: version arithmetic and the file rewrites.
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { bumpCdn, changelogSection, compareVersions, findStaged, nextVersion, promoteChangelog, releaseState, tidyPlan, worktreesOn } from '../../tools/release.js';
+import { readdirSync, readFileSync } from 'node:fs';
+import { bumpCdn, changelogSection, compareVersions, findStaged, nextVersion, promoteChangelog, releaseState, rulesetDrift, covers, tidyPlan, worktreesOn } from '../../tools/release.js';
 import { advisories, evaluate } from '../../tools/audit.js';
 import { JOBS } from '../../tools/ci.js';
 
@@ -63,6 +63,41 @@ describe('release tooling', () => {
     assert.equal(releaseState({ tagOnOrigin: false, pr: { state: 'OPEN' } }), 'checks');
     assert.equal(releaseState({ tagOnOrigin: false, pr: { state: 'CLOSED' } }), 'new');
     assert.equal(releaseState({ tagOnOrigin: false, pr: null }), 'new');
+  });
+
+  it('rebuilds an open PR that was built before HEAD, so a fix is just another run', () => {
+    assert.equal(releaseState({ tagOnOrigin: false, pr: { state: 'OPEN' }, headInPr: false }), 'rebuild');
+    assert.equal(releaseState({ tagOnOrigin: false, pr: { state: 'OPEN' }, headInPr: true }), 'checks');
+    // Once merged or tagged, a newer HEAD belongs to the next version.
+    assert.equal(releaseState({ tagOnOrigin: false, pr: { state: 'MERGED' }, headInPr: false }), 'tag');
+    assert.equal(releaseState({ tagOnOrigin: true, pr: { state: 'OPEN' }, headInPr: false }), 'publish');
+  });
+
+  it('compares rulesets with what GitHub returns, ignoring the fields GitHub adds', () => {
+    assert.ok(covers({ a: 1, b: [{ c: 2 }, { c: 3 }] }, { a: 1, id: 9, b: [{ c: 3, x: 0 }, { c: 2 }] }));
+    assert.ok(!covers({ a: 1 }, { a: 2 }));
+    assert.ok(!covers({ b: [1, 2] }, { b: [1, 2, 3] }));
+    assert.ok(!covers({ b: [1] }, { b: 1 }));
+    assert.ok(!covers({ a: { b: 1 } }, { a: null }));
+    assert.ok(!covers({ a: { b: 1 } }, {}));
+
+    const dir = new URL('../../.github/rulesets/', import.meta.url);
+    const desired = readdirSync(dir).map(f => JSON.parse(readFileSync(new URL(f, dir), 'utf8')));
+    assert.deepEqual(desired.map(d => d.name).sort(), ['main', 'release tags']);
+    // What GitHub returns: the same rules plus ids, links and defaults.
+    const fromGitHub = desired.map((d, i) => ({ id: i + 1, source_type: 'Repository', _links: {}, current_user_can_bypass: 'always', ...structuredClone(d),
+      rules: d.rules.map(r => r.parameters ? { ...r, parameters: { automatic_copilot_code_review_enabled: false, ...r.parameters } } : r) }));
+    assert.deepEqual(rulesetDrift(desired, fromGitHub), []);
+    assert.deepEqual(rulesetDrift(desired, []).sort(), ['main', 'release tags']);
+    const noChecks = fromGitHub.map(r => r.name === 'main' ? { ...r, rules: r.rules.filter(x => x.type !== 'required_status_checks') } : r);
+    assert.deepEqual(rulesetDrift(desired, noChecks), ['main']);
+    // The required checks are the job names in the workflows.
+    const main = desired.find(d => d.name === 'main');
+    const contexts = main.rules.find(r => r.type === 'required_status_checks').parameters.required_status_checks.map(c => c.context);
+    const workflows = ['ci', 'codeql', 'dependency-review'].map(w => readFileSync(new URL(`../../.github/workflows/${w}.yml`, import.meta.url), 'utf8')).join('\n');
+    const jobNames = [...workflows.matchAll(/^ {4}name: (.+)$/gm)]
+      .map(m => new RegExp(`^${m[1].split(/\$\{\{[^}]*\}\}/).map(p => p.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')).join('.+')}$`));
+    for (const c of contexts) assert.ok(jobNames.some(re => re.test(c)), `no workflow job is named "${c}"`);
   });
 
   it('tidies the checkout only when that is safe', () => {
@@ -128,6 +163,9 @@ describe('CI definition', () => {
     for (const job of Object.keys(JOBS)) assert.ok(ci.includes(`node tools/ci.js --job ${job}`), `ci.yml runs the ${job} job`);
     const publish = readFileSync(new URL('../../.github/workflows/publish.yml', import.meta.url), 'utf8');
     assert.ok(publish.includes('node tools/ci.js'));
+    // npm reads a bare "dir/file.tgz" as a GitHub "user/repo" shorthand (EALLOWGIT, 0.9.1).
+    const spec = /npm@[\d.]+ publish "\$TARBALL"/.test(publish) && /^\s+TARBALL: (.+)$/m.exec(publish)?.[1];
+    assert.ok(spec && /^(\.\/|\/)/.test(spec), `npm publish gets a file path, not ${spec}`);
     assert.ok(!/npm audit --omit=dev/.test(ci), 'the runtime audit goes through the allowlist');
   });
 });

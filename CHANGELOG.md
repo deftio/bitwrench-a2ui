@@ -4,7 +4,16 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## Unreleased
 
-Nothing yet.
+0.9.1 was tagged but never reached npm: npm 12 read the workflow's tarball path as a GitHub repository. 0.9.2 is the first release with the 0.9.1 changes on npm.
+
+Release process:
+
+* **Publishing** - `publish.yml` passes the tarball to `npm publish` as `./release/…`, a file path (npm 12 read `release/…` as a GitHub shorthand and refused it: `EALLOWGIT`).
+* **Fix and run again** - while the release PR is open, a fix committed on your branch is just another `npm run release`: it rebuilds the release from `HEAD` and force-pushes it to the PR. A release branch left on GitHub without an open PR is replaced instead of stopping the release.
+* **Release script hardening** - the release worktree lives in a private temporary directory, and versions are fully escaped in regular expressions (CodeQL findings).
+* **Rulesets** - the release pre-flight checks that GitHub enforces `.github/rulesets/` and offers to apply them (`tools/github-settings.sh`); they had never been applied, so no check was required on `main`.
+
+Credits: the 0.9.2 release-process work was done with Claude (Anthropic) as a coding assistant, reviewed and released by the maintainer.
 
 ## 0.9.1 - 2026-11-23
 
