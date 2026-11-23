@@ -1,7 +1,7 @@
 {
   "name": "bitwrench-a2ui",
-  "version": "0.9.1",
-  "built": "2026-11-23T05:02:17.715Z",
+  "version": "0.9.2",
+  "built": "2026-11-23T06:05:05.357Z",
   "pins": {
     "bitwrench": "2.1.15",
     "@a2ui/web_core": "0.15.0",
@@ -12,26 +12,26 @@
     "bitwrench-a2ui.bundle.min.js": {
       "bytes": 662570,
       "gzip": 188675,
-      "brotli": 156431,
-      "integrity": "sha384-0kKDgOxnm83lUFzlWULVD/zNKj0uhqJ8w7rDfgdcjejyImjeUMgnM38+6cxAIEd7"
+      "brotli": 156453,
+      "integrity": "sha384-xCouvE/MAl5IAx14QnEva9jLzY5RdxjINgykdsIoXcEsEPuIcuNbHywfrikhvy+K"
     },
     "bitwrench-a2ui.esm.min.js": {
       "bytes": 486429,
       "gzip": 140667,
-      "brotli": 115151,
-      "integrity": "sha384-z7Xr+4QnsedrEYtUzvKzvR7mpJCdx253ZivQj1M2aeJ51IXDjBIUhp99vVBzD3Z0"
+      "brotli": 115222,
+      "integrity": "sha384-xO/9c7lmR2w8DS78Ybb8ryCSkPxVrhraW1pWDnteQ3HHnx9NrrR/NEyn4rqk9OR8"
     },
     "bitwrench-a2ui.js": {
       "bytes": 1056561,
       "gzip": 213218,
-      "brotli": 168906,
-      "integrity": "sha384-gi8GFyA446qvEX+QQgbWDhqISM5aD01B9c1y/8/uoF3XrdfFjpRFYtV2EpxLXjjO"
+      "brotli": 168887,
+      "integrity": "sha384-ulQCt2JweJ1AzFZh1vDgXGI5cHRDElxFOnTxcCmuNpYNQS8BydlmMpthTUQadPQG"
     },
     "bitwrench-a2ui.min.js": {
       "bytes": 486850,
       "gzip": 140828,
-      "brotli": 115317,
-      "integrity": "sha384-ita3LT56zLoI9g4h2sxdkdqkfAZWdnIYMwEvDea+ZpslsZPCEkgzjoEaIPX96vIH"
+      "brotli": 115350,
+      "integrity": "sha384-dlPO03yOM/xBxmsD9ijj41OKKbfe40wiLZ/wiGlIJWs5tnFjXv858fjFNdQtD0PI"
     },
     "bitwrench.umd.min.js (pinned, loaded separately)": {
       "bytes": 175720,

@@ -31,8 +31,9 @@ Your checkout is never modified: the release is built in a fresh `git worktree` 
 
 1. **Checks** identity, tree and version:
    * `git config user.name` is `deftio`, `gh` is signed in as `deftio`, and `origin` is a `github.com/deftio/` repository
+   * GitHub enforces the rulesets in `.github/rulesets/` as committed. If one is missing or different, the script offers to apply them with `tools/github-settings.sh`. Without them GitHub requires no check before a merge.
    * the tree is clean and `HEAD` contains `origin/main`
-   * the tag `vX.Y.Z` and the branch `release/vX.Y.Z` are free, and the version is not on npm
+   * the tag `vX.Y.Z` is free, and the version is not on npm. A `release/vX.Y.Z` branch left on origin without an open PR (a stopped run, a closed PR) is replaced.
    * CHANGELOG.md has notes under `## Unreleased`
 2. **Creates a worktree** of `HEAD` on branch `release/vX.Y.Z`, and runs `npm ci --ignore-scripts` there.
 3. **Sets the version** and commits it as `release: vX.Y.Z` (locally):
@@ -41,8 +42,8 @@ Your checkout is never modified: the release is built in a fresh `git worktree` 
    * the CHANGELOG: `## Unreleased` becomes `## X.Y.Z - date`
    * the rebuilt `dist/` and the conformance report
 4. **Runs local CI** on that commit: `tools/ci.js`, exactly the steps of `ci.yml` (version check, build, committed `dist/` matches, CDN tags, tests at 100% coverage, conformance report, package check with a real install, registry signatures, runtime audit, site build). If anything fails, the worktree and branch are deleted and nothing was pushed.
-5. **Asks**, then pushes the branch and opens the pull request `release: vX.Y.Z` with the CHANGELOG notes.
-6. **Waits for the checks** on the PR (`gh pr checks --watch`): the ones the `main` ruleset requires, or every check if it requires none. If one fails, the PR stays open. Either push a fix to the release branch and run the same version again, or close the PR (`gh pr close N --delete-branch`), fix it on your branch, and run the release again.
+5. **Asks**, then pushes the branch and opens the pull request `release: vX.Y.Z` with the CHANGELOG notes. When the PR is already open but was built from an older `HEAD`, it force-pushes the rebuilt branch to that PR instead (see *Fix and run again* below).
+6. **Waits for the checks** on the PR (`gh pr checks --watch`): the ones the `main` ruleset requires, or every check if it requires none. If one fails, the PR stays open: commit the fix and run the release again.
 7. **Asks**, then squash-merges the PR as `release: vX.Y.Z (#N)`, pinned to the head commit that passed. As the only maintainer you cannot approve your own PR, so it merges with admin rights (`gh pr merge --admin`) after the script has seen every required check pass. With a second maintainer, `--auto-merge` waits for their approval instead.
 8. **Asks**, then tags the merge commit `vX.Y.Z` (annotated, or signed when git has a signing key) and pushes the tag, after checking that the merge commit is on `main`, has the version, and has the tree that passed CI.
 9. **Follows `publish.yml`** to the end. If npm staged the version, the script shows the staged entry and approves it in the terminal (`npm stage approve`, which asks for your 2FA code): no npmjs.com or GitHub web UI step. If the run failed, re-running the script offers to re-run its failed jobs.
@@ -116,7 +117,16 @@ The script prints the links. To check by hand:
 
 ## Recovery
 
-When something goes wrong:
+### Fix and run again
+
+Until the release PR is merged, fixing a release is the same as making it: commit the fix on your branch and run `npm run release` (or `npm run release -- X.Y.Z`) again, as often as needed. The script compares your `HEAD` with the open PR:
+
+* **The PR contains `HEAD`** (nothing new) - it resumes: waits for the checks, merges, tags, publishes.
+* **`HEAD` has commits the PR does not** - it rebuilds the release commit from `HEAD` (steps 2-4: fresh worktree, version, local CI), lists what it replaces on the release branch, asks, force-pushes the branch with a lease, and updates the PR body. The checks run again on the new head.
+
+Do not push fixes to the `release/vX.Y.Z` branch yourself: the next run replaces it from your `HEAD`. Once the PR is merged, the version is fixed, and later fixes go into the next version.
+
+### When something goes wrong
 
 * **The release stopped** - run `npm run release -- X.Y.Z` again. It reads where the release is from GitHub (an open PR, a merged PR without a tag, or a tag) and continues from there.
 * **The workflow failed** - fix the cause; re-running the script offers to re-run the failed jobs. Every step is safe to repeat: an existing npm version is not republished, and an existing GitHub Release gets its assets refreshed.

@@ -40,7 +40,7 @@ Save this as `hello.html` and open it:
 ```html
 <div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/bitwrench@2.1.15/dist/bitwrench.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bitwrench-a2ui@0.9.1/dist/bitwrench-a2ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitwrench-a2ui@0.9.2/dist/bitwrench-a2ui.min.js"></script>
 <script>
   const renderer = bwA2UI.createRenderer({
     mount: '#app',

@@ -12,15 +12,16 @@
 //          merging with admin rights)
 //
 // Steps (each stops the release on failure; see RELEASE.md):
-//   1. Pre-flight  identity (git user, gh account, origin owner are deftio), clean
-//                  committed HEAD that contains origin/main, tag and branch free, version
-//                  not on npm, CHANGELOG "Unreleased" notes
+//   1. Pre-flight  identity (git user, gh account, origin owner are deftio), the GitHub
+//                  rulesets match .github/rulesets/ (offers to apply them), clean committed
+//                  HEAD that contains origin/main, tag free, version not on npm,
+//                  CHANGELOG "Unreleased" notes
 //   2. Worktree    a fresh git worktree of HEAD on branch release/vX.Y.Z, npm ci
 //   3. Version     package.json + lockfile, src/version.js, CDN URLs, CHANGELOG, build,
 //                  conformance report; committed as "release: vX.Y.Z"
 //   4. Local CI    tools/ci.js on that commit: the same checks as ci.yml
-//   5. PR          push the branch and open a pull request to main
-//   6. Checks      wait for the required checks on GitHub
+//   5. PR          push the branch and open a pull request to main (or update the open one)
+//   6. Checks      wait for the required checks on GitHub (every check if none are required)
 //   7. Merge       squash-merge (with admin rights, unless --auto-merge)
 //   8. Tag         an annotated (or signed) tag vX.Y.Z on the merge commit, pushed
 //   9. Publish     follow publish.yml (npm with provenance, GitHub Release); approve the
@@ -30,9 +31,12 @@
 //
 // The state lives on GitHub (the branch, the PR, the tag), so running the same version
 // again picks up where it stopped, and running it after a release is done just reports
-// it. Your checkout is only touched at the very end, and only after asking.
+// it. To fix a release in progress, commit the fix on your branch and run it again: while
+// the PR is open, a HEAD the PR does not contain rebuilds the release commit from HEAD and
+// force-pushes it to the release branch (steps 2-5 again). Once merged, fixes go into the
+// next version. Your checkout is only touched at the very end, and only after asking.
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createInterface } from 'node:readline/promises';
@@ -100,11 +104,28 @@ export function changelogSection(text, version) {
  * Where a release stands, from what GitHub has: the tag on origin wins, then the PR of
  * the release branch.
  */
-export function releaseState({ tagOnOrigin, pr }) {
+export function releaseState({ tagOnOrigin, pr, headInPr = true }) {
   if (tagOnOrigin) return 'publish';
   if (pr?.state === 'MERGED') return 'tag';
-  if (pr?.state === 'OPEN') return 'checks';
+  if (pr?.state === 'OPEN') return headInPr ? 'checks' : 'rebuild';
   return 'new';
+}
+/**
+ * True when every field in `want` has the same value in `have` (GitHub adds defaults and
+ * ids to what it returns). Arrays must match in length, element for element in any order.
+ */
+export function covers(want, have) {
+  if (Array.isArray(want)) {
+    return Array.isArray(have) && want.length === have.length && want.every(w => have.some(h => covers(w, h)));
+  }
+  if (want && typeof want === 'object') {
+    return Boolean(have) && typeof have === 'object' && Object.keys(want).every(k => covers(want[k], have[k]));
+  }
+  return want === have;
+}
+/** Names of the rulesets in `desired` that GitHub does not have, or has with other rules. */
+export function rulesetDrift(desired, existing) {
+  return desired.filter(d => !existing.some(e => e.name === d.name && covers(d, e))).map(d => d.name);
 }
 /** The staged npm entry for a version, from `npm stage list --json`. */
 export function findStaged(items, name, version) {
@@ -185,13 +206,20 @@ async function main() {
   ok(`identity: git user ${user}, origin owner ${owner}, gh account ${ghUser ?? '(not signed in; fine for a dry run)'}`);
 
   run('git', ['fetch', '--quiet', '--tags', 'origin', BASE]);
+  if (ghUser) await checkRulesets();
   const tagOnOrigin = Boolean(git('ls-remote', '--tags', 'origin', `refs/tags/${tag}`));
-  const pr = ghUser ? JSON.parse(gh('pr', 'list', '--repo', REPO, '--head', branch, '--state', 'all', '--limit', '1', '--json', 'number,state,url,headRefOid,mergeCommit'))[0] ?? null : null;
-  const state = releaseState({ tagOnOrigin, pr });
+  const pr = ghUser ? prFor(branch) : null;
+  // An open PR built from an older HEAD (you committed a fix since) is rebuilt from HEAD.
+  let headInPr = true;
+  if (pr?.state === 'OPEN') {
+    tryGit('fetch', '--quiet', 'origin', `refs/pull/${pr.number}/head`);
+    headInPr = tryGit('merge-base', '--is-ancestor', 'HEAD', pr.headRefOid) !== null;
+  }
+  const state = releaseState({ tagOnOrigin, pr, headInPr });
 
-  if (state === 'new') {
+  if (state === 'new' || state === 'rebuild') {
     if (compareVersions(version, pkg.version) <= 0) {
-      fail(`${version} is not newer than package.json (${pkg.version}), and there is no ${branch} pull request or ${tag} tag to resume`);
+      fail(`${version} is not newer than package.json (${pkg.version}), and there is no open ${branch} pull request or ${tag} tag to resume`);
     }
     console.log(`\nbitwrench-a2ui ${pkg.version} -> ${version}${prerelease ? ', pre-release (npm tag "next")' : ''}`);
     const dirty = git('status', '--porcelain');
@@ -199,9 +227,18 @@ async function main() {
     if (tryGit('merge-base', '--is-ancestor', `origin/${BASE}`, 'HEAD') === null) fail(`HEAD does not contain origin/${BASE}: merge or rebase onto it first`);
     const extra = Number(git('rev-list', '--count', `origin/${BASE}..HEAD`));
     ok(`releasing ${git('rev-parse', '--abbrev-ref', 'HEAD')} @ ${git('rev-parse', '--short', 'HEAD')}${extra ? `, with ${extra} commit(s) not yet on ${BASE} (they go into the release PR)` : ''}`);
+    if (state === 'rebuild') {
+      // What the open PR has that HEAD does not: its release commit, and anything pushed to
+      // the release branch by hand. All of it is replaced.
+      const dropped = git('log', '--format=  %h %s', `HEAD..${pr.headRefOid}`);
+      warn(`${pr.url} is open, but was built before HEAD: it will be rebuilt from HEAD and force-pushed. Replaced on ${branch}:\n${dropped}`);
+    }
     if (tryGit('rev-parse', '-q', '--verify', `refs/tags/${tag}`)) fail(`tag ${tag} already exists locally: git tag -d ${tag} if it is stale`);
-    if (git('ls-remote', '--heads', 'origin', branch)) fail(`branch ${branch} exists on origin without a pull request: delete it or open the PR, then run again`);
-    ok(`tag ${tag} and branch ${branch} are free`);
+    // A release branch on origin without an open PR is left from a run that stopped, or
+    // from a closed PR: it is replaced (pushed with a lease on what is there now).
+    const remoteSha = git('ls-remote', '--heads', 'origin', branch).split(/\s/)[0] || '';
+    if (remoteSha && state === 'new') warn(`${branch} exists on origin without an open pull request: it will be replaced`);
+    ok(`tag ${tag} is free`);
     if (onNpm(pkg.name, version)) fail(`${pkg.name}@${version} is already on npm`);
     ok(`${pkg.name}@${version} is not on npm yet`);
     if (pkg.private) fail('package.json has "private": true, so npm would refuse to publish');
@@ -210,51 +247,7 @@ async function main() {
     ok('CHANGELOG "Unreleased" has the release notes');
     if (!onNpm(pkg.name, pkg.version) && !git('ls-remote', '--tags', 'origin', `refs/tags/v${pkg.version}`)) warn(`package.json's ${pkg.version} was never released: if you meant to resume it, run npm run release -- ${pkg.version}`);
 
-    // 2. Worktree --------------------------------------------------------------------------
-    step(2, `Fresh worktree on ${branch}`);
-    // A fresh private directory (mode 0700, unpredictable name) holds the worktree and the
-    // PR body, so nothing else on the machine can pre-create or read them.
-    const tmp = mkdtempSync(path.join(os.tmpdir(), `bitwrench-a2ui-${tag}-`));
-    const wt = path.join(tmp, 'worktree');
-    // A worktree left by an interrupted run still holds the branch: remove it first.
-    for (const stale of worktreesOn(tryGit('worktree', 'list', '--porcelain') || '', branch)) tryGit('worktree', 'remove', '--force', stale);
-    tryGit('worktree', 'prune');
-    if (tryGit('rev-parse', '-q', '--verify', `refs/heads/${branch}`)) git('branch', '-D', branch);
-    run('git', ['worktree', 'add', '-b', branch, wt, 'HEAD']);
-    const cleanup = () => {
-      tryGit('worktree', 'remove', '--force', wt);
-      tryGit('branch', '-D', branch);
-      rmSync(tmp, { recursive: true, force: true });
-    };
-    try {
-      run(npm, ['ci', '--ignore-scripts', '--no-audit', '--no-fund'], wt);
-
-      // 3. Version ---------------------------------------------------------------------------
-      step(3, `Version ${version}`);
-      const at = rel => path.join(wt, rel);
-      run(npm, ['version', version, '--no-git-tag-version', '--ignore-scripts'], wt);
-      run(process.execPath, ['tools/gen-version.js'], wt);
-      for (const f of cdnFiles(wt)) {
-        const before = readFileSync(at(f), 'utf8');
-        const after = bumpCdn(before, version);
-        if (after !== before) { writeFileSync(at(f), after); ok(`CDN version in ${f}`); }
-      }
-      writeFileSync(at('CHANGELOG.md'), promoteChangelog(readFileSync(at('CHANGELOG.md'), 'utf8'), version, new Date().toISOString().slice(0, 10)));
-      ok('CHANGELOG "Unreleased" notes moved under the new version');
-      run(npm, ['run', 'build'], wt);
-      run(npm, ['run', 'conformance:report'], wt);
-      sh('git', ['add', '-A'], wt);
-      sh('git', ['commit', '-q', '-m', `release: ${tag}`], wt);
-      ok(`committed "release: ${tag}" on ${branch} (local only)`);
-
-      // 4. Local CI --------------------------------------------------------------------------
-      step(4, 'Local CI (tools/ci.js, the same checks as ci.yml)');
-      if (!tryRun(process.execPath, ['tools/ci.js'], wt)) throw new Error('local CI failed; nothing was pushed');
-      ok('local CI passed');
-    } catch (e) {
-      cleanup();
-      fail(`${e.message}\n  The worktree and the local ${branch} branch were removed.`);
-    }
+    const { tmp, wt, cleanup } = build({ version, tag, branch });
     if (DRY) {
       cleanup();
       console.log(`\n✓ dry run complete: ${tag} builds and passes CI. Nothing was pushed; the worktree is removed.\n`);
@@ -263,30 +256,105 @@ async function main() {
 
     // 5. PR ----------------------------------------------------------------------------------
     step(5, 'Pull request');
-    if (!await confirm(`Push ${branch} and open a pull request to ${BASE}?`)) {
+    const question = state === 'rebuild' ? `Force-push the rebuilt ${branch}, updating ${pr.url}?` : `Push ${branch} and open a pull request to ${BASE}?`;
+    if (!await confirm(question)) {
       cleanup();
       console.log('\n  Stopped before pushing. The worktree and branch were removed.\n');
       return;
     }
-    run('git', ['push', '-u', 'origin', branch], wt);
+    const head = git('-C', wt, 'rev-parse', 'HEAD');
+    run('git', ['push', `--force-with-lease=refs/heads/${branch}:${remoteSha}`, 'origin', `${branch}:refs/heads/${branch}`], wt);
     const notes = changelogSection(readFileSync(path.join(wt, 'CHANGELOG.md'), 'utf8'), version);
     const bodyFile = path.join(tmp, 'pr-body.md');
-    writeFileSync(bodyFile, `Release ${tag}, opened by \`npm run release\`. Local CI passed on this commit; the release script merges it when the required checks pass, then tags the merge commit.\n\n${notes}\n`);
-    run('gh', ['pr', 'create', '--repo', REPO, '--base', BASE, '--head', branch, '--title', `release: ${tag}`, '--body-file', bodyFile]);
-    rmSync(bodyFile, { force: true });
+    writeFileSync(bodyFile, `Release ${tag}, opened by \`npm run release\`. Local CI passed on this commit; the release script merges it when the checks pass, then tags the merge commit.\n\n${notes}\n`);
+    if (state === 'rebuild') run('gh', ['pr', 'edit', String(pr.number), '--repo', REPO, '--body-file', bodyFile]);
+    else run('gh', ['pr', 'create', '--repo', REPO, '--base', BASE, '--head', branch, '--title', `release: ${tag}`, '--body-file', bodyFile]);
     cleanup();   // the branch is on GitHub now; the local copy is not needed
+    // GitHub takes a moment to move the PR to the pushed commit.
+    for (let i = 0; i < 24 && prFor(branch)?.headRefOid !== head; i++) await sleep(5000);
     return resume(pkg, version);
   }
 
-  console.log(`\nResuming ${tag}: ${state === 'checks' ? `pull request ${pr.url} is open` : state === 'tag' ? `pull request ${pr.url} is merged, ${tag} is not tagged yet` : `${tag} is on GitHub`}`);
+  console.log(`\nResuming ${tag}: ${state === 'checks' ? `pull request ${pr.url} is open and contains HEAD` : state === 'tag' ? `pull request ${pr.url} is merged, ${tag} is not tagged yet` : `${tag} is on GitHub`}`);
   if (DRY) { console.log('\n  dry run: nothing to rehearse for a release in progress.\n'); return; }
   return resume(pkg, version);
+}
+
+const prFor = branch => JSON.parse(gh('pr', 'list', '--repo', REPO, '--head', branch, '--state', 'all', '--limit', '1', '--json', 'number,state,url,headRefOid,mergeCommit'))[0] ?? null;
+
+// Steps 2-4: the release commit, built and checked in a fresh worktree of HEAD. Stops the
+// release (after removing the worktree) if anything fails.
+function build({ version, tag, branch }) {
+  // 2. Worktree ----------------------------------------------------------------------------
+  step(2, `Fresh worktree on ${branch}`);
+  // A fresh private directory (mode 0700, unpredictable name) holds the worktree and the
+  // PR body, so nothing else on the machine can pre-create or read them.
+  const tmp = mkdtempSync(path.join(os.tmpdir(), `bitwrench-a2ui-${tag}-`));
+  const wt = path.join(tmp, 'worktree');
+  // A worktree left by an interrupted run still holds the branch: remove it first.
+  for (const stale of worktreesOn(tryGit('worktree', 'list', '--porcelain') || '', branch)) tryGit('worktree', 'remove', '--force', stale);
+  tryGit('worktree', 'prune');
+  if (tryGit('rev-parse', '-q', '--verify', `refs/heads/${branch}`)) git('branch', '-D', branch);
+  run('git', ['worktree', 'add', '-b', branch, wt, 'HEAD']);
+  const cleanup = () => {
+    tryGit('worktree', 'remove', '--force', wt);
+    tryGit('branch', '-D', branch);
+    rmSync(tmp, { recursive: true, force: true });
+  };
+  try {
+    run(npm, ['ci', '--ignore-scripts', '--no-audit', '--no-fund'], wt);
+
+    // 3. Version -----------------------------------------------------------------------------
+    step(3, `Version ${version}`);
+    const at = rel => path.join(wt, rel);
+    run(npm, ['version', version, '--no-git-tag-version', '--ignore-scripts'], wt);
+    run(process.execPath, ['tools/gen-version.js'], wt);
+    for (const f of cdnFiles(wt)) {
+      const before = readFileSync(at(f), 'utf8');
+      const after = bumpCdn(before, version);
+      if (after !== before) { writeFileSync(at(f), after); ok(`CDN version in ${f}`); }
+    }
+    writeFileSync(at('CHANGELOG.md'), promoteChangelog(readFileSync(at('CHANGELOG.md'), 'utf8'), version, new Date().toISOString().slice(0, 10)));
+    ok('CHANGELOG "Unreleased" notes moved under the new version');
+    run(npm, ['run', 'build'], wt);
+    run(npm, ['run', 'conformance:report'], wt);
+    sh('git', ['add', '-A'], wt);
+    sh('git', ['commit', '-q', '-m', `release: ${tag}`], wt);
+    ok(`committed "release: ${tag}" on ${branch} (local only)`);
+
+    // 4. Local CI ----------------------------------------------------------------------------
+    step(4, 'Local CI (tools/ci.js, the same checks as ci.yml)');
+    if (!tryRun(process.execPath, ['tools/ci.js'], wt)) throw new Error('local CI failed; nothing was pushed');
+    ok('local CI passed');
+  } catch (e) {
+    cleanup();
+    fail(`${e.message}\n  The worktree and the local ${branch} branch were removed.`);
+  }
+  return { tmp, wt, cleanup };
+}
+
+// The rulesets in .github/rulesets/ are what makes GitHub enforce PRs and checks on main.
+// Compare them with what GitHub has, and offer to apply them (tools/github-settings.sh).
+async function checkRulesets() {
+  const dir = path.join(root, '.github', 'rulesets');
+  const desired = readdirSync(dir).filter(f => f.endsWith('.json')).map(f => JSON.parse(readFileSync(path.join(dir, f), 'utf8')));
+  const list = JSON.parse(tryGh('api', `repos/${REPO}/rulesets`) || 'null');
+  if (!list) { warn('could not read the repository rulesets (gh needs admin access): skipping the ruleset check'); return; }
+  const existing = list.filter(r => desired.some(d => d.name === r.name))
+    .map(r => JSON.parse(tryGh('api', `repos/${REPO}/rulesets/${r.id}`) || '{}'));
+  const drift = rulesetDrift(desired, existing);
+  if (!drift.length) { ok(`GitHub enforces the rulesets in .github/rulesets/ (${desired.map(d => d.name).join(', ')})`); return; }
+  warn(`GitHub does not enforce .github/rulesets/ as committed: ${drift.map(n => `"${n}"`).join(', ')} missing or different. Without them no check is required before a merge.`);
+  if (DRY) return;
+  if (!await confirm('Apply the repository settings and rulesets now (tools/github-settings.sh)?')) { warn('continuing without them: the release still waits on every check'); return; }
+  run('bash', [path.join(root, 'tools', 'github-settings.sh')]);
+  ok('rulesets applied');
 }
 
 async function resume(pkg, version) {
   const tag = `v${version}`;
   const branch = `release/${tag}`;
-  const prOf = () => JSON.parse(gh('pr', 'list', '--repo', REPO, '--head', branch, '--state', 'all', '--limit', '1', '--json', 'number,state,url,headRefOid,mergeCommit'))[0] ?? null;
+  const prOf = () => prFor(branch);
   let tagOnOrigin = Boolean(git('ls-remote', '--tags', 'origin', `refs/tags/${tag}`));
   let pr = prOf();
 
@@ -301,7 +369,7 @@ async function resume(pkg, version) {
     const required = JSON.parse(tryGh('pr', 'checks', String(pr.number), '--repo', REPO, '--required', '--json', 'name') || '[]').length > 0;
     if (!required) warn(`no required status checks reported for ${BASE}; waiting on every check on the PR`);
     if (!tryRun('gh', ['pr', 'checks', String(pr.number), '--repo', REPO, ...(required ? ['--required'] : []), '--watch', '--fail-fast', '--interval', '20'])) {
-      fail(`a check failed on ${pr.url} (see its Checks tab)\n  Fix it on ${branch} and run npm run release -- ${version} again, or close the PR, fix it on your branch and run npm run release -- ${version}.`);
+      fail(`a check failed on ${pr.url} (see its Checks tab)\n  Commit the fix on your branch and run npm run release -- ${version} again: it rebuilds the release from your HEAD and updates the PR.`);
     }
     ok(required ? 'required checks passed' : 'all checks passed');
 

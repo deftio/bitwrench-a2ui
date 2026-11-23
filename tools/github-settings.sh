@@ -11,8 +11,9 @@
 #   - Actions: GITHUB_TOKEN read-only by default (each workflow asks for what it needs), and
 #     workflows may not approve pull requests
 #   - environment "npm": only v* tags may deploy to it (the npm trusted publisher names it)
-#   - ruleset "main": pull requests with a code-owner review and green CI for everyone
-#     except repository admins, who may push releases directly; no force pushes or deletion
+#   - ruleset "main": pull requests with a code-owner review, green CI and no high CodeQL
+#     alerts; repository admins may bypass (the release script merges its own PR that way,
+#     after the checks pass); no force pushes or deletion
 #   - ruleset "release tags": only repository admins may create, move or delete v* tags
 set -euo pipefail
 
