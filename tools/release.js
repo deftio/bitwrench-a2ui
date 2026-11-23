@@ -439,7 +439,11 @@ async function resume(pkg, version) {
   }
   await approveIfStaged(pkg.name, version);
   let live = false;
-  for (let i = 0; i < 12 && !(live = onNpm(pkg.name, version)); i++) await sleep(5000);
+  // npm accepts a publish, then takes a few minutes ("Your package is being processed") to serve it.
+  for (let i = 0; i < 60 && !(live = onNpm(pkg.name, version)); i++) {
+    if (i === 0) console.log('  waiting for npm to serve the new version (it can take a few minutes)…');
+    await sleep(10000);
+  }
   if (!live) fail(`${pkg.name}@${version} is not on npm after the workflow: check ${runUrl} and npm stage list ${pkg.name}`);
   ok(`${pkg.name}@${version} is on npm (dist-tags: ${trySh(npm, ['view', pkg.name, 'dist-tags', '--json'])?.replace(/\s+/g, ' ')})`);
 

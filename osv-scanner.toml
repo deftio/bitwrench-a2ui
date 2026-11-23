@@ -1,0 +1,24 @@
+# Advisories reviewed and accepted for now, for osv-scanner (and OpenSSF Scorecard, which
+# runs it). Each entry has a reason and an expiry date; test/unit/release-tools.test.js
+# checks that none has expired and that runtime entries match .github/audit-allowlist.json.
+
+# Runtime: zod 3 inside @a2ui/web_core 0.15.0. Mitigated by the size guard; see
+# .github/audit-allowlist.json for the full reason and mitigation.
+[[IgnoredVulns]]
+id = "GHSA-mrhx-c7xc-m3w5"
+ignoreUntil = 2027-02-28
+reason = "zod 3 via @a2ui/web_core: no compatible fix (zod 4 breaks web_core); messages are size-checked before validation (checkLimits)."
+
+# Development only: glob and minimatch inside c8 (coverage) via test-exclude, which pins
+# glob ^13 and minimatch ^10; the fixes are glob 14.0.2 and minimatch 11.0.1. They match
+# this repository's own fixed coverage patterns, never input from outside, and are not in
+# the published package.
+[[IgnoredVulns]]
+id = "GHSA-3g3m-2fjr-6pw4"
+ignoreUntil = 2027-02-28
+reason = "glob via c8/test-exclude, dev only: no AbortSignal is used; patterns are the repository's own. Drop when c8 takes glob 14."
+
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+ignoreUntil = 2027-02-28
+reason = "minimatch via c8/test-exclude, dev only: patterns are the repository's own, never attacker-controlled. Drop when c8 takes minimatch 11."

@@ -6,7 +6,7 @@ bitwrench-a2ui renders user interfaces described by AI agents. Agent output is u
 
 Please report security issues privately. Do not open a public issue for them.
 
-* **GitHub** - use "Report a vulnerability" on the repository's Security tab (private vulnerability reporting).
+* **GitHub** - use [Report a vulnerability](https://github.com/deftio/bitwrench-a2ui/security/advisories/new) on the repository's [Security tab](https://github.com/deftio/bitwrench-a2ui/security) (private vulnerability reporting).
 * **What to include** - the version, a minimal message sequence or page that reproduces the problem, the browser or Node version, and what an attacker gains.
 * **What happens next** - we acknowledge within a few days, agree on a fix and a disclosure date with you, and credit you in the release notes unless you prefer otherwise.
 
@@ -16,7 +16,8 @@ Security fixes go into the latest release. The project is pre-1.0, so there are 
 
 | Version | Supported |
 |---|---|
-| 0.1.x | Yes |
+| 0.9.x | Yes |
+| Older | No |
 
 ## What the renderer protects
 
@@ -45,4 +46,4 @@ The renderer cannot know what your actions do. Please keep these in mind:
 
 ## Dependencies
 
-Runtime dependencies are pinned to exact versions: `@a2ui/web_core` (Google, Apache-2.0), `bitwrench` and `quikdown` (both BSD-2-Clause, same maintainer as this project). Upgrades are deliberate and gated on the full test and conformance suite. `dist/builds.json` records the exact versions and SRI hashes of every browser file. CI fails on any moderate or worse advisory in runtime dependencies, except ones reviewed and listed, with a reason, mitigation and expiry date, in `.github/audit-allowlist.json` (currently one: zod 3 inside web_core, see [docs/security.md](docs/security.md#known-limits)).
+Runtime dependencies are pinned to exact versions: `@a2ui/web_core` (Google, Apache-2.0), `bitwrench` and `quikdown` (both BSD-2-Clause, same maintainer as this project). Upgrades are deliberate and gated on the full test and conformance suite. `dist/builds.json` records the exact versions and SRI hashes of every browser file. CI fails on any moderate or worse advisory in runtime dependencies, except ones reviewed and listed, with a reason, mitigation and expiry date, in `.github/audit-allowlist.json` (currently one: zod 3 inside web_core, see [docs/security.md](docs/security.md#known-limits)). The same exceptions, plus two development-only ones (glob and minimatch inside the coverage tool, never in the package), are recorded for osv-scanner and OpenSSF Scorecard in `osv-scanner.toml`.

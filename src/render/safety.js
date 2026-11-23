@@ -7,9 +7,17 @@
 // Tab, CR and LF are removed anywhere (browsers ignore them inside URLs, so attackers
 // use them to hide schemes); other C0 controls and spaces are trimmed from the ends.
 const STRIP = /[\t\n\r]/g;
-const EDGE_CONTROLS = /^[\u0000- ]+|[\u0000- ]+$/g;
 const SCHEME = /^([a-zA-Z][a-zA-Z0-9+.-]*):/;
 
+// Trim C0 controls and spaces (U+0000-U+0020) from both ends. A loop, not a regex: an
+// end-anchored character-class regex backtracks quadratically on a long run of spaces.
+function trimControls(s) {
+  let start = 0;
+  let end = s.length;
+  while (start < end && s.charCodeAt(start) <= 0x20) start++;
+  while (end > start && s.charCodeAt(end - 1) <= 0x20) end--;
+  return s.slice(start, end);
+}
 /**
  * Return a safe media URL or '' when it must not be rendered.
  * @param {unknown} raw
@@ -17,7 +25,7 @@ const SCHEME = /^([a-zA-Z][a-zA-Z0-9+.-]*):/;
  */
 export function safeMediaUrl(raw, { allowData = true } = {}) {
   if (typeof raw !== 'string') return '';
-  const url = raw.replace(STRIP, '').replace(EDGE_CONTROLS, '');
+  const url = trimControls(raw.replace(STRIP, ''));
   if (!url) return '';
   const normalized = url.replace(/\\/g, '/');
   if (normalized.startsWith('//')) return '';

@@ -155,6 +155,24 @@ describe('runtime audit allowlist', () => {
     const review = readFileSync(new URL('../../.github/workflows/dependency-review.yml', import.meta.url), 'utf8');
     for (const e of list.advisories) assert.ok(review.includes(e.id), `dependency-review.yml allows ${e.id} too`);
   });
+
+  it('osv-scanner.toml (read by Scorecard) has every runtime exception, each with a reason and a live expiry', () => {
+    const toml = readFileSync(new URL('../../osv-scanner.toml', import.meta.url), 'utf8');
+    const entries = toml.split('[[IgnoredVulns]]').slice(1).map(block => ({
+      id: /^id = "([^"]+)"$/m.exec(block)?.[1],
+      until: /^ignoreUntil = (\d{4}-\d{2}-\d{2})$/m.exec(block)?.[1],
+      reason: /^reason = "([^"]+)"$/m.exec(block)?.[1],
+    }));
+    assert.ok(entries.length > 0);
+    const today = new Date().toISOString().slice(0, 10);
+    for (const e of entries) {
+      assert.match(e.id ?? '', /^GHSA-/);
+      assert.ok(e.reason, `${e.id} needs a reason`);
+      assert.ok(e.until && e.until >= today, `${e.id}: review it again, its ignoreUntil ${e.until} has passed`);
+    }
+    const list = JSON.parse(readFileSync(new URL('../../.github/audit-allowlist.json', import.meta.url), 'utf8'));
+    for (const a of list.advisories) assert.ok(entries.some(e => e.id === a.id), `osv-scanner.toml lists ${a.id} too`);
+  });
 });
 
 describe('CI definition', () => {

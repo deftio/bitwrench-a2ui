@@ -1,4 +1,4 @@
-/*! bitwrench-a2ui v0.9.2 | Apache-2.0 | https://github.com/deftio/bitwrench-a2ui
+/*! bitwrench-a2ui v0.9.3 | Apache-2.0 | https://github.com/deftio/bitwrench-a2ui
  *  Bundles @a2ui/web_core 0.15.0 (Apache-2.0, Google LLC) and quikdown 1.3.2 (BSD-2-Clause).
  *  Requires bitwrench 2.1.15 (BSD-2-Clause), loaded separately. See THIRD_PARTY_LICENSES. */
 var bwA2UI = (() => {
@@ -183,7 +183,7 @@ var bwA2UI = (() => {
   var bitwrench_default = bw;
 
   // src/version.js
-  var VERSION = "0.9.2";
+  var VERSION = "0.9.3";
   function getVersion() {
     return VERSION;
   }
@@ -25343,11 +25343,17 @@ var bwA2UI = (() => {
 
   // src/render/safety.js
   var STRIP = /[\t\n\r]/g;
-  var EDGE_CONTROLS = /^[\u0000- ]+|[\u0000- ]+$/g;
   var SCHEME = /^([a-zA-Z][a-zA-Z0-9+.-]*):/;
+  function trimControls(s2) {
+    let start = 0;
+    let end = s2.length;
+    while (start < end && s2.charCodeAt(start) <= 32) start++;
+    while (end > start && s2.charCodeAt(end - 1) <= 32) end--;
+    return s2.slice(start, end);
+  }
   function safeMediaUrl(raw, { allowData = true } = {}) {
     if (typeof raw !== "string") return "";
-    const url = raw.replace(STRIP, "").replace(EDGE_CONTROLS, "");
+    const url = trimControls(raw.replace(STRIP, ""));
     if (!url) return "";
     const normalized = url.replace(/\\/g, "/");
     if (normalized.startsWith("//")) return "";
