@@ -2,7 +2,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { bumpCdn, changelogSection, compareVersions, findStaged, nextVersion, promoteChangelog, releaseState, tidyPlan } from '../../tools/release.js';
+import { bumpCdn, changelogSection, compareVersions, findStaged, nextVersion, promoteChangelog, releaseState, tidyPlan, worktreesOn } from '../../tools/release.js';
 import { advisories, evaluate } from '../../tools/audit.js';
 import { JOBS } from '../../tools/ci.js';
 
@@ -44,6 +44,17 @@ describe('release tooling', () => {
     assert.equal(changelogSection(text, '0.9.0'), 'First.');
     assert.equal(changelogSection(text, '0.9.2'), null);
     assert.equal(changelogSection(text, '0.9'), null);
+    // Regex metacharacters in the version are literal.
+    assert.equal(changelogSection('## 1.0.0-rc.1+b (x) - d\n\nRC\n', '1.0.0-rc.1+b (x)'), 'RC');
+    assert.equal(changelogSection('## 1x0x0 - d\n\nno\n', '1.0.0'), null);
+    assert.equal(changelogSection('## 1\\0 - d\n\nbs\n', '1\\0'), 'bs');
+  });
+
+  it('finds the worktrees that hold a branch, so an interrupted run can be cleaned up', () => {
+    const list = 'worktree /repo\nHEAD abc\nbranch refs/heads/main\n\nworktree /tmp/x/worktree\nHEAD def\nbranch refs/heads/release/v1.0.0\n\nworktree /tmp/d\nHEAD 123\ndetached\n';
+    assert.deepEqual(worktreesOn(list, 'release/v1.0.0'), ['/tmp/x/worktree']);
+    assert.deepEqual(worktreesOn(list, 'release/v1.0'), []);
+    assert.deepEqual(worktreesOn('', 'main'), []);
   });
 
   it('resumes from what GitHub has: tag, then merged PR, then open PR', () => {

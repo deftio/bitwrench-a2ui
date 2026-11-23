@@ -32,7 +32,7 @@
 // again picks up where it stopped, and running it after a release is done just reports
 // it. Your checkout is only touched at the very end, and only after asking.
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createInterface } from 'node:readline/promises';
@@ -85,9 +85,14 @@ export function promoteChangelog(text, version, date) {
   if (!body || /^nothing yet\.?$/i.test(body)) throw new Error('CHANGELOG.md "Unreleased" is empty: describe the release first');
   return text.replace(m[0], `## Unreleased\n\nNothing yet.\n\n## ${version} - ${date}\n\n${body}\n\n`);
 }
+/** Paths of the worktrees that have a branch checked out, from `git worktree list --porcelain`. */
+export function worktreesOn(porcelain, branch) {
+  return porcelain.split(/\n\n+/).filter(b => b.split('\n').includes(`branch refs/heads/${branch}`))
+    .map(b => b.split('\n').find(l => l.startsWith('worktree ')).slice(9));
+}
 /** The body of the CHANGELOG section for a version, without its heading. */
 export function changelogSection(text, version) {
-  const esc = version.replace(/[.+]/g, '\\$&');
+  const esc = version.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
   const m = new RegExp(`^## ${esc} [^\\n]*\\n([\\s\\S]*?)(?=^## |(?![\\s\\S]))`, 'm').exec(text);
   return m ? m[1].trim() : null;
 }
@@ -207,14 +212,19 @@ async function main() {
 
     // 2. Worktree --------------------------------------------------------------------------
     step(2, `Fresh worktree on ${branch}`);
-    const wt = path.join(os.tmpdir(), `bitwrench-a2ui-${tag}`);
-    if (existsSync(wt)) { tryGit('worktree', 'remove', '--force', wt); rmSync(wt, { recursive: true, force: true }); }
+    // A fresh private directory (mode 0700, unpredictable name) holds the worktree and the
+    // PR body, so nothing else on the machine can pre-create or read them.
+    const tmp = mkdtempSync(path.join(os.tmpdir(), `bitwrench-a2ui-${tag}-`));
+    const wt = path.join(tmp, 'worktree');
+    // A worktree left by an interrupted run still holds the branch: remove it first.
+    for (const stale of worktreesOn(tryGit('worktree', 'list', '--porcelain') || '', branch)) tryGit('worktree', 'remove', '--force', stale);
     tryGit('worktree', 'prune');
     if (tryGit('rev-parse', '-q', '--verify', `refs/heads/${branch}`)) git('branch', '-D', branch);
     run('git', ['worktree', 'add', '-b', branch, wt, 'HEAD']);
     const cleanup = () => {
       tryGit('worktree', 'remove', '--force', wt);
       tryGit('branch', '-D', branch);
+      rmSync(tmp, { recursive: true, force: true });
     };
     try {
       run(npm, ['ci', '--ignore-scripts', '--no-audit', '--no-fund'], wt);
@@ -260,7 +270,7 @@ async function main() {
     }
     run('git', ['push', '-u', 'origin', branch], wt);
     const notes = changelogSection(readFileSync(path.join(wt, 'CHANGELOG.md'), 'utf8'), version);
-    const bodyFile = path.join(wt, '..', `bitwrench-a2ui-${tag}-pr.md`);
+    const bodyFile = path.join(tmp, 'pr-body.md');
     writeFileSync(bodyFile, `Release ${tag}, opened by \`npm run release\`. Local CI passed on this commit; the release script merges it when the required checks pass, then tags the merge commit.\n\n${notes}\n`);
     run('gh', ['pr', 'create', '--repo', REPO, '--base', BASE, '--head', branch, '--title', `release: ${tag}`, '--body-file', bodyFile]);
     rmSync(bodyFile, { force: true });
