@@ -4,6 +4,10 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## Unreleased
 
+Nothing yet.
+
+## 0.9.4 - 2026-11-23
+
 **Upgraded to `@a2ui/web_core` 0.16.1** (released 2026-11-23), from 0.15.0, and moved the upstream spec pin to `a2ui-project/a2ui@7a776e7a`, the commit 0.16.1 was released from (the pinned spec, catalog, examples and conformance files are unchanged). All 36 upstream suite cases and all 43 examples pass as before.
 
 * **Four workarounds removed** - web_core now handles the v1.0 `@` envelope keys, routes calls to catalog functions without an implementation to the agent, resolves custom-catalog accessibility bindings and bound Icon names reactively, and removes properties left out of an `updateComponents`. The adapter's own versions of these are gone; `normalizeMessage` now only drops `createSurface.theme` (still rejected by 0.16.1) and leaves `@` keys alone. Removed properties are now actually removed (a known difference with 0.15).

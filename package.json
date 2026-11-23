@@ -1,6 +1,6 @@
 {
   "name": "bitwrench-a2ui",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "private": false,
   "description": "A2UI v1.0 renderer for plain JavaScript, built on bitwrench. One script tag, live DOM or an HTML string, no framework or build step.",
   "type": "module",
