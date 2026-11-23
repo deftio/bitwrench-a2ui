@@ -25343,11 +25343,17 @@ var bwA2UI = (() => {
 
   // src/render/safety.js
   var STRIP = /[\t\n\r]/g;
-  var EDGE_CONTROLS = /^[\u0000- ]+|[\u0000- ]+$/g;
   var SCHEME = /^([a-zA-Z][a-zA-Z0-9+.-]*):/;
+  function trimControls(s2) {
+    let start = 0;
+    let end = s2.length;
+    while (start < end && s2.charCodeAt(start) <= 32) start++;
+    while (end > start && s2.charCodeAt(end - 1) <= 32) end--;
+    return s2.slice(start, end);
+  }
   function safeMediaUrl(raw, { allowData = true } = {}) {
     if (typeof raw !== "string") return "";
-    const url = raw.replace(STRIP, "").replace(EDGE_CONTROLS, "");
+    const url = trimControls(raw.replace(STRIP, ""));
     if (!url) return "";
     const normalized = url.replace(/\\/g, "/");
     if (normalized.startsWith("//")) return "";

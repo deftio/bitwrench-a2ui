@@ -52,7 +52,7 @@ const rows = features.map(f => {
   const list = cases.map(c => `\`${c.case}\``).join(', ');
   const detail = na ? `${NOTES[f.id]}${cases.length ? ` (Tagged v1.0 cases ${list} pass, but the feature itself is not claimed.)` : ''}`
     : cases.length ? list : (NOTES[f.id] ?? 'No case in the pinned suites.');
-  return `| ${f.id} | ${f.title.replace(/\s+/g, ' ').replace(/\|/g, '\\|')} | ${status} | ${detail} |`;
+  return `| ${f.id} | ${f.title.replace(/\s+/g, ' ').replace(/[\\|]/g, '\\$&')} | ${status} | ${detail} |`;
 });
 
 const pins = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8')).dependencies;

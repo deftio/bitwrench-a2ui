@@ -6,6 +6,18 @@ import { markdownToTaco, astToTaco } from '../../src/render/markdown.js';
 import { isNode, val, isWritable, str, childNodes } from '../../src/core/interface.js';
 
 describe('media URL policy', () => {
+  it('trims controls and spaces from the ends in linear time', () => {
+    assert.equal(safeMediaUrl('\u0000\u001f https://a.example/x \u0007'), 'https://a.example/x');
+    assert.equal(safeMediaUrl(' \u0001 '), '');
+    assert.equal(safeMediaUrl('a b'), 'a b');                         // inner spaces stay
+    // 100k spaces before a non-space: an end-anchored regex took quadratic time here.
+    const hostile = 'x' + ' '.repeat(100000) + 'y';
+    const t = performance.now();
+    assert.equal(safeMediaUrl(hostile), hostile);
+    assert.equal(safeMediaUrl(' '.repeat(100000)), '');
+    assert.ok(performance.now() - t < 200, 'trimming is linear');
+  });
+
   it('allows http(s), data and relative URLs', () => {
     assert.equal(safeMediaUrl('https://a.example/x.png'), 'https://a.example/x.png');
     assert.equal(safeMediaUrl('  http://a.example/x  '), 'http://a.example/x');

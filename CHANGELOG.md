@@ -4,7 +4,20 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## Unreleased
 
-Nothing yet.
+Security:
+
+* **Media URL trimming in linear time** - `safeMediaUrl` trimmed controls and spaces with an end-anchored regex that took quadratic time on a long run of spaces (about 3.6 s for 100,000), so an agent could stall the page with one oversized URL. It now trims with a loop (CodeQL `js/polynomial-redos`).
+* **Dependency exceptions for Scorecard** - `osv-scanner.toml` records the reviewed advisories with reasons and expiry dates: zod (runtime, mitigated by the size guard) and glob and minimatch (inside the coverage tool only, never in the package).
+* **`SECURITY.md`** - links the private reporting form, and lists 0.9.x as the supported line.
+
+Tooling:
+
+* **Local site server** - `tools/serve.js` checks and reads each file through one open handle (CodeQL `js/file-system-race`).
+* **Conformance report** - feature titles escape backslashes as well as `|` in the Markdown table (CodeQL `js/incomplete-sanitization`).
+* **Docs page** - `pages/docs.html` takes the document id from the site's own list before fetching it (CodeQL `js/client-side-request-forgery`; the id was already checked against that list).
+* **Release script** - waits up to 10 minutes for npm to serve a new version: npm accepts a publish, then takes a few minutes to process it.
+
+Credits: the 0.9.3 security fixes were done with Claude (Anthropic) as a coding assistant, reviewed and released by the maintainer.
 
 ## 0.9.2 - 2026-11-23
 

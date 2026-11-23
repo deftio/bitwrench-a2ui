@@ -51,7 +51,8 @@
   }), { id: 'docs-css' });
 
   const params = new URLSearchParams(location.search);
-  const doc = known.has(params.get('doc')) ? params.get('doc') : 'README';
+  // The page fetches docs/<doc>.md: take the id from the site's own list, never from the URL.
+  const doc = [...known].find(id => id === params.get('doc')) ?? 'README';
 
   bw.mount('#app', { t: 'div', a: { class: 'docs' }, c: [
     { t: 'nav', a: { class: 'docs-nav', 'aria-label': 'Documentation' }, c: DOCS.map(([group, items]) => [

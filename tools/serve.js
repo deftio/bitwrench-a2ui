@@ -4,7 +4,7 @@
 // exactly as they do on GitHub Pages (see build-site.js).
 // bitwrench and quikdown load from jsDelivr (pinned, with SRI; see tools/cdn-tags.js).
 import http from 'node:http';
-import { readFile, stat } from 'node:fs/promises';
+import { open } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -34,11 +34,20 @@ http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
   let file = resolveInside(root, url.pathname);
   if (!file) { res.writeHead(404, { 'content-type': 'text/plain' }).end('not found'); return; }
+  // Check and read through one open file handle, so the file cannot change in between.
+  let handle;
   try {
-    if ((await stat(file)).isDirectory()) file = path.join(file, 'index.html');
-    const data = await readFile(file);
+    handle = await open(file);
+    if ((await handle.stat()).isDirectory()) {
+      await handle.close();
+      file = path.join(file, 'index.html');
+      handle = await open(file);
+    }
+    const data = await handle.readFile();
     res.writeHead(200, { 'content-type': types[path.extname(file)] || 'application/octet-stream', 'cache-control': 'no-store' }).end(data);
   } catch {
     res.writeHead(404, { 'content-type': 'text/plain' }).end('not found');
+  } finally {
+    await handle?.close().catch(() => {});
   }
 }).listen(port, () => console.log(`serving ${root} at http://localhost:${port}/pages/`));
