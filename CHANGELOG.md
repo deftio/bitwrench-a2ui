@@ -4,6 +4,10 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## Unreleased
 
+Nothing yet.
+
+## 0.9.2 - 2026-11-23
+
 0.9.1 was tagged but never reached npm: npm 12 read the workflow's tarball path as a GitHub repository. 0.9.2 is the first release with the 0.9.1 changes on npm.
 
 Release process:
