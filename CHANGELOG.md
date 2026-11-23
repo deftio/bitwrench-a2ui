@@ -4,6 +4,10 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## Unreleased
 
+Nothing yet.
+
+## 0.9.3 - 2026-11-23
+
 Security:
 
 * **Media URL trimming in linear time** - `safeMediaUrl` trimmed controls and spaces with an end-anchored regex that took quadratic time on a long run of spaces (about 3.6 s for 100,000), so an agent could stall the page with one oversized URL. It now trims with a loop (CodeQL `js/polynomial-redos`).
