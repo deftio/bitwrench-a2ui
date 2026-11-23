@@ -191,6 +191,53 @@ export function normalizeMessage(msg, opts = {}) {
   return msg;
 }
 
+// ---------------------------------------------------------------------------------
+// Message size limits.
+//
+// web_core 0.15 validates with zod 3, which keeps every issue of every failing array
+// element (GHSA-mrhx-c7xc-m3w5, fixed only in zod 4, which web_core 0.15 cannot use).
+// A 250 KB message of 20,000 invalid components costs about 116 MB of heap, and 100,000
+// overflow the stack. Agent output is untrusted, so each message is measured before the
+// core sees it, and one over the limits is rejected as VALIDATION_FAILED.
+// TODO(web_core on zod 4): keep the limits as defense in depth, revisit the defaults.
+// ---------------------------------------------------------------------------------
+export const DEFAULT_LIMITS = Object.freeze({ maxArrayItems: 10000, maxDepth: 64 });
+
+/**
+ * Check one message against the limits. Returns null when it fits, else
+ * `{ path, message }` naming the first place it does not. The walk is iterative, so a
+ * deeply nested message cannot overflow the stack here either.
+ */
+export function checkLimits(msg, limits = DEFAULT_LIMITS) {
+  const { maxArrayItems, maxDepth } = { ...DEFAULT_LIMITS, ...limits };
+  let items = 0;
+  const stack = [[msg, '', 0]];
+  while (stack.length) {
+    const [value, path, depth] = stack.pop();
+    if (!value || typeof value !== 'object') continue;
+    if (depth > maxDepth) return { path, message: `message is nested more than ${maxDepth} levels deep` };
+    const isArray = Array.isArray(value);
+    if (isArray && (items += value.length) > maxArrayItems) {
+      return { path, message: `message has more than ${maxArrayItems} array items in total` };
+    }
+    const keys = isArray ? value.keys() : Object.keys(value);
+    for (const k of keys) stack.push([value[k], `${path}/${k}`, depth + 1]);
+  }
+  return null;
+}
+
+// The envelopes of a receive() call: one message, an array, or {messages: [...]}.
+const envelopes = input => Array.isArray(input) ? input
+  : Array.isArray(input?.messages) ? input.messages : [input];
+
+// Only called for a message checkLimits rejected, which is always an object or array.
+function surfaceIdOf(msg) {
+  for (const v of Object.values(msg)) {
+    if (typeof v?.surfaceId === 'string') return v.surfaceId;
+  }
+  return undefined;
+}
+
 /** Validation presets. 'relaxed' tolerates streams that are incomplete for a while. */
 export const VALIDATION = {
   strict: { allowOrphanComponents: false, allowDanglingReferences: false, allowMissingRoot: false, allowUnknownElements: false },
@@ -205,7 +252,7 @@ export const VALIDATION = {
  * @param {'strict'|'relaxed'|object} [opts.validation]
  * @param {(msg: object) => void} opts.onOutbound  Receives RPC envelopes (callAgentFunction, rendererFunctionResponse).
  */
-export function createCore({ catalogs, validation, onOutbound, onNote = () => {} }) {
+export function createCore({ catalogs, validation, limits, onOutbound, onNote = () => {} }) {
   const validationConfig = typeof validation === 'string' ? VALIDATION[validation] : validation;
   const processor = new MessageProcessor(catalogs, undefined, {
     ...(validationConfig ? { validationConfig } : {}),
@@ -223,7 +270,22 @@ export function createCore({ catalogs, validation, onOutbound, onNote = () => {}
     processor,
     /** Process messages synchronously. Returns renderer error envelopes. */
     process(messages) {
-      return processor.processMessagesWithErrors(normalizeMessage(messages, { dropTheme, onDrop }));
+      const list = envelopes(messages);
+      const rejected = [];
+      const accepted = list.filter(m => {
+        const over = checkLimits(m, limits);
+        if (!over) return true;
+        const surfaceId = surfaceIdOf(m);
+        rejected.push({ version: PROTOCOL_VERSION, error: {
+          code: 'VALIDATION_FAILED', ...(surfaceId === undefined ? {} : { surfaceId }), path: over.path || '/',
+          message: `Message rejected before validation: ${over.message}.`,
+        } });
+        return false;
+      });
+      // Pass the input through untouched when nothing was rejected.
+      const input = rejected.length ? accepted : messages;
+      const errors = accepted.length ? processor.processMessagesWithErrors(normalizeMessage(input, { dropTheme, onDrop })) : [];
+      return [...rejected, ...errors];
     },
     capabilities(options = {}) {
       return processor.getRendererCapabilities({ version: PROTOCOL_VERSION, ...options });

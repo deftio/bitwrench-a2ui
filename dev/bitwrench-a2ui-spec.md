@@ -512,7 +512,7 @@ bitwrench-a2ui/
   templates/mcp-app/      # single-file ui:// template
   pages/                  # GitHub Pages site (section 18)
   docs/                   # Markdown sources for docs pages
-  .github/workflows/      # ci.yml, pages.yml, release.yml
+  .github/workflows/      # ci.yml, pages.yml, publish.yml
 ```
 
 The adapter imports only `src/core/interface.js`. The default build wires it to `src/core/webcore.js`, and the standalone build wires it to `src/core/standalone/`. Both are built and tested from the same source tree.

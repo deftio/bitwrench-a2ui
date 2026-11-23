@@ -34,21 +34,9 @@ jobs:
       # --ignore-scripts: dependency install scripts are the classic supply-chain vector,
       # and nothing here needs them (esbuild ships its binary as an optional dependency).
       - run: npm ci --ignore-scripts
-      - name: src/version.js matches package.json (the single source of truth)
-        run: node tools/gen-version.js --check
-      # Build first: test/dist loads the built browser files.
-      - run: npm run build
-      - name: Committed dist/ matches a fresh build
-        # dist/ is committed so CDN users and the site get exactly what CI built. Only the
-        # build timestamp in builds.json may differ.
-        run: |
-          git diff --exit-code -I '"built":' -- dist/ || { echo "::error::dist/ is stale: run npm run build and commit it"; exit 1; }
-      - name: Tests with the 100% coverage gate
-        run: npm run test:coverage
-      - name: Conformance report is current
-        run: |
-          npm run conformance:report
-          git diff --exit-code -I '^\* \*\*Generated\*\*' -- docs/conformance-report.md || { echo "::error::docs/conformance-report.md is stale: run npm run conformance:report"; exit 1; }
+      # The steps live in tools/ci.js, shared with the release script (npm run ci).
+      - name: Version, build, committed dist/, CDN tags, tests at 100% coverage, conformance report
+        run: node tools/ci.js --job test
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: matrix.node == 22
         with:
@@ -69,14 +57,5 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: npm run build
-      - name: Package contents, exports, versions, and a real install of the tarball
-        run: node tools/check-package.js --install
-      - name: Registry signatures and provenance of installed dependencies
-        run: npm audit signatures
-      - name: Known vulnerabilities in runtime dependencies
-        # Runtime dependencies are what users install. Dev dependencies are covered by
-        # Dependabot alerts and dependency review on pull requests.
-        run: npm audit --omit=dev --audit-level=moderate
-      - name: Site builds
-        run: node tools/build-site.js
+      - name: Package, real install, registry signatures, runtime audit, site build
+        run: node tools/ci.js --job package

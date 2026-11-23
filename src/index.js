@@ -4,7 +4,7 @@
 //   const renderer = createRenderer({ mount: '#app', send: msg => agent.post(msg) });
 //   renderer.receive(a2uiMessages);
 export { createRenderer, createBasicCatalog, viewTree } from './renderer.js';
-export { buildCatalog, makeFunction, normalizeMessage, BASIC_CATALOG_ID, PROTOCOL_VERSION, VALIDATION } from './core/webcore.js';
+export { buildCatalog, makeFunction, normalizeMessage, checkLimits, DEFAULT_LIMITS, BASIC_CATALOG_ID, PROTOCOL_VERSION, VALIDATION } from './core/webcore.js';
 export { component } from './catalog/define.js';
 export { BASIC_COMPONENTS } from './catalog/basic/components.js';
 export { ICONS, ICON_VIEWBOX } from './catalog/basic/icons.js';

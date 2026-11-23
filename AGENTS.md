@@ -26,6 +26,7 @@ npm test                # all tests
 npm run test:coverage   # 100% lines/branches/functions/statements gate on src/
 npm run test:conformance
 npm run conformance:report
+npm run ci              # exactly what CI runs (tools/ci.js); run on committed work
 npm run pages           # local site
 ```
 

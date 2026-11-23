@@ -49,7 +49,7 @@ The usual flow:
 1. **Open an issue first** for anything larger than a small fix, so we can agree on the approach.
 2. **Branch** from `main`.
 3. **Write tests with the change** - a bug fix starts with a failing test.
-4. **Run `npm run build` and `npm run test:coverage`** - both must pass. Commit the rebuilt `dist/` with your change: CI fails if `dist/` differs from a fresh build.
+4. **Run `npm run build` and `npm run test:coverage`** - both must pass. Commit the rebuilt `dist/` with your change: CI fails if `dist/` differs from a fresh build. After committing, `npm run ci` runs exactly what CI runs (`tools/ci.js`).
 5. **Update the docs** - if behavior or API changes, update `docs/`, and the CHANGELOG under "Unreleased".
 6. **Open a pull request** with a short description of what and why. Link the issue.
 
@@ -75,4 +75,4 @@ By contributing, you agree that your contributions are licensed under the Apache
 
 ## Releases
 
-Releases are cut by the maintainer with `npm run release` and published by CI. See [RELEASE.md](RELEASE.md).
+Releases are cut by the maintainer with `npm run release` (a patch; or `-- minor`, `-- major`), which goes through a release pull request like any other change, and are published by CI. See [RELEASE.md](RELEASE.md).

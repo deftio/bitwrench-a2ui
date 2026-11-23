@@ -58,6 +58,7 @@ export function frameAction(a) {
  * @param {string|object} [opts.theme]     bitwrench preset name or StyleConfig
  * @param {object} [opts.bw]               bitwrench instance (default: the imported one)
  * @param {boolean} [opts.includeCapabilities=true]  attach a2uiRendererCapabilities to metadata
+ * @param {{maxArrayItems?: number, maxDepth?: number}} [opts.limits]  per-message size limits (default DEFAULT_LIMITS)
  */
 export function createRenderer(opts = {}) {
   const bw = opts.bw ?? bwDefault;
@@ -88,7 +89,7 @@ export function createRenderer(opts = {}) {
     try { send(message, metadata()); } catch (e) { diagnostics({ level: 'error', code: 'SEND_FAILED', message: String(e?.message ?? e) }); }
   }
 
-  const core = createCore({ catalogs, validation: opts.validation, onOutbound: msg => emit(msg), onNote: d => diagnostics({ source: 'process', ...d }) });
+  const core = createCore({ catalogs, validation: opts.validation, limits: opts.limits, onOutbound: msg => emit(msg), onNote: d => diagnostics({ source: 'process', ...d }) });
 
   /** @type {Map<string, {surface: object, host: HTMLElement|null, resolver: object, root: View|null, stop: Function, subs: Array}>} */
   const mounted = new Map();
