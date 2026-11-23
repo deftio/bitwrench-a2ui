@@ -23,5 +23,7 @@ jobs:
       - uses: actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec # v5.0.1
         with:
           fail-on-severity: moderate
+          # Reviewed exceptions; the reasons and expiry dates are in .github/audit-allowlist.json.
+          allow-ghsas: GHSA-mrhx-c7xc-m3w5
           comment-summary-in-pr: on-failure
           allow-licenses: Apache-2.0, MIT, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD, CC0-1.0, BlueOak-1.0.0, Unlicense, CC-BY-4.0, Python-2.0

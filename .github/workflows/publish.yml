@@ -1,8 +1,8 @@
-name: Release
+name: Publish
 
 # Runs when tools/release.js pushes a version tag (vX.Y.Z or vX.Y.Z-pre.N).
 #
-#   build    verify the tag, build, run every gate, pack the tarball once
+#   build    verify the tag, run every CI check (tools/ci.js), pack the tarball once
 #   npm      publish that exact tarball with npm trusted publishing (OIDC): no stored
 #            token, provenance attached automatically. Runs in the "npm" environment, which
 #            can require a manual approval.
@@ -11,7 +11,7 @@ name: Release
 #
 # Re-running a failed run is safe: each step skips work that is already done.
 # npm side (one-time): package Settings > Trusted publishing > GitHub Actions, with
-# owner "deftio", repository "bitwrench-a2ui", workflow "release.yml", environment "npm".
+# owner "deftio", repository "bitwrench-a2ui", workflow "publish.yml", environment "npm".
 on:
   push:
     tags: ['v[0-9]+.[0-9]+.[0-9]+', 'v[0-9]+.[0-9]+.[0-9]+-*']
@@ -65,12 +65,9 @@ jobs:
                              *)   echo "npm_tag=latest" >> "$GITHUB_OUTPUT"; echo "prerelease=false" >> "$GITHUB_OUTPUT";; esac
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
       - run: npm ci --ignore-scripts
-      - run: npm run build
-      - name: Committed dist/ matches this build
-        run: git diff --exit-code -I '"built":' -- dist/ || { echo "::error::dist/ in the tag differs from a fresh build"; exit 1; }
-      - run: npm run test:coverage
-      - run: node tools/check-package.js --install
-      - run: npm audit signatures
+      # Every CI check once more, on the tagged commit (tools/ci.js, the same steps as ci.yml).
+      - name: All CI checks on the tagged commit
+        run: node tools/ci.js
       - name: Pack, checksums and release notes
         id: pack
         env:
@@ -117,11 +114,8 @@ jobs:
           VERSION: ${{ needs.build.outputs.version }}
           TARBALL: release/${{ needs.build.outputs.tarball }}
           NPM_TAG: ${{ needs.build.outputs.npm-tag }}
-          # Only for the very first publish, if npm will not let you configure trusted
-          # publishing before the package exists: add an NPM_TOKEN secret to the "npm"
-          # environment, publish, then delete the secret and the token. Left unset, npm
-          # authenticates with OIDC.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # No token: npm authenticates this job with OIDC (trusted publishing). The
+          # trusted publisher on npmjs.com must name workflow publish.yml, environment npm.
         run: |
           if npm view "bitwrench-a2ui@$VERSION" version >/dev/null 2>&1; then
             echo "bitwrench-a2ui@$VERSION is already on npm; nothing to do."

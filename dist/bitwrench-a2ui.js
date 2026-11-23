@@ -140,6 +140,7 @@ var bwA2UI = (() => {
     BASIC_CATALOG_DOCUMENT: () => catalog_json_default,
     BASIC_CATALOG_ID: () => BASIC_CATALOG_ID,
     BASIC_COMPONENTS: () => BASIC_COMPONENTS,
+    DEFAULT_LIMITS: () => DEFAULT_LIMITS,
     ICONS: () => ICONS,
     ICON_VIEWBOX: () => ICON_VIEWBOX,
     JsonlDecoder: () => JsonlDecoder,
@@ -147,6 +148,7 @@ var bwA2UI = (() => {
     VALIDATION: () => VALIDATION,
     VERSION: () => VERSION,
     buildCatalog: () => buildCatalog,
+    checkLimits: () => checkLimits,
     collectEnvelopes: () => collectEnvelopes,
     component: () => component,
     connectAgUi: () => connectAgUi,
@@ -24647,11 +24649,36 @@ var bwA2UI = (() => {
     }
     return msg;
   }
+  var DEFAULT_LIMITS = Object.freeze({ maxArrayItems: 1e4, maxDepth: 64 });
+  function checkLimits(msg, limits = DEFAULT_LIMITS) {
+    const { maxArrayItems, maxDepth } = { ...DEFAULT_LIMITS, ...limits };
+    let items = 0;
+    const stack = [[msg, "", 0]];
+    while (stack.length) {
+      const [value, path, depth] = stack.pop();
+      if (!value || typeof value !== "object") continue;
+      if (depth > maxDepth) return { path, message: `message is nested more than ${maxDepth} levels deep` };
+      const isArray = Array.isArray(value);
+      if (isArray && (items += value.length) > maxArrayItems) {
+        return { path, message: `message has more than ${maxArrayItems} array items in total` };
+      }
+      const keys = isArray ? value.keys() : Object.keys(value);
+      for (const k of keys) stack.push([value[k], `${path}/${k}`, depth + 1]);
+    }
+    return null;
+  }
+  var envelopes = (input) => Array.isArray(input) ? input : Array.isArray(input?.messages) ? input.messages : [input];
+  function surfaceIdOf(msg) {
+    for (const v2 of Object.values(msg)) {
+      if (typeof v2?.surfaceId === "string") return v2.surfaceId;
+    }
+    return void 0;
+  }
   var VALIDATION = {
     strict: { allowOrphanComponents: false, allowDanglingReferences: false, allowMissingRoot: false, allowUnknownElements: false },
     relaxed: { allowOrphanComponents: true, allowDanglingReferences: true, allowMissingRoot: true, allowUnknownElements: true }
   };
-  function createCore({ catalogs, validation, onOutbound, onNote = () => {
+  function createCore({ catalogs, validation, limits, onOutbound, onNote = () => {
   } }) {
     const validationConfig = typeof validation === "string" ? VALIDATION[validation] : validation;
     const processor = new MessageProcessor(catalogs, void 0, {
@@ -24674,7 +24701,23 @@ var bwA2UI = (() => {
       processor,
       /** Process messages synchronously. Returns renderer error envelopes. */
       process(messages) {
-        return processor.processMessagesWithErrors(normalizeMessage(messages, { dropTheme, onDrop }));
+        const list = envelopes(messages);
+        const rejected = [];
+        const accepted = list.filter((m2) => {
+          const over = checkLimits(m2, limits);
+          if (!over) return true;
+          const surfaceId = surfaceIdOf(m2);
+          rejected.push({ version: PROTOCOL_VERSION, error: {
+            code: "VALIDATION_FAILED",
+            ...surfaceId === void 0 ? {} : { surfaceId },
+            path: over.path || "/",
+            message: `Message rejected before validation: ${over.message}.`
+          } });
+          return false;
+        });
+        const input = rejected.length ? accepted : messages;
+        const errors = accepted.length ? processor.processMessagesWithErrors(normalizeMessage(input, { dropTheme, onDrop })) : [];
+        return [...rejected, ...errors];
       },
       capabilities(options = {}) {
         return processor.getRendererCapabilities({ version: PROTOCOL_VERSION, ...options });
@@ -26627,7 +26670,7 @@ ${styles.alternateCss}` : "", themeVarsCss(bw2, styles, ".a2ui-surface"), adapte
         diagnostics({ level: "error", code: "SEND_FAILED", message: String(e2?.message ?? e2) });
       }
     }
-    const core = createCore({ catalogs, validation: opts.validation, onOutbound: (msg) => emit(msg), onNote: (d2) => diagnostics({ source: "process", ...d2 }) });
+    const core = createCore({ catalogs, validation: opts.validation, limits: opts.limits, onOutbound: (msg) => emit(msg), onNote: (d2) => diagnostics({ source: "process", ...d2 }) });
     const mounted = /* @__PURE__ */ new Map();
     function mountSurface(surface) {
       const subs = [];
@@ -26833,8 +26876,8 @@ ${styles.alternateCss}` : "", themeVarsCss(bw2, styles, ".a2ui-surface"), adapte
     if (typeof ES !== "function") throw new Error("connectSSE: EventSource is not available");
     const es = new ES(url, { withCredentials: !!opts.withCredentials });
     const handler = (ev) => {
-      const envelopes = collectEnvelopes(ev.data);
-      if (envelopes.length) renderer.receive(envelopes);
+      const envelopes2 = collectEnvelopes(ev.data);
+      if (envelopes2.length) renderer.receive(envelopes2);
     };
     es.addEventListener(opts.event ?? "message", handler);
     if (opts.onError) es.addEventListener("error", opts.onError);
@@ -26851,8 +26894,8 @@ ${styles.alternateCss}` : "", themeVarsCss(bw2, styles, ".a2ui-surface"), adapte
     const ws = new WS(url, opts.protocols);
     const queue = [];
     ws.addEventListener("message", (ev) => {
-      const envelopes = collectEnvelopes(typeof ev.data === "string" ? ev.data : "");
-      if (envelopes.length) renderer.receive(envelopes);
+      const envelopes2 = collectEnvelopes(typeof ev.data === "string" ? ev.data : "");
+      if (envelopes2.length) renderer.receive(envelopes2);
     });
     ws.addEventListener("open", () => {
       while (queue.length) ws.send(queue.shift());
@@ -26882,11 +26925,11 @@ ${styles.alternateCss}` : "", themeVarsCss(bw2, styles, ".a2ui-surface"), adapte
     const parts = Array.isArray(value) ? value : Array.isArray(value.parts) ? value.parts : Array.isArray(value.status?.message?.parts) ? value.status.message.parts : Array.isArray(value.artifacts) ? value.artifacts.flatMap((a2) => a2.parts ?? []) : [];
     return parts.filter(isA2uiPart).flatMap((p2) => collectEnvelopes(p2.data));
   }
-  function toA2APart(envelopes) {
-    return { kind: "data", data: Array.isArray(envelopes) ? envelopes : [envelopes], metadata: { mimeType: A2UI_MIME_TYPE } };
+  function toA2APart(envelopes2) {
+    return { kind: "data", data: Array.isArray(envelopes2) ? envelopes2 : [envelopes2], metadata: { mimeType: A2UI_MIME_TYPE } };
   }
   var messageSeq = 0;
-  function toA2AMessage(envelopes, metadata = {}, ids = {}) {
+  function toA2AMessage(envelopes2, metadata = {}, ids = {}) {
     const messageId = ids.messageId ?? (globalThis.crypto?.randomUUID?.() ?? `m-${Date.now().toString(36)}-${++messageSeq}`);
     return {
       kind: "message",
@@ -26894,7 +26937,7 @@ ${styles.alternateCss}` : "", themeVarsCss(bw2, styles, ".a2ui-surface"), adapte
       messageId,
       ...ids.contextId ? { contextId: ids.contextId } : {},
       ...ids.taskId ? { taskId: ids.taskId } : {},
-      parts: [toA2APart(envelopes)],
+      parts: [toA2APart(envelopes2)],
       metadata
     };
   }
@@ -26913,8 +26956,8 @@ ${styles.alternateCss}` : "", themeVarsCss(bw2, styles, ".a2ui-surface"), adapte
   }
   function connectAgUi(renderer, source) {
     const handle = (ev) => {
-      const envelopes = fromAgUiEvent(ev);
-      if (envelopes.length) renderer.receive(envelopes);
+      const envelopes2 = fromAgUiEvent(ev);
+      if (envelopes2.length) renderer.receive(envelopes2);
     };
     if (source && typeof source.subscribe === "function") {
       const sub = source.subscribe(handle);
@@ -26938,7 +26981,7 @@ ${styles.alternateCss}` : "", themeVarsCss(bw2, styles, ".a2ui-surface"), adapte
   // src/static/index.js
   function renderToHTML(messages, opts = {}) {
     const bw2 = opts.bw ?? bitwrench_default;
-    const core = createCore({ catalogs: opts.catalogs ?? [createBasicCatalog()], validation: opts.validation, onOutbound: () => {
+    const core = createCore({ catalogs: opts.catalogs ?? [createBasicCatalog()], validation: opts.validation, limits: opts.limits, onOutbound: () => {
     } });
     const errors = [...core.process(messages)];
     const ids = opts.surfaceId ? [opts.surfaceId] : [...core.surfaces().keys()];

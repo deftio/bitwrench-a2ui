@@ -14,6 +14,7 @@ Three parties are involved:
 
 Each layer adds a check:
 
+* **Size limits** - before validation, each message is measured: more than 10,000 array items in total, or nesting deeper than 64 levels, and it is rejected as `VALIDATION_FAILED` (the `limits` option changes the numbers). This bounds the memory and stack the validator can be made to use; see the zod note under Known limits. The JSONL decoder also caps lines at 4 MB.
 * **Schema validation** - web_core validates every message against the v1.0 schemas, with no unknown keys allowed. Invalid messages change nothing and produce an `error` for the agent.
 * **Catalog allowlist** - only component types and functions from catalogs the host registered can appear. Unknown types render nothing.
 * **Components build their own markup** - each component constructs TACO from typed, resolved values. Agent strings only become text content or values of a fixed set of attributes. No agent object is ever spread into attributes.
@@ -29,4 +30,6 @@ The test suite checks these properties directly: hostile URLs (`javascript:`, mi
 
 ## Known limits
 
-Some things the renderer cannot decide for you; see "What stays your responsibility" in [SECURITY.md](../SECURITY.md). In short: authorize actions on the server, write custom components with the same care as the built-in ones, and label agent-generated UI so users know where it came from.
+* **zod 3 in web_core** - `@a2ui/web_core` 0.15 validates with zod 3, which is affected by [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5): it keeps every issue of every failing array element, so one large invalid message could use hundreds of MB (we measured 116 MB for a 250 KB message of 20,000 invalid components). The fix is only in zod 4, which web_core 0.15 cannot use. The size limits above bound it; CI accepts this one advisory through a reviewed allowlist with an expiry date (`.github/audit-allowlist.json`), and the entry goes when web_core moves to zod 4.
+
+Beyond that, some things the renderer cannot decide for you; see "What stays your responsibility" in [SECURITY.md](../SECURITY.md). In short: authorize actions on the server, write custom components with the same care as the built-in ones, and label agent-generated UI so users know where it came from.

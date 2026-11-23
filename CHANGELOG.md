@@ -4,7 +4,18 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## Unreleased
 
-Nothing yet.
+Security:
+
+* **Message size limits** - every agent message is measured before `@a2ui/web_core` validates it, and rejected as `VALIDATION_FAILED` when it has more than 10,000 array items in total or nests deeper than 64 levels. This bounds GHSA-mrhx-c7xc-m3w5 in zod 3 (inside web_core 0.15), where a 250 KB message of 20,000 invalid components used 116 MB of memory. New `limits` option on `createRenderer` and `renderToHTML`; new exports `checkLimits` and `DEFAULT_LIMITS`.
+* **Runtime audit allowlist** - CI fails on any moderate or worse advisory in runtime dependencies unless it is listed in `.github/audit-allowlist.json` with a reason, a mitigation and an expiry date (`tools/audit.js`).
+
+Release process:
+
+* **Releases go through a pull request** - `npm run release -- patch` builds a fresh worktree, bumps the version, runs the full CI locally, opens a release PR, waits for the required checks, merges it, tags the merge commit, follows the publish workflow, and approves a staged npm version in the terminal. Re-running with the version resumes a release that stopped.
+* **One CI definition** - `npm run ci` (`tools/ci.js`) runs exactly the checks of `ci.yml`, which now calls it, as does the publish workflow on the tag.
+* **`publish.yml`** - the tag workflow is renamed from `release.yml`, and publishes to npm with trusted publishing (OIDC) only.
+
+Credits: the 0.9.1 security and release work was done with Claude (Anthropic) as a coding assistant, reviewed and released by the maintainer.
 
 ## 0.9.0 - 2026-11-22
 

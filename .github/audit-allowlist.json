@@ -1,0 +1,12 @@
+{
+  "$comment": "Runtime advisories reviewed and accepted for now. Read by tools/audit.js (CI and the release). Every entry needs a reason, the mitigation, and an expiry date; expired entries fail CI. The same ids are allowed in .github/workflows/dependency-review.yml.",
+  "advisories": [
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "zod",
+      "reason": "zod 3 (via @a2ui/web_core 0.15.0) keeps every issue of every failing array element, so an oversized invalid message can exhaust memory. Fixed only in zod 4.6.6; web_core 0.15 does not work with zod 4 (forcing it fails 21 of our test files), so there is no fix we can take.",
+      "mitigation": "Every agent message is measured before web_core validates it (src/core/webcore.js checkLimits: 10,000 array items and 64 levels by default) and rejected as VALIDATION_FAILED when over. The JSONL transport also caps lines at 4 MB. Remove this entry when web_core moves to zod 4.",
+      "expires": "2027-02-28"
+    }
+  ]
+}

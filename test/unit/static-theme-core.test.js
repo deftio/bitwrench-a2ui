@@ -2,11 +2,11 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
 import '../helpers/dom.js';
-import { create, data } from '../helpers/a2ui.js';
+import { create, data, update } from '../helpers/a2ui.js';
 
 const { renderToHTML, renderToDocument } = await import('../../src/static/index.js');
 const { themeCss, resolveThemeConfig, adapterCss, applyTheme, removeTheme } = await import('../../src/theme/theme.js');
-const { normalizeMessage, createCore, buildBasicCatalog, VALIDATION } = await import('../../src/core/webcore.js');
+const { normalizeMessage, createCore, buildBasicCatalog, VALIDATION, checkLimits, DEFAULT_LIMITS } = await import('../../src/core/webcore.js');
 const { compose, stripHandlers, resolvePath, defaultSlots, a11yOf } = await import('../../src/render/view.js');
 const { default: bw } = await import('bitwrench');
 
@@ -130,6 +130,41 @@ describe('core wrapper', () => {
     assert.equal(dropped, 's');
     normalizeMessage({ version: '1.0', createSurface: { surfaceId: 's', theme: {} } }, { dropTheme: true });
     assert.deepEqual(normalizeMessage({ version: '1.0', updateComponents: { surfaceId: 's' } }), { version: '1.0', updateComponents: { surfaceId: 's' } });
+  });
+
+  it('measures message size: total array items and depth (GHSA-mrhx-c7xc-m3w5)', () => {
+    assert.equal(checkLimits(create('s', [{ id: 'root', component: 'Text', text: 'x' }])), null);
+    assert.equal(checkLimits(null), null);
+    assert.deepEqual(DEFAULT_LIMITS, { maxArrayItems: 10000, maxDepth: 64 });
+    const wide = update('s', Array.from({ length: 11 }, (_, i) => ({ id: `c${i}` })));
+    assert.deepEqual(checkLimits(wide, { maxArrayItems: 10 }), { path: '/updateComponents/components', message: 'message has more than 10 array items in total' });
+    // Items add up across arrays.
+    assert.ok(checkLimits({ a: [1, 2, 3], b: [[1, 2], [3]] }, { maxArrayItems: 7 }));
+    assert.equal(checkLimits({ a: [1, 2, 3], b: [[1, 2], [3]] }, { maxArrayItems: 8 }), null);
+    let deep = {};
+    for (let i = 0; i < 70; i++) deep = { d: deep };
+    assert.match(checkLimits(deep).message, /nested more than 64 levels/);
+    assert.equal(checkLimits(deep, { maxDepth: 100 }), null);
+  });
+
+  it('rejects oversized messages before the core sees them, and processes the rest', () => {
+    const core = createCore({ catalogs: [buildBasicCatalog({})], limits: { maxArrayItems: 5 }, onOutbound: () => {} });
+    const big = update('s', Array.from({ length: 6 }, (_, i) => ({ id: `c${i}`, component: 'Text', text: 'x' })));
+    const errors = core.process([create('s', [{ id: 'root', component: 'Text', text: 'hi' }]), big]);
+    assert.equal(errors.length, 1);
+    assert.deepEqual(errors[0], { version: '1.0', error: { code: 'VALIDATION_FAILED', surfaceId: 's', path: '/updateComponents/components',
+      message: 'Message rejected before validation: message has more than 5 array items in total.' } });
+    assert.ok(core.surface('s'));
+    assert.equal(core.surface('s').componentsModel.get('c0'), undefined);
+    // No surfaceId to report, the whole message as the path, {messages} input, all rejected.
+    let deep = {};
+    for (let i = 0; i < 70; i++) deep = { d: deep };
+    const [e] = core.process({ messages: [deep] });
+    assert.equal(e.error.surfaceId, undefined);
+    assert.equal(core.process(['not an object']).length, 1);
+    const root = core.process([Array.from({ length: 6 })]);
+    assert.equal(root[0].error.path, '/');
+    core.dispose();
   });
 
   it('createCore with a custom validation object and capabilities', () => {

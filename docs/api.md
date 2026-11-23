@@ -22,6 +22,7 @@ Options:
 * **`onDiagnostic(d)`** - local diagnostics: `{level, source, code, message, ...}` where `source` is `'process'` (message validation), `'surface'` (resolution and function errors, also sent to the agent) or `'render'` (adapter notes).
 * **`catalogs`** - default `[createBasicCatalog()]`. Add custom catalogs here (see [Custom catalogs](custom-catalogs.md)).
 * **`validation`** - `'strict'`, `'relaxed'`, or a web_core validation config object. Default: the core's own defaults. Strict rejects incomplete streams and a stray `theme`; relaxed tolerates missing roots and dangling references while a stream is arriving.
+* **`limits`** - per-message size limits, checked before validation: `{ maxArrayItems, maxDepth }`, default `DEFAULT_LIMITS` (`10000` array items in total, `64` levels). A message over them is not processed and is reported to the agent as `VALIDATION_FAILED` with the `path` where it went over. See [Security](security.md).
 * **`theme`** - a bitwrench preset name (`'teal'`, `'ocean'`, `'sunset'`, `'forest'`, `'slate'`, `'rose'`, `'indigo'`, `'amber'`, `'emerald'`, `'nord'`, `'coral'`, `'midnight'`) or a bitwrench style config such as `{ primary: '#0b6e4f', radius: 'lg' }`, optionally with `preset`. See [Theming](theming.md).
 * **`includeCapabilities`** - default `true`. Set `false` to leave capabilities out of `metadata`.
 * **`bw`** - a bitwrench instance (default: the imported or global one).
@@ -61,12 +62,13 @@ Functions for building catalogs:
 * **`BASIC_CATALOG_DOCUMENT`** - the upstream basic catalog JSON document (schemas, descriptions and `instructions`), for building prompts or advertising the catalog to an agent.
 * **`BASIC_CATALOG_ID`**, **`PROTOCOL_VERSION`**, **`VALIDATION`** - constants.
 * **`normalizeMessage(msg, opts)`** - the envelope-key normalizer used internally (exported for agents and tests).
+* **`checkLimits(msg, limits)`**, **`DEFAULT_LIMITS`** - the size check the renderer runs on every message: `null` when it fits, else `{path, message}`. Agents can call it before sending.
 
 ## Static HTML
 
 From `bitwrench-a2ui` or `bitwrench-a2ui/static`:
 
-* **`renderToHTML(messages, {surfaceId, theme, includeCss, catalogs, validation})`** - returns `{html, css, surfaces, errors, taco}`. Works in Node with no DOM.
+* **`renderToHTML(messages, {surfaceId, theme, includeCss, catalogs, validation, limits})`** - returns `{html, css, surfaces, errors, taco}`. Works in Node with no DOM.
 * **`renderToDocument(messages, {title, lang, ...})`** - a complete HTML document with the CSS inlined.
 
 ## Transports

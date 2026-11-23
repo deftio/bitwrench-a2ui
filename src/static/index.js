@@ -22,11 +22,12 @@ import { themeCss } from '../theme/theme.js';
  * @param {boolean} [opts.includeCss=false]  prepend a <style> element to the html
  * @param {Array} [opts.catalogs]
  * @param {object} [opts.bw]
+ * @param {{maxArrayItems?: number, maxDepth?: number}} [opts.limits]  per-message size limits
  * @returns {{html: string, css: string, surfaces: string[], errors: object[], taco: object[]}}
  */
 export function renderToHTML(messages, opts = {}) {
   const bw = opts.bw ?? bwDefault;
-  const core = createCore({ catalogs: opts.catalogs ?? [createBasicCatalog()], validation: opts.validation, onOutbound: () => {} });
+  const core = createCore({ catalogs: opts.catalogs ?? [createBasicCatalog()], validation: opts.validation, limits: opts.limits, onOutbound: () => {} });
   const errors = [...core.process(messages)];
   const ids = opts.surfaceId ? [opts.surfaceId] : [...core.surfaces().keys()];
   const parts = [];
