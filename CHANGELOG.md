@@ -4,6 +4,10 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## Unreleased
 
+Nothing yet.
+
+## 0.9.1 - 2026-11-23
+
 Security:
 
 * **Message size limits** - every agent message is measured before `@a2ui/web_core` validates it, and rejected as `VALIDATION_FAILED` when it has more than 10,000 array items in total or nests deeper than 64 levels. This bounds GHSA-mrhx-c7xc-m3w5 in zod 3 (inside web_core 0.15), where a 250 KB message of 20,000 invalid components used 116 MB of memory. New `limits` option on `createRenderer` and `renderToHTML`; new exports `checkLimits` and `DEFAULT_LIMITS`.
